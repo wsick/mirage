@@ -1,0 +1,37 @@
+{
+  "name": "mirana",
+  "main": "dist/mirana.js",
+  "version": "0.7.6",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/wsick/mirana"
+  },
+  "authors": [
+    "BSick7 <brad.sickles@gmail.com>"
+  ],
+  "description": "XAML-inspired layout engine",
+  "keywords": [
+    "mirana",
+    "xaml"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "build",
+    "node_modules",
+    "bower_components",
+    "stress",
+    "test",
+    "typings",
+    "package.json",
+    "Gruntfile.js"
+  ],
+  "devDependencies": {
+    "qunit": "~1.15.0",
+    "requirejs": "~2.1.15",
+    "requirejs-text": "~2.0.12"
+  },
+  "dependencies": {
+    "perfex": "~0.1.3"
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "name": "mirana",
+  "version": "0.7.6",
+  "description": "XAML-inspired layout engine",
+  "main": "Gruntfile.js",
+  "directories": {
+    "doc": "docs",
+    "test": "test"
+  },
+  "scripts": {
+    "test": "grunt test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/wsick/mirana.git"
+  },
+  "keywords": [
+    "xaml",
+    "fayde"
+  ],
+  "author": "Brad Sickles <brad.sickles@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/wsick/mirana/issues"
+  },
+  "homepage": "https://github.com/wsick/mirana",
+  "devDependencies": {
+    "del": "^1.2.0",
+    "fayde-unify": "~0.4.0",
+    "glob": "^5.0.5",
+    "gulp": "^3.9.0",
+    "gulp-bower": "0.0.10",
+    "gulp-bump": "^0.3.0",
+    "gulp-connect": "^2.2.0",
+    "gulp-open": "^0.3.2",
+    "gulp-rename": "^1.2.2",
+    "gulp-sourcemaps": "^1.5.1",
+    "gulp-typescript": "2.9.0",
+    "gulp-uglify": "^1.2.0",
+    "karma": "^0.13.19",
+    "karma-phantomjs-launcher": "^1.0.0",
+    "karma-qunit": "^0.1.9",
+    "merge2": "^0.3.3",
+    "phantomjs-prebuilt": "^2.1.3",
+    "qunitjs": "^1.21.0",
+    "run-sequence": "^1.0.2",
+    "version-ts": "^0.1.1",
+    "vinyl-fs": "^2.3.1"
+  }
+}
