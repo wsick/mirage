@@ -20,13 +20,10 @@ previousConstraint: new Size(),
 desiredSize: new Size(),
 hiddenDesire: new Size(Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY),
 
-renderSize: new Size(),
 visualOffset: new Point(),
-lastRenderSize: undefined,
 layoutSlot: new Rect(),
 actualWidth: 0,
 actualHeight: 0,
-
 layoutXform: mat3.identity(),
 
 # new flags
@@ -37,22 +34,21 @@ uiHints
 The following enumerates properties that will not carry over from minerva Updater.
 
 ```
+# inputs
 clip: null,
 effect: null,
-
 visibility: Visibility.Visible,
 opacity: 1.0,
-
 isHitTestVisible: true,
 z: NaN,
+renderTransform: null,
+renderTransformOrigin: new Point(),
+
+effectPadding: new Thickness(),
 
 layoutClip: new Rect(),
 compositeLayoutClip: new Rect(),
 breakLayoutClip: false,
-
-renderTransform: null,
-renderTransformOrigin: new Point(),
-effectPadding: new Thickness(),
 
 totalIsRenderVisible: true,
 totalIsHitTestVisible: true,
@@ -66,6 +62,9 @@ globalBoundsWithChildren: new Rect(),
 carrierXform: null,
 renderXform: mat3.identity(),
 absoluteXform: mat3.identity(),
+
+renderSize: new Size(),
+lastRenderSize: undefined,
 
 dirtyRegion: new Rect(),
 dirtyFlags: 0,
