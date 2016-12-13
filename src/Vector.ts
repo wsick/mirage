@@ -1,4 +1,4 @@
-module mirage.Vector {
+namespace mirage.Vector {
     var EPSILON = 1e-10;
 
     export function create(x: number, y: number): number[] {

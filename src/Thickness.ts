@@ -1,4 +1,4 @@
-module mirage {
+namespace mirage {
     export class Thickness {
         left: number;
         top: number;

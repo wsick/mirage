@@ -1,4 +1,4 @@
-module mirage {
+namespace mirage {
     export interface ISize {
         width: number;
         height: number;

@@ -1,6 +1,6 @@
 /// <reference path="mat/vec2" />
 
-module mirage {
+namespace mirage {
     export enum RectOverlap {
         Out,
         In,

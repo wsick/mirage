@@ -2,7 +2,7 @@ interface IVector4Static {
     create(x: number, y: number, z: number, w: number): number[];
     init(x: number, y: number, z: number, w: number, dest?: number[]): number[];
 }
-module mirage {
+namespace mirage {
     var createTypedArray: (length: number) => number[];
 
     if (typeof Float32Array !== "undefined") {

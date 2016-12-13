@@ -1,4 +1,4 @@
-module mirage {
+namespace mirage {
     export interface IPoint {
         x: number;
         y: number;
