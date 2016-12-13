@@ -1,8 +1,8 @@
 module tests.primitives.size {
     QUnit.module("primitives.size");
 
-    import Size = mirana.Size;
-    import Rect =  mirana.Rect;
+    import Size = mirage.Size;
+    import Rect =  mirage.Rect;
 
     QUnit.test("isEqual", (assert) => {
         assert.notDeepEqual(new Size(0, 0), new Size(0, 120));

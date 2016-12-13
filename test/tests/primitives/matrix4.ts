@@ -1,4 +1,4 @@
-module mirana.tests.primitives.matrix {
+module mirage.tests.primitives.matrix {
     QUnit.module("primitives.matrix4");
 
     function typedToArray(typed) {

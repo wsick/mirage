@@ -1,4 +1,4 @@
-module mirana {
+module mirage {
     export interface ICornerRadius {
         topLeft: number;
         topRight: number;

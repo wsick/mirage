@@ -1,6 +1,6 @@
 /// <reference path="../Rect" />
 
-module mirana {
+module mirage {
     Rect.transform4 = function (dest: Rect, projection: number[]) {
         console.warn("[Rect.transform4] Not implemented");
         /*

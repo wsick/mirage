@@ -1,17 +1,17 @@
 {
-  "name": "mirana",
-  "main": "dist/mirana.js",
+  "name": "mirage",
+  "main": "dist/mirage.js",
   "version": "0.7.6",
   "repository": {
     "type": "git",
-    "url": "git://github.com/wsick/mirana"
+    "url": "git://github.com/wsick/mirage"
   },
   "authors": [
     "BSick7 <brad.sickles@gmail.com>"
   ],
   "description": "XAML-inspired layout engine",
   "keywords": [
-    "mirana",
+    "mirage",
     "xaml"
   ],
   "license": "MIT",

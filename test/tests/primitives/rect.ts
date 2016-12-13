@@ -1,9 +1,9 @@
 module tests.primitives.rect {
     QUnit.module("primitives.rect");
 
-    import Size = mirana.Size;
-    import Point = mirana.Point;
-    import Rect =  mirana.Rect;
+    import Size = mirage.Size;
+    import Point = mirage.Point;
+    import Rect =  mirage.Rect;
 
     QUnit.test("copyTo", (assert) => {
         var origr = new Rect(10, 10, 150, 300);

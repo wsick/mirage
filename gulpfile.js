@@ -1,6 +1,6 @@
 var fs = require('fs'),
     meta = {
-        name: 'mirana',
+        name: 'mirage',
         buildfiles: [
             'typings/**/*.d.ts',
             'lib/perfex/dist/perfex.d.ts',

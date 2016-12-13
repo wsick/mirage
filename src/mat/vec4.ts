@@ -2,7 +2,7 @@ interface IVector4Static {
     create(x: number, y: number, z: number, w: number): number[];
     init(x: number, y: number, z: number, w: number, dest?: number[]): number[];
 }
-module mirana {
+module mirage {
     var createTypedArray: (length: number) => number[];
 
     if (typeof Float32Array !== "undefined") {
@@ -35,4 +35,4 @@ module mirana {
     };
 }
 
-var vec4 = mirana.vec4;
+var vec4 = mirage.vec4;

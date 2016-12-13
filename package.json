@@ -1,5 +1,5 @@
 {
-  "name": "mirana",
+  "name": "mirage",
   "version": "0.7.6",
   "description": "XAML-inspired layout engine",
   "main": "Gruntfile.js",
@@ -12,7 +12,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/wsick/mirana.git"
+    "url": "git://github.com/wsick/mirage.git"
   },
   "keywords": [
     "xaml",
@@ -21,9 +21,9 @@
   "author": "Brad Sickles <brad.sickles@gmail.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/wsick/mirana/issues"
+    "url": "https://github.com/wsick/mirage/issues"
   },
-  "homepage": "https://github.com/wsick/mirana",
+  "homepage": "https://github.com/wsick/mirage",
   "devDependencies": {
     "del": "^1.2.0",
     "fayde-unify": "~0.4.0",

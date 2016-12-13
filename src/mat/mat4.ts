@@ -17,7 +17,7 @@ interface IMatrix4Static {
     createViewport (width: number, height: number, dest?: number[]): number[];
 }
 
-module mirana {
+module mirage {
     enum Indexes {
         M11 = 0,
         M12 = 1,
@@ -435,4 +435,4 @@ module mirana {
     };
 }
 
-var mat4 = mirana.mat4;
+var mat4 = mirage.mat4;

@@ -15,7 +15,7 @@ module.exports = function (config) {
 
         // list of files / patterns to load in the browser
         files: [
-            'lib/mirana/dist/mirana.js',
+            'lib/mirage/dist/mirage.js',
             '.build/tests/**/*.js'
         ],
 

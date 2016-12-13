@@ -1,4 +1,4 @@
-module mirana {
+module mirage {
     export interface IPoint {
         x: number;
         y: number;

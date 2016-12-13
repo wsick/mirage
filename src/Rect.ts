@@ -1,6 +1,6 @@
 /// <reference path="mat/vec2" />
 
-module mirana {
+module mirage {
     export enum RectOverlap {
         Out,
         In,

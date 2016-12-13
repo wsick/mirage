@@ -1,18 +1,18 @@
 {
-  "name": "mirana",
+  "name": "mirage",
   "client": {
     "exclude": [
       "self"
     ]
   },
   "type": "lib",
-  "dist": "dist/mirana.js",
+  "dist": "dist/mirage.js",
   "library": {
     "type": "export",
-    "exports": "mirana"
+    "exports": "mirage"
   },
   "themes": "none",
   "typings": [
-    "dist/mirana.d.ts"
+    "dist/mirage.d.ts"
   ]
 }

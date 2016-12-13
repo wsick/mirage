@@ -1,4 +1,4 @@
-module mirana {
+module mirage {
     export class Thickness {
         left: number;
         top: number;

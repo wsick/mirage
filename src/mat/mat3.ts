@@ -19,7 +19,7 @@ interface IMatrix3Static {
     preapply(dest: number[], mat: number[]): number[];
     apply(dest: number[], mat: number[]): number[];
 }
-module mirana {
+module mirage {
     /// NOTE:
     ///     Row-major order
     ///     [m11, m12, m21, m22, x0, y0]
@@ -249,4 +249,4 @@ module mirana {
         return dest;
     }
 }
-var mat3 = mirana.mat3;
+var mat3 = mirage.mat3;

@@ -1,7 +1,7 @@
 module tests.primitives.vector {
     QUnit.module("primitives.vector");
 
-    import Vector = mirana.Vector;
+    import Vector = mirage.Vector;
 
     QUnit.test("Vector", (assert) => {
         var EPSILON = 1e-10;
