@@ -53,14 +53,6 @@ namespace mirage.core {
         (coreSize: ISize): Size;
     }
 
-    export function NOOP_MEASURE_OVERRIDE(framedSize: ISize): ISize {
-        return new Size();
-    }
-
-    export function DefaultMeasurer(inputs: IMeasureInputs, state: IMeasureState, tree: ILayoutTree): IMeasurer {
-        return NewMeasurer(inputs, state, tree, NOOP_MEASURE_OVERRIDE);
-    }
-
     export function NewMeasurer(inputs: IMeasureInputs, state: IMeasureState, tree: ILayoutTree, override: IMeasureOverride): IMeasurer {
         return function (availableSize: ISize): boolean {
             // Validate

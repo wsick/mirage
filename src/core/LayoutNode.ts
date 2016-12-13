@@ -83,6 +83,22 @@ namespace mirage.core {
             return DefaultLayoutTree(this);
         }
 
+        protected setParent(parent: LayoutNode) {
+            if (!parent) {
+                if (!this.tree.parent)
+                    return;
+                this.tree.parent = null;
+                this.onDetached();
+            } else {
+                if (parent === this.tree.parent)
+                    return;
+                this.tree.parent = null;
+                this.onDetached();
+                this.tree.parent = parent;
+                this.onAttached();
+            }
+        }
+
         protected onDetached() {
             this.invalidateMeasure();
             if (this.tree.parent)
@@ -106,9 +122,17 @@ namespace mirage.core {
             this.tree.propagateFlagUp(LayoutFlags.MeasureHint);
         }
 
+        measure(availableSize: ISize): boolean {
+            return this.$measurer(availableSize);
+        }
+
         invalidateArrange() {
             this.state.flags |= LayoutFlags.Arrange | LayoutFlags.ArrangeHint;
             this.tree.propagateFlagUp(LayoutFlags.ArrangeHint);
+        }
+
+        arrange(finalRect: Rect): boolean {
+            return this.$arranger(finalRect);
         }
     }
 }

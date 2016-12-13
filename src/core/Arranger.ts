@@ -84,14 +84,6 @@ namespace mirage.core {
         (finalSize: ISize): ISize;
     }
 
-    export function NOOP_ARRANGE_OVERRIDE(finalSize: ISize): ISize {
-        return new Size();
-    }
-
-    export function DefaultArranger(inputs: IArrangeInputs, state: IArrangeState, tree: ILayoutTree): IArranger {
-        return NewArranger(inputs, state, tree, NOOP_ARRANGE_OVERRIDE);
-    }
-
     export function NewArranger(inputs: IArrangeInputs, state: IArrangeState, tree: ILayoutTree, override: IArrangeOverride): IArranger {
         return function (finalRect: Rect): boolean {
             if (inputs.visible !== true) {
