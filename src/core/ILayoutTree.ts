@@ -1,7 +1,7 @@
 namespace mirage.core {
     export interface ILayoutTree {
         isLayoutContainer: boolean;
-        parent: any;
+        parent: LayoutNode;
         applyTemplate(): boolean;
         propagateFlagUp(flag: LayoutFlags);
     }

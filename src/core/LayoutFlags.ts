@@ -1,5 +1,7 @@
 namespace mirage.core {
     export enum LayoutFlags {
+        None = 0,
+
         Measure = 1 << 1,
         Arrange = 1 << 2,
 

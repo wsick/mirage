@@ -22,5 +22,10 @@ namespace mirage {
             dest.x = src.x;
             dest.y = src.y;
         }
+
+        static round(dest: IPoint) {
+            dest.x = Math.round(dest.x);
+            dest.y = Math.round(dest.y);
+        }
     }
 }

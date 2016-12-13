@@ -23,7 +23,7 @@ namespace mirage.core {
     }
 
     export function NewMeasureBinder(state: IMeasureState, tree: ILayoutTree, measurer: IMeasurer): IMeasureBinder {
-        return function(): boolean {
+        return function (): boolean {
             var last = state.previousAvailable;
 
             if (Size.isUndef(last) && !tree.parent && tree.isLayoutContainer)
@@ -106,8 +106,7 @@ namespace mirage.core {
             desired.width = Math.min(desired.width, availableSize.width);
             desired.height = Math.min(desired.height, availableSize.height);
             if (inputs.useLayoutRounding) {
-                desired.width = Math.round(desired.width);
-                desired.height = Math.round(desired.height);
+                Size.round(desired);
             }
             Size.copyTo(desired, state.desiredSize);
 

@@ -28,13 +28,28 @@ namespace mirage {
                 || size.height === 0;
         }
 
+        static max (dest: ISize, size2: ISize) {
+            dest.width = Math.max(dest.width, size2.width);
+            dest.height = Math.max(dest.height, size2.height);
+        }
+
         static min (dest: ISize, size2: ISize) {
             dest.width = Math.min(dest.width, size2.width);
             dest.height = Math.min(dest.height, size2.height);
         }
 
+        static round(size: ISize) {
+            size.width = Math.round(size.width);
+            size.height = Math.round(size.height);
+        }
+
         static isUndef (size: ISize): boolean {
             return isNaN(size.width) && isNaN(size.height);
+        }
+
+        static clear (size: ISize) {
+            size.width = 0;
+            size.height = 0;
         }
 
         static undef (size: ISize) {
