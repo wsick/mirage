@@ -11,4 +11,8 @@ namespace mirage {
         Bottom = 2,
         Stretch = 3,
     }
+    export enum Orientation {
+        Horizontal = 0,
+        Vertical = 1,
+    }
 }
