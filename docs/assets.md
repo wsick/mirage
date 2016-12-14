@@ -16,19 +16,16 @@ horizontalAlignment: HorizontalAlignment.Stretch,
 verticalAlignment: VerticalAlignment.Stretch,
 
 # internal states
-previousConstraint: new Size(),
+previousAvailable: new Size(),
 desiredSize: new Size(),
 hiddenDesire: new Size(Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY),
-
-visualOffset: new Point(),
 layoutSlot: new Rect(),
-actualWidth: 0,
-actualHeight: 0,
-layoutXform: mat3.identity(),
+visualOffset: new Point(),
+arranged: new Size(),
+lastArranged: undefined,
 
 # new flags
-dirtyFlags
-uiHints
+flags
 ```
 
 The following enumerates properties that will not carry over from minerva Updater.
@@ -59,6 +56,7 @@ extentsWithChildren: new Rect(),
 surfaceBoundsWithChildren: new Rect(),
 globalBoundsWithChildren: new Rect(),
 
+layoutXform: mat3.identity(),
 carrierXform: null,
 renderXform: mat3.identity(),
 absoluteXform: mat3.identity(),

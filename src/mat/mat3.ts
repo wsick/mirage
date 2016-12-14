@@ -19,7 +19,7 @@ interface IMatrix3Static {
     preapply(dest: number[], mat: number[]): number[];
     apply(dest: number[], mat: number[]): number[];
 }
-module mirage {
+namespace mirage {
     /// NOTE:
     ///     Row-major order
     ///     [m11, m12, m21, m22, x0, y0]

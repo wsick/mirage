@@ -1,4 +1,4 @@
-module mirage {
+namespace mirage {
     export interface IPoint {
         x: number;
         y: number;
@@ -21,6 +21,11 @@ module mirage {
         static copyTo(src: IPoint, dest: IPoint) {
             dest.x = src.x;
             dest.y = src.y;
+        }
+
+        static round(dest: IPoint) {
+            dest.x = Math.round(dest.x);
+            dest.y = Math.round(dest.y);
         }
     }
 }

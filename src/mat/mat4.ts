@@ -17,7 +17,7 @@ interface IMatrix4Static {
     createViewport (width: number, height: number, dest?: number[]): number[];
 }
 
-module mirage {
+namespace mirage {
     enum Indexes {
         M11 = 0,
         M12 = 1,
