@@ -8,5 +8,6 @@ namespace mirage.core {
         MeasureHint = 1 << 3,
         ArrangeHint = 1 << 4,
         SizeHint    = 1 << 5,
+        Hints       = MeasureHint | ArrangeHint | SizeHint,
     }
 }

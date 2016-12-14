@@ -24,6 +24,12 @@ namespace mirage.core {
         lastArranged: ISize;
     }
 
+    export interface ILayoutTreeDeepWalker {
+        current: LayoutNode;
+        step(): boolean;
+        skipBranch();
+    }
+
     export class LayoutNode {
         inputs: ILayoutNodeInputs;
         state: ILayoutNodeState;
@@ -83,6 +89,8 @@ namespace mirage.core {
             return DefaultLayoutTree(this);
         }
 
+        // TREE
+
         protected setParent(parent: LayoutNode) {
             if (!parent) {
                 if (!this.tree.parent)
@@ -117,9 +125,37 @@ namespace mirage.core {
             }
         }
 
+        walkDeep(reverse?: boolean): ILayoutTreeDeepWalker {
+            var last: LayoutNode = undefined;
+            var walkList: LayoutNode[] = [this];
+
+            return {
+                current: undefined,
+                step(): boolean {
+                    if (last) {
+                        for (var subwalker = last.tree.walk(reverse); subwalker.step();) {
+                            walkList.unshift(subwalker.current);
+                        }
+                    }
+
+                    this.current = last = walkList.shift();
+                    return this.current !== undefined;
+                },
+                skipBranch() {
+                    last = undefined;
+                },
+            };
+        }
+
+        // LAYOUT
+
         invalidateMeasure() {
             this.state.flags |= LayoutFlags.Measure | LayoutFlags.MeasureHint;
             this.tree.propagateFlagUp(LayoutFlags.MeasureHint);
+        }
+
+        doMeasure(): boolean {
+            return this.$measureBinder();
         }
 
         measure(availableSize: ISize): boolean {
@@ -131,8 +167,26 @@ namespace mirage.core {
             this.tree.propagateFlagUp(LayoutFlags.ArrangeHint);
         }
 
+        doArrange(): boolean {
+            return this.$arrangeBinder();
+        }
+
         arrange(finalRect: Rect): boolean {
             return this.$arranger(finalRect);
+        }
+
+        sizing(oldSize: ISize, newSize: ISize): boolean {
+            var state = this.state;
+            if (state.lastArranged)
+                Size.copyTo(state.lastArranged, oldSize);
+            Size.copyTo(state.arranged, newSize);
+            state.lastArranged = undefined;
+            // TODO: Set actualWidth, actualHeight
+            return true;
+        }
+
+        onSizeChanged(oldSize: ISize, newSize: ISize) {
+            // Placeholder for sizing notifications
         }
     }
 }

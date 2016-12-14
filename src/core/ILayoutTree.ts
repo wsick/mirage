@@ -5,6 +5,7 @@ namespace mirage.core {
     }
 
     export interface ILayoutTree {
+        isContainer: boolean;
         isLayoutContainer: boolean;
         parent: LayoutNode;
         applyTemplate(): boolean;
