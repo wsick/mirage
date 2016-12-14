@@ -1,5 +1,5 @@
 namespace mirage.core {
-    export function DefaultLayoutTree(node: LayoutNode): ILayoutTree {
+    export function DefaultLayoutTree(): ILayoutTree {
         return {
             isContainer: true,
             isLayoutContainer: false,

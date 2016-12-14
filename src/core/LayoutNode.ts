@@ -50,10 +50,10 @@ namespace mirage.core {
                 "state": {value: this.createState(), writable: false},
                 "tree": {value: this.createTree(), writable: false},
             });
-            this.$measurer = core.DefaultMeasurer(this.inputs, this.state, this.tree);
-            this.$arranger = core.DefaultArranger(this.inputs, this.state, this.tree);
-            this.$measureBinder = core.NewMeasureBinder(this.state, this.tree, this.$measurer);
-            this.$arrangeBinder = core.NewArrangeBinder(this.state, this.tree, this.$arranger);
+            this.$measurer = this.createMeasurer();
+            this.$arranger = this.createArranger();
+            this.$measureBinder = NewMeasureBinder(this.state, this.tree, this.$measurer);
+            this.$arrangeBinder = NewArrangeBinder(this.state, this.tree, this.$arranger);
         }
 
         protected createInputs(): ILayoutNodeInputs {
@@ -86,7 +86,15 @@ namespace mirage.core {
         }
 
         protected createTree(): ILayoutTree {
-            return DefaultLayoutTree(this);
+            return DefaultLayoutTree();
+        }
+
+        protected createMeasurer(): core.IMeasurer {
+            return core.NewMeasurer(this.inputs, this.state, this.tree, constraint => this.measureOverride(constraint));
+        }
+
+        protected createArranger(): core.IArranger {
+            return core.NewArranger(this.inputs, this.state, this.tree, arrangeSize => this.arrangeOverride(arrangeSize));
         }
 
         // TREE
@@ -162,6 +170,15 @@ namespace mirage.core {
             return this.$measurer(availableSize);
         }
 
+        protected measureOverride(constraint: ISize): ISize {
+            var desired = new Size();
+            for (var walker = this.tree.walk(); walker.step();) {
+                walker.current.measure(constraint);
+                Size.max(desired, walker.current.state.desiredSize);
+            }
+            return desired;
+        }
+
         invalidateArrange() {
             this.state.flags |= LayoutFlags.Arrange | LayoutFlags.ArrangeHint;
             this.tree.propagateFlagUp(LayoutFlags.ArrangeHint);
@@ -173,6 +190,15 @@ namespace mirage.core {
 
         arrange(finalRect: Rect): boolean {
             return this.$arranger(finalRect);
+        }
+
+        protected arrangeOverride(arrangeSize: ISize): ISize {
+            var arranged = new Size(arrangeSize.width, arrangeSize.height);
+            for (var walker = this.tree.walk(); walker.step();) {
+                var childRect = new Rect(0, 0, arrangeSize.width, arrangeSize.height);
+                walker.current.arrange(childRect);
+            }
+            return arranged;
         }
 
         sizing(oldSize: ISize, newSize: ISize): boolean {
