@@ -7,21 +7,9 @@ namespace mirage {
         inputs: IStackPanelInputs;
 
         protected createInputs(): IStackPanelInputs {
-            return {
-                visible: true,
-                useLayoutRounding: true,
-                margin: new Thickness(),
-                width: NaN,
-                height: NaN,
-                minWidth: 0.0,
-                minHeight: 0.0,
-                maxWidth: Number.POSITIVE_INFINITY,
-                maxHeight: Number.POSITIVE_INFINITY,
-                horizontalAlignment: HorizontalAlignment.Stretch,
-                verticalAlignment: VerticalAlignment.Stretch,
-
-                orientation: Orientation.Horizontal,
-            };
+            var inputs = <IStackPanelInputs>super.createInputs();
+            inputs.orientation = Orientation.Horizontal;
+            return inputs;
         }
 
         protected measureOverride(constraint: ISize): ISize {

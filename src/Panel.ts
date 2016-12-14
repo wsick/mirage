@@ -1,9 +1,11 @@
+/// <reference path="core/LayoutNode" />
+
 namespace mirage {
     export class Panel extends core.LayoutNode {
         tree: IPanelTree;
 
         protected createTree(): core.ILayoutTree {
-            return new PanelTree();
+            return NewPanelTree();
         }
 
         protected measureOverride(constraint: ISize): ISize {
@@ -13,13 +15,63 @@ namespace mirage {
         protected arrangeOverride(arrangeSize: ISize): ISize {
             return new Size(arrangeSize.width, arrangeSize.height);
         }
+
+        get childCount(): number {
+            return this.tree.children.length;
+        }
+
+        insertChild(child: core.LayoutNode, index: number) {
+            var children = this.tree.children;
+            if (index >= children.length) {
+                this.appendChild(child);
+            } else if (index <= 0) {
+                this.prependChild(child);
+            } else {
+                children.splice(index, 0, child);
+                child.setParent(this);
+            }
+        }
+
+        prependChild(child: core.LayoutNode) {
+            this.tree.children.unshift(child);
+            child.setParent(this);
+        }
+
+        appendChild(child: core.LayoutNode) {
+            this.tree.children.push(child);
+            child.setParent(this);
+        }
+
+        removeChild(child: core.LayoutNode): boolean {
+            var children = this.tree.children;
+            var index = children.indexOf(child);
+            if (index < 0)
+                return false;
+            this.tree.children.splice(index, 1);
+            child.setParent(null);
+            return true;
+        }
+
+        removeChildAt(index: number): core.LayoutNode {
+            var children = this.tree.children;
+            if (index < 0 || index >= children.length)
+                return null;
+            var removed = children.splice(index, 1)[0];
+            if (removed)
+                removed.setParent(null);
+            return removed;
+        }
+
+        getChildAt(index: number): core.LayoutNode {
+            return this.tree.children[index];
+        }
     }
 
     export interface IPanelTree extends core.ILayoutTree {
         children: core.LayoutNode[];
     }
 
-    export function PanelTree(): IPanelTree {
+    export function NewPanelTree(): IPanelTree {
         var tree = <IPanelTree>core.DefaultLayoutTree();
         tree.isLayoutContainer = true;
         tree.children = [];

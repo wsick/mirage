@@ -99,7 +99,7 @@ namespace mirage.core {
 
         // TREE
 
-        protected setParent(parent: LayoutNode) {
+        setParent(parent: LayoutNode) {
             if (!parent) {
                 if (!this.tree.parent)
                     return;
