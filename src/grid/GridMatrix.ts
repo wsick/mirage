@@ -119,6 +119,20 @@ namespace mirage.grid {
             calcChildRect(childRect: Rect, col: number, colspan: number, row: number, rowspan: number) {
                 Rect.clear(childRect);
 
+                col = col || 0; //coerce NaN, undefined, null, 0 => 0
+                col = Math.min(col, cm.length - 1);
+
+                if (colspan !== 0)
+                    colspan = colspan || 1; //coerce NaN, undefined, null => 1
+                colspan = Math.min(colspan, cm.length - col);
+
+                row = row || 0; //coerce NaN, undefined, null, 0 => 0
+                row = Math.min(row, rm.length - 1);
+
+                if (rowspan !== 0)
+                    rowspan = rowspan || 1; //coerce NaN, undefined, null => 1
+                rowspan = Math.min(rowspan, rm.length - row);
+
                 for (var i = 0; i < col; i++) {
                     childRect.x += cm[i][i].offered;
                 }
