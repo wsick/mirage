@@ -1,17 +1,14 @@
 namespace mirage.grid {
     export function NewGridArrangeOverride(inputs: IGridInputs, state: IGridState, tree: IPanelTree): core.IArrangeOverride {
+        var des = state.design.arrange;
+
         return function (arrangeSize: ISize): ISize {
-            state.matrix.restoreMeasure();
-            state.matrix.calcActuals(arrangeSize, inputs.columnDefinitions, inputs.rowDefinitions);
+            des.init(arrangeSize, inputs.columnDefinitions, inputs.rowDefinitions);
 
             var cr = new Rect();
             for (var walker = tree.walk(); walker.step();) {
                 var child = walker.current;
-                state.matrix.calcChildRect(cr,
-                    Grid.getColumn(child),
-                    Grid.getColumnSpan(child),
-                    Grid.getRow(child),
-                    Grid.getRowSpan(child));
+                des.calcChildRect(cr, child);
                 child.arrange(cr);
             }
 

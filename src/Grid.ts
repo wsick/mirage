@@ -7,7 +7,7 @@ namespace mirage {
     }
 
     export interface IGridState extends core.ILayoutNodeState {
-        matrix: grid.IGridMatrix;
+        design: grid.design.IGridDesign;
     }
 
     export class Grid extends Panel {
@@ -15,14 +15,17 @@ namespace mirage {
             //TODO:
             return 0;
         }
+
         static getColumnSpan(node: core.LayoutNode): number {
             //TODO:
             return 1;
         }
+
         static getRow(node: core.LayoutNode): number {
             //TODO:
             return 0;
         }
+
         static getRowSpan(node: core.LayoutNode): number {
             //TODO:
             return 1;
@@ -49,7 +52,7 @@ namespace mirage {
 
         protected createState(): IGridState {
             var state = <IGridState>super.createState();
-            state.matrix = grid.NewGridMatrix();
+            state.design = grid.design.NewGridDesign();
             return state;
         }
 

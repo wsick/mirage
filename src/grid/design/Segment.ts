@@ -1,4 +1,4 @@
-module mirage.grid {
+module mirage.grid.design {
     export class Segment {
         desired: number = 0.0;
         offered: number = 0.0;
