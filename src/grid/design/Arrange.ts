@@ -19,11 +19,15 @@ namespace mirage.grid.design {
                     helpers.expand(arrangeSize.height, rm);
                 }
 
-                for (var i = 0; i < coldefs.length; i++) {
-                    coldefs[i].setActualWidth(cm[i][i].offered);
+                if (!!coldefs) {
+                    for (var i = 0; i < coldefs.length; i++) {
+                        coldefs[i].setActualWidth(cm[i][i].offered);
+                    }
                 }
-                for (var i = 0; i < rowdefs.length; i++) {
-                    rowdefs[i].setActualHeight(rm[i][i].offered);
+                if (!!rowdefs) {
+                    for (var i = 0; i < rowdefs.length; i++) {
+                        rowdefs[i].setActualHeight(rm[i][i].offered);
+                    }
                 }
             },
             calcChildRect(childRect: IRect, child: core.LayoutNode) {

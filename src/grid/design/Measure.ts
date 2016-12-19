@@ -14,8 +14,8 @@ namespace mirage.grid.design {
 
         return {
             init(constraint: ISize, coldefs: IColumnDefinition[], rowdefs: IRowDefinition[], tree: IPanelTree) {
-                ensureMatrix(cm, coldefs.length || 1);
-                ensureMatrix(rm, rowdefs.length || 1);
+                ensureMatrix(cm, !coldefs ? 1 : coldefs.length || 1);
+                ensureMatrix(rm, !rowdefs ? 1 : rowdefs.length || 1);
                 prepareCols(cm, coldefs);
                 prepareRows(rm, rowdefs);
 
@@ -107,16 +107,16 @@ namespace mirage.grid.design {
         }
     }
 
-    function prepareCols(cm: Segment[][], colDefs: IColumnDefinition[]) {
-        if (colDefs.length === 0) {
+    function prepareCols(cm: Segment[][], coldefs: IColumnDefinition[]) {
+        if (!coldefs || coldefs.length === 0) {
             var mcell = cm[0][0];
             mcell.type = GridUnitType.star;
             mcell.stars = 1.0;
             return;
         }
 
-        for (var i = 0; i < colDefs.length; i++) {
-            var colDef = colDefs[i];
+        for (var i = 0; i < coldefs.length; i++) {
+            var colDef = coldefs[i];
             var width = colDef.width || DEFAULT_GRID_LEN;
             colDef.setActualWidth(Number.POSITIVE_INFINITY);
 
@@ -132,16 +132,16 @@ namespace mirage.grid.design {
         }
     }
 
-    function prepareRows(rm: Segment[][], rowDefs: IRowDefinition[]) {
-        if (rowDefs.length === 0) {
+    function prepareRows(rm: Segment[][], rowdefs: IRowDefinition[]) {
+        if (!rowdefs || rowdefs.length === 0) {
             var mcell = rm[0][0];
             mcell.type = GridUnitType.star;
             mcell.stars = 1.0;
             return;
         }
 
-        for (var i = 0; i < rowDefs.length; i++) {
-            var rowDef = rowDefs[i];
+        for (var i = 0; i < rowdefs.length; i++) {
+            var rowDef = rowdefs[i];
             var height = rowDef.height || DEFAULT_GRID_LEN;
             rowDef.setActualHeight(Number.POSITIVE_INFINITY);
 
