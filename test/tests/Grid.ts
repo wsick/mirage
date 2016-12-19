@@ -19,7 +19,8 @@ namespace mirage.tests {
         deepEqual(parseGridLength("auto"), {value: 0, type: GridUnitType.auto}, "auto");
         deepEqual(parseGridLength("20"), {value: 20, type: GridUnitType.pixel}, "pixel");
         deepEqual(parseGridLength("20.2"), {value: 20, type: GridUnitType.pixel}, "pixel (decimal)");
-        deepEqual(parseGridLength("2*"), {value: 2, type: GridUnitType.star}, "star");
+        deepEqual(parseGridLength("*"), {value: 1, type: GridUnitType.star}, "star");
+        deepEqual(parseGridLength("2*"), {value: 2, type: GridUnitType.star}, "2 star");
     });
 
     QUnit.test("NewRowDefinition", () => {

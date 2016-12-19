@@ -16,6 +16,8 @@ namespace mirage {
             return auto;
         }
         if (s[s.length - 1] === "*") {
+            if (s.length === 1)
+                return {value: 1, type: GridUnitType.star};
             return {
                 value: parseInt(s.substr(0, s.length - 1)),
                 type: GridUnitType.star,
