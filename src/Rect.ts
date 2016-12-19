@@ -1,16 +1,9 @@
-/// <reference path="mat/vec2" />
-
 namespace mirage {
     export enum RectOverlap {
         outside,
         inside,
         part,
     }
-
-    var p1 = vec2.create(0, 0);
-    var p2 = vec2.create(0, 0);
-    var p3 = vec2.create(0, 0);
-    var p4 = vec2.create(0, 0);
 
     export interface IRect extends IPoint, ISize {
     }
@@ -178,40 +171,6 @@ namespace mirage {
             if (Rect.isEqual(copy, rect2))
                 return RectOverlap.inside;
             return RectOverlap.part;
-        }
-
-        static transform(dest: IRect, mat: number[]) {
-            if (!mat)
-                return dest;
-            var x = dest.x;
-            var y = dest.y;
-            var width = dest.width;
-            var height = dest.height;
-
-            vec2.init(x, y, p1);
-            vec2.init(x + width, y, p2);
-            vec2.init(x + width, y + height, p3);
-            vec2.init(x, y + height, p4);
-
-            mat3.transformVec2(mat, p1);
-            mat3.transformVec2(mat, p2);
-            mat3.transformVec2(mat, p3);
-            mat3.transformVec2(mat, p4);
-
-            var l = Math.min(p1[0], p2[0], p3[0], p4[0]);
-            var t = Math.min(p1[1], p2[1], p3[1], p4[1]);
-            var r = Math.max(p1[0], p2[0], p3[0], p4[0]);
-            var b = Math.max(p1[1], p2[1], p3[1], p4[1]);
-
-            dest.x = l;
-            dest.y = t;
-            dest.width = r - l;
-            dest.height = b - t;
-            return dest;
-        }
-
-        static transform4(dest: IRect, projection: number[]) {
-            //See mat/transform4.ts
         }
     }
 }
