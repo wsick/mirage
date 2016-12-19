@@ -24,7 +24,7 @@ namespace mirage.tests {
     });
 
     QUnit.test("NewRowDefinition", () => {
-        sameRowDef(NewRowDefinition(), {value: 0, type: GridUnitType.auto}, 0, Number.POSITIVE_INFINITY, "0");
+        sameRowDef(NewRowDefinition(), {value: 1, type: GridUnitType.star}, 0, Number.POSITIVE_INFINITY, "0");
         sameRowDef(NewRowDefinition("auto"), {value: 0, type: GridUnitType.auto}, 0, Number.POSITIVE_INFINITY, "1");
         sameRowDef(NewRowDefinition(0, GridUnitType.auto), {
             value: 0,
@@ -35,7 +35,7 @@ namespace mirage.tests {
     });
 
     QUnit.test("NewColumnDefinition", () => {
-        sameColDef(NewColumnDefinition(), {value: 0, type: GridUnitType.auto}, 0, Number.POSITIVE_INFINITY, "0");
+        sameColDef(NewColumnDefinition(), {value: 1, type: GridUnitType.star}, 0, Number.POSITIVE_INFINITY, "0");
         sameColDef(NewColumnDefinition("auto"), {value: 0, type: GridUnitType.auto}, 0, Number.POSITIVE_INFINITY, "1");
         sameColDef(NewColumnDefinition(0, GridUnitType.auto), {
             value: 0,

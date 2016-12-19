@@ -44,8 +44,8 @@ namespace mirage {
                 break;
             default:
                 len = {
-                    value: 0,
-                    type: GridUnitType.auto,
+                    value: 1,
+                    type: GridUnitType.star,
                 };
                 break;
         }
