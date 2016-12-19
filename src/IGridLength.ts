@@ -9,4 +9,21 @@ namespace mirage {
         value: number;
         type: GridUnitType;
     }
+
+    export function parseGridLength(s: string): IGridLength {
+        var auto = {value: 0, type: GridUnitType.auto};
+        if (s === "auto") {
+            return auto;
+        }
+        if (s[s.length - 1] === "*") {
+            return {
+                value: parseInt(s.substr(0, s.length - 1)),
+                type: GridUnitType.star,
+            };
+        }
+        return {
+            value: parseInt(s),
+            type: GridUnitType.pixel,
+        };
+    }
 }
