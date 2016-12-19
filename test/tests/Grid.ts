@@ -45,10 +45,10 @@ namespace mirage.tests {
         sameColDef(NewColumnDefinition(0, GridUnitType.auto, 10, 50), {value: 0, type: GridUnitType.auto}, 10, 50, "4");
     });
 
-    QUnit.test("scenario1", () => {
+    QUnit.test("draft-scenario1", () => {
         var grid = new Grid();
-        // no defined row defs => 1 "auto" row
-        // no defined col defs => 1 "auto" col
+        // no defined row defs => 1*
+        // no defined col defs => 1*
         grid.invalidateMeasure();
 
         var child1 = new core.LayoutNode();
@@ -84,11 +84,11 @@ namespace mirage.tests {
         arrangeState(child3, new Rect(0, 0, 200, 200), new Rect(125, 150, 75, 50), "child3");
     });
 
-    QUnit.test("scenario2", () => {
+    QUnit.test("draft-scenario2", () => {
         var grid = new Grid();
-        // 1* 2* 1* => 25%
+        // 1* 2* 1* => 25% 50% 25%
         grid.rowDefinitions = NewRowDefinitions("1* 2* *");
-        // no defined col defs => 1 "auto" col
+        // no defined col defs => 1*
         grid.invalidateMeasure();
 
         var child1 = new core.LayoutNode();
@@ -120,5 +120,43 @@ namespace mirage.tests {
         arrangeState(child1, new Rect(0, 0, 400, 100), new Rect(150, 25, 100, 50), "child1");
         arrangeState(child2, new Rect(0, 100, 400, 200), new Rect(150, 175, 100, 50), "child2");
         arrangeState(child3, new Rect(0, 300, 400, 100), new Rect(150, 325, 100, 50), "child3");
+    });
+
+    QUnit.test("draft-scenario3", () => {
+        var grid = new Grid();
+        // no defined row defs => 1*
+        // 1* auto 50 col defs => (given child constraints) 250 100 50
+        grid.columnDefinitions = NewColumnDefinitions("* auto 50");
+        grid.invalidateMeasure();
+
+        var child1 = new core.LayoutNode();
+        child1.width = 50;
+        child1.height = 50;
+        grid.appendChild(child1);
+
+        var child2 = new core.LayoutNode();
+        child2.width = 100;
+        child2.height = 50;
+        Grid.setColumn(child2, 1);
+        grid.appendChild(child2);
+
+        var child3 = new core.LayoutNode();
+        child3.width = 50;
+        child3.height = 50;
+        Grid.setColumn(child3, 2);
+        grid.appendChild(child3);
+
+        // measure
+        ok(grid.measure(new Size(400, 400)), "measure changed");
+        strictEqual(grid.state.flags & LayoutFlags.measure, 0, "measure flag cleared");
+        deepEqual(grid.state.desiredSize, new Size(150, 50), "desiredSize");
+
+        // arrange
+        ok(grid.arrange(new Rect(0, 0, 400, 400)), "arrange changed");
+        strictEqual(grid.state.flags & LayoutFlags.arrange, 0, "arrange flag cleared");
+        arrangeState(grid, new Rect(0, 0, 400, 400), new Rect(0, 0, 400, 400), "root");
+        arrangeState(child1, new Rect(0, 0, 250, 400), new Rect(100, 175, 50, 50), "child1");
+        arrangeState(child2, new Rect(250, 0, 100, 400), new Rect(250, 175, 100, 50), "child2");
+        arrangeState(child3, new Rect(350, 0, 50, 400), new Rect(350, 175, 50, 50), "child3");
     });
 }
