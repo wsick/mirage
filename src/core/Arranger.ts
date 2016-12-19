@@ -23,58 +23,6 @@ namespace mirage.core {
         lastArranged: ISize;
     }
 
-    export interface IArrangeBinder {
-        (): boolean;
-    }
-
-    export function NewArrangeBinder(state: IArrangeState, tree: ILayoutTree, arranger: IArranger): IArrangeBinder {
-        /*
-         function expandViewport (viewport: IRect) {
-         if (tree.isLayoutContainer) {
-         Size.copyTo(state.desiredSize, viewport);
-         if (tree.surface) {
-         var measure = state.previousAvailable;
-         if (!Size.isUndef(measure)) {
-         viewport.width = Math.max(viewport.width, measure.width);
-         viewport.height = Math.max(viewport.height, measure.height);
-         } else {
-         viewport.width = tree.surface.width;
-         viewport.height = tree.surface.height;
-         }
-         }
-         } else {
-         viewport.width = assets.actualWidth;
-         viewport.height = assets.actualHeight;
-         }
-         }
-         function shiftViewport (viewport: IRect) {
-         //NOTE: Coercing undefined, null, NaN, and 0 to 0
-         viewport.x = updater.getAttachedValue("Canvas.Left") || 0;
-         viewport.y = updater.getAttachedValue("Canvas.Top") || 0;
-         }
-         */
-
-        return function (): boolean {
-            var last = state.layoutSlot || undefined;
-            /*
-             TODO: This is intended to expand a top-level node to consume entire surface area
-             - Do we need this?
-             - Can we do this other ways?
-             if (!tree.parent) {
-             last = new Rect();
-             expandViewport(last);
-             shiftViewport(last);
-             }
-             */
-
-            if (last) {
-                return arranger(last);
-            } else if (tree.parent) {
-                tree.parent.invalidateArrange();
-            }
-            return false;
-        };
-    }
 
     export interface IArranger {
         (finalRect: Rect): boolean;
