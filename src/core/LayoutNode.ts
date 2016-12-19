@@ -19,8 +19,7 @@ namespace mirage.core {
         desiredSize: ISize;
         hiddenDesire: ISize;
         layoutSlot: Rect;
-        visualOffset: Point;
-        arranged: ISize;
+        arrangedSlot: Rect;
         lastArranged: ISize;
     }
 
@@ -79,8 +78,7 @@ namespace mirage.core {
                 desiredSize: new Size(),
                 hiddenDesire: new Size(),
                 layoutSlot: new Rect(),
-                visualOffset: new Point(),
-                arranged: new Size(),
+                arrangedSlot: new Rect(),
                 lastArranged: new Size(),
             };
         }
@@ -125,7 +123,7 @@ namespace mirage.core {
         protected onAttached() {
             var state = this.state;
             Size.undef(state.previousAvailable);
-            Size.clear(state.arranged);
+            Size.clear(state.arrangedSlot);
             this.invalidateMeasure();
             this.invalidateArrange();
             if ((state.flags & LayoutFlags.SizeHint) > 0 || state.lastArranged !== undefined) {
@@ -205,7 +203,7 @@ namespace mirage.core {
             var state = this.state;
             if (state.lastArranged)
                 Size.copyTo(state.lastArranged, oldSize);
-            Size.copyTo(state.arranged, newSize);
+            Size.copyTo(state.arrangedSlot, newSize);
             state.lastArranged = undefined;
             // TODO: Set actualWidth, actualHeight
             return true;

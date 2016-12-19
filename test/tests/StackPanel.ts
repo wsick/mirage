@@ -33,10 +33,10 @@ namespace mirage.tests {
         // arrange
         ok(sp.arrange(new Rect(0, 0, 200, 200)), "arrange change");
         strictEqual(sp.state.flags & LayoutFlags.Arrange, 0, "arrange flag cleared");
-        arrangeState(sp, new Rect(0, 0, 200, 200), new Point(), new Size(200, 200), "root");
-        arrangeState(child1, new Rect(0, 0, 200, 50), new Point(50, 0), new Size(100, 50), "child1");
-        arrangeState(child2, new Rect(0, 50, 200, 50), new Point(75, 50), new Size(50, 50), "child2");
-        arrangeState(child3, new Rect(0, 100, 200, 50), new Point(125, 100), new Size(75, 50), "child3");
+        arrangeState(sp, new Rect(0, 0, 200, 200), new Rect(0, 0, 200, 200), "root");
+        arrangeState(child1, new Rect(0, 0, 200, 50), new Rect(50, 0, 100, 50), "child1");
+        arrangeState(child2, new Rect(0, 50, 200, 50), new Rect(75, 50, 50, 50), "child2");
+        arrangeState(child3, new Rect(0, 100, 200, 50), new Rect(125, 100, 75, 50), "child3");
     });
 
     QUnit.test("draft-horizontal", () => {
@@ -69,9 +69,9 @@ namespace mirage.tests {
         // arrange
         ok(sp.arrange(new Rect(0, 0, 200, 200)), "arrange change");
         strictEqual(sp.state.flags & LayoutFlags.Arrange, 0, "arrange flag cleared");
-        arrangeState(sp, new Rect(0, 0, 200, 200), new Point(), new Size(200, 200), "root");
-        arrangeState(child1, new Rect(0, 0, 50, 200), new Point(0, 50), new Size(50, 100), "child1");
-        arrangeState(child2, new Rect(50, 0, 50, 200), new Point(50, 75), new Size(50, 50), "child2");
-        arrangeState(child3, new Rect(100, 0, 50, 200), new Point(100, 125), new Size(50, 75), "child3");
+        arrangeState(sp, new Rect(0, 0, 200, 200), new Rect(0, 0, 200, 200), "root");
+        arrangeState(child1, new Rect(0, 0, 50, 200), new Rect(0, 50, 50, 100), "child1");
+        arrangeState(child2, new Rect(50, 0, 50, 200), new Rect(50, 75, 50, 50), "child2");
+        arrangeState(child3, new Rect(100, 0, 50, 200), new Rect(100, 125, 50, 75), "child3");
     });
 }
