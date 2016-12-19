@@ -1,7 +1,7 @@
 namespace mirage.grid.design {
     export interface IGridArrangeDesign {
         init(arrangeSize: ISize, coldefs: IColumnDefinition[], rowdefs: IRowDefinition[]);
-        calcChildRect(childRect: Rect, child: core.LayoutNode);
+        calcChildRect(childRect: IRect, child: core.LayoutNode);
     }
 
     export function NewGridArrangeDesign(cm: Segment[][], rm: Segment[][]): IGridArrangeDesign {
@@ -26,7 +26,7 @@ namespace mirage.grid.design {
                     rowdefs[i].setActualHeight(rm[i][i].offered);
                 }
             },
-            calcChildRect(childRect: Rect, child: core.LayoutNode) {
+            calcChildRect(childRect: IRect, child: core.LayoutNode) {
                 Rect.clear(childRect);
 
                 var col = Grid.getColumn(child) || 0; //coerce NaN, undefined, null, 0 => 0

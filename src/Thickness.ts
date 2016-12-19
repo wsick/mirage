@@ -48,7 +48,7 @@ namespace mirage {
             return dest;
         }
 
-        static shrinkRect (thickness: Thickness, dest: Rect) {
+        static shrinkRect (thickness: Thickness, dest: IRect) {
             dest.x += thickness.left;
             dest.y += thickness.top;
             dest.width -= thickness.left + thickness.right;
@@ -78,7 +78,7 @@ namespace mirage {
             return dest;
         }
 
-        static growRect (thickness: Thickness, dest: Rect) {
+        static growRect (thickness: Thickness, dest: IRect) {
             dest.x -= thickness.left;
             dest.y -= thickness.top;
             dest.width += thickness.left + thickness.right;

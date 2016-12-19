@@ -1,7 +1,7 @@
 /// <reference path="../Rect" />
 
 namespace mirage {
-    Rect.transform4 = function (dest: Rect, projection: number[]) {
+    Rect.transform4 = function (dest: IRect, projection: number[]) {
         console.warn("[Rect.transform4] Not implemented");
         /*
         if (!projection)

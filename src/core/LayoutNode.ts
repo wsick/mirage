@@ -18,8 +18,8 @@ namespace mirage.core {
         previousAvailable: ISize;
         desiredSize: ISize;
         hiddenDesire: ISize;
-        layoutSlot: Rect;
-        arrangedSlot: Rect;
+        layoutSlot: IRect;
+        arrangedSlot: IRect;
         lastArranged: ISize;
     }
 
@@ -186,7 +186,7 @@ namespace mirage.core {
             return this.$arrangeBinder();
         }
 
-        arrange(finalRect: Rect): boolean {
+        arrange(finalRect: IRect): boolean {
             return this.$arranger(finalRect);
         }
 

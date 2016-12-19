@@ -18,8 +18,8 @@ namespace mirage.core {
         previousAvailable: ISize;
         desiredSize: ISize;
         hiddenDesire: ISize;
-        layoutSlot: Rect;
-        arrangedSlot: Rect;
+        layoutSlot: IRect;
+        arrangedSlot: IRect;
         lastArranged: ISize;
     }
 
@@ -29,7 +29,7 @@ namespace mirage.core {
 
     export function NewArrangeBinder(state: IArrangeState, tree: ILayoutTree, arranger: IArranger): IArrangeBinder {
         /*
-         function expandViewport (viewport: Rect) {
+         function expandViewport (viewport: IRect) {
          if (tree.isLayoutContainer) {
          Size.copyTo(state.desiredSize, viewport);
          if (tree.surface) {
@@ -47,7 +47,7 @@ namespace mirage.core {
          viewport.height = assets.actualHeight;
          }
          }
-         function shiftViewport (viewport: Rect) {
+         function shiftViewport (viewport: IRect) {
          //NOTE: Coercing undefined, null, NaN, and 0 to 0
          viewport.x = updater.getAttachedValue("Canvas.Left") || 0;
          viewport.y = updater.getAttachedValue("Canvas.Top") || 0;
