@@ -6,6 +6,18 @@ namespace mirage {
     export class StackPanel extends Panel {
         inputs: IStackPanelInputs;
 
+        get orientation(): Orientation {
+            return this.inputs.orientation;
+        }
+
+        set orientation(value: Orientation) {
+            if (this.inputs.orientation === value)
+                return;
+            this.inputs.orientation = value;
+            this.invalidateMeasure();
+            this.invalidateArrange();
+        }
+
         protected createInputs(): IStackPanelInputs {
             var inputs = <IStackPanelInputs>super.createInputs();
             inputs.orientation = Orientation.horizontal;

@@ -5,24 +5,24 @@ namespace mirage.tests {
 
     QUnit.test("draft-vertical", () => {
         var sp = new StackPanel();
-        sp.inputs.orientation = Orientation.vertical;
+        sp.orientation = Orientation.vertical;
         sp.invalidateMeasure();
 
         var child1 = new core.LayoutNode();
-        child1.inputs.width = 100;
-        child1.inputs.height = 50;
+        child1.width = 100;
+        child1.height = 50;
         sp.appendChild(child1);
 
         var child2 = new core.LayoutNode();
-        child2.inputs.width = 50;
-        child2.inputs.height = 50;
-        child2.inputs.horizontalAlignment = HorizontalAlignment.center;
+        child2.width = 50;
+        child2.height = 50;
+        child2.horizontalAlignment = HorizontalAlignment.center;
         sp.appendChild(child2);
 
         var child3 = new core.LayoutNode();
-        child3.inputs.width = 75;
-        child3.inputs.height = 50;
-        child3.inputs.horizontalAlignment = HorizontalAlignment.right;
+        child3.width = 75;
+        child3.height = 50;
+        child3.horizontalAlignment = HorizontalAlignment.right;
         sp.appendChild(child3);
 
         // measure
@@ -41,24 +41,24 @@ namespace mirage.tests {
 
     QUnit.test("draft-horizontal", () => {
         var sp = new StackPanel();
-        sp.inputs.orientation = Orientation.horizontal;
+        sp.orientation = Orientation.horizontal;
         sp.invalidateMeasure();
 
         var child1 = new core.LayoutNode();
-        child1.inputs.width = 50;
-        child1.inputs.height = 100;
+        child1.width = 50;
+        child1.height = 100;
         sp.appendChild(child1);
 
         var child2 = new core.LayoutNode();
-        child2.inputs.width = 50;
-        child2.inputs.height = 50;
-        child2.inputs.verticalAlignment = VerticalAlignment.center;
+        child2.width = 50;
+        child2.height = 50;
+        child2.verticalAlignment = VerticalAlignment.center;
         sp.appendChild(child2);
 
         var child3 = new core.LayoutNode();
-        child3.inputs.width = 50;
-        child3.inputs.height = 75;
-        child3.inputs.verticalAlignment = VerticalAlignment.bottom;
+        child3.width = 50;
+        child3.height = 75;
+        child3.verticalAlignment = VerticalAlignment.bottom;
         sp.appendChild(child3);
 
         // measure

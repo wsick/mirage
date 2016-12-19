@@ -51,22 +51,22 @@ namespace mirage.tests {
         grid.invalidateMeasure();
 
         var child1 = new core.LayoutNode();
-        child1.inputs.width = 100;
-        child1.inputs.height = 50;
+        child1.width = 100;
+        child1.height = 50;
         grid.appendChild(child1);
 
         var child2 = new core.LayoutNode();
-        child2.inputs.width = 50;
-        child2.inputs.height = 50;
-        child2.inputs.horizontalAlignment = HorizontalAlignment.center;
-        child2.inputs.verticalAlignment = VerticalAlignment.center;
+        child2.width = 50;
+        child2.height = 50;
+        child2.horizontalAlignment = HorizontalAlignment.center;
+        child2.verticalAlignment = VerticalAlignment.center;
         grid.appendChild(child2);
 
         var child3 = new core.LayoutNode();
-        child3.inputs.width = 75;
-        child3.inputs.height = 50;
-        child3.inputs.horizontalAlignment = HorizontalAlignment.right;
-        child3.inputs.verticalAlignment = VerticalAlignment.bottom;
+        child3.width = 75;
+        child3.height = 50;
+        child3.horizontalAlignment = HorizontalAlignment.right;
+        child3.verticalAlignment = VerticalAlignment.bottom;
         grid.appendChild(child3);
 
         // measure

@@ -55,6 +55,24 @@ namespace mirage {
             this.$arrangeOverride = grid.NewGridArrangeOverride(this.inputs, this.state, this.tree);
         }
 
+        get rowDefinitions(): IRowDefinition[] {
+            return this.inputs.rowDefinitions;
+        }
+
+        set rowDefinitions(value: IRowDefinition[]) {
+            this.inputs.rowDefinitions = value;
+            this.invalidateMeasure();
+        }
+
+        get columnDefinitions(): IColumnDefinition[] {
+            return this.inputs.columnDefinitions;
+        }
+
+        set columnDefinitions(value: IColumnDefinition[]) {
+            this.inputs.columnDefinitions = value;
+            this.invalidateMeasure();
+        }
+
         protected createInputs(): IGridInputs {
             var inputs = <IGridInputs>super.createInputs();
             inputs.rowDefinitions = [];
