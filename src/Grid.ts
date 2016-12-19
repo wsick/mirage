@@ -17,6 +17,7 @@ namespace mirage {
 
         static setColumn(node: core.LayoutNode, value: number) {
             node.setAttached("grid.column", value);
+            invalidateCell(node);
         }
 
         static getColumnSpan(node: core.LayoutNode): number {
@@ -25,6 +26,7 @@ namespace mirage {
 
         static setColumnSpan(node: core.LayoutNode, value: number) {
             node.setAttached("grid.column-span", value);
+            invalidateCell(node);
         }
 
         static getRow(node: core.LayoutNode): number {
@@ -33,6 +35,7 @@ namespace mirage {
 
         static setRow(node: core.LayoutNode, value: number) {
             node.setAttached("grid.row", value);
+            invalidateCell(node);
         }
 
         static getRowSpan(node: core.LayoutNode): number {
@@ -41,6 +44,7 @@ namespace mirage {
 
         static setRowSpan(node: core.LayoutNode, value: number) {
             node.setAttached("grid.row-span", value);
+            invalidateCell(node);
         }
 
         inputs: IGridInputs;
@@ -93,5 +97,12 @@ namespace mirage {
         protected arrangeOverride(arrangeSize: ISize): ISize {
             return this.$arrangeOverride(arrangeSize);
         }
+    }
+
+    function invalidateCell(node: core.LayoutNode) {
+        var parent = node.tree.parent;
+        if (parent instanceof Grid)
+            parent.invalidateMeasure();
+        node.invalidateMeasure();
     }
 }
