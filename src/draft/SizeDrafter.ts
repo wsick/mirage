@@ -24,7 +24,7 @@ namespace mirage.draft {
             flush() {
                 var cur: core.LayoutNode;
                 while ((cur = sizingList.shift()) != null) {
-                    cur.tree.propagateFlagUp(LayoutFlags.SizeHint);
+                    cur.tree.propagateFlagUp(LayoutFlags.sizeHint);
                 }
             },
             prepare(): boolean {
@@ -35,12 +35,12 @@ namespace mirage.draft {
                         continue;
                     }
 
-                    if ((cur.state.flags & LayoutFlags.SizeHint) === 0) {
+                    if ((cur.state.flags & LayoutFlags.sizeHint) === 0) {
                         walker.skipBranch();
                         continue;
                     }
 
-                    cur.state.flags &= ~LayoutFlags.SizeHint;
+                    cur.state.flags &= ~LayoutFlags.sizeHint;
                     if (cur.state.lastArranged !== undefined) {
                         sizingList.push(cur);
                     }

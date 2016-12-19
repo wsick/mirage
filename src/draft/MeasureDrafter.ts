@@ -15,7 +15,7 @@ namespace mirage.draft {
             prepare(): boolean {
                 var last = node.state.previousAvailable;
                 if (node.tree.isContainer && (Size.isUndef(last) || !Size.isEqual(last, rootSize))) {
-                    node.state.flags |= LayoutFlags.Measure;
+                    node.state.flags |= LayoutFlags.measure;
                     Size.copyTo(rootSize, node.state.previousAvailable);
                 }
 
@@ -27,13 +27,13 @@ namespace mirage.draft {
                         continue;
                     }
 
-                    if ((cur.state.flags & LayoutFlags.MeasureHint) === 0) {
+                    if ((cur.state.flags & LayoutFlags.measureHint) === 0) {
                         walker.skipBranch();
                         continue;
                     }
 
-                    cur.state.flags &= ~LayoutFlags.MeasureHint;
-                    if ((cur.state.flags & LayoutFlags.Measure) > 0) {
+                    cur.state.flags &= ~LayoutFlags.measureHint;
+                    if ((cur.state.flags & LayoutFlags.measure) > 0) {
                         measureList.push(cur);
                     }
                 }

@@ -18,64 +18,11 @@ namespace mirage.core {
         previousAvailable: ISize;
         desiredSize: ISize;
         hiddenDesire: ISize;
-        layoutSlot: Rect;
-        visualOffset: Point;
-        arranged: ISize;
+        layoutSlot: IRect;
+        arrangedSlot: IRect;
         lastArranged: ISize;
     }
 
-    export interface IArrangeBinder {
-        (): boolean;
-    }
-
-    export function NewArrangeBinder(state: IArrangeState, tree: ILayoutTree, arranger: IArranger): IArrangeBinder {
-        /*
-         function expandViewport (viewport: Rect) {
-         if (tree.isLayoutContainer) {
-         Size.copyTo(state.desiredSize, viewport);
-         if (tree.surface) {
-         var measure = state.previousAvailable;
-         if (!Size.isUndef(measure)) {
-         viewport.width = Math.max(viewport.width, measure.width);
-         viewport.height = Math.max(viewport.height, measure.height);
-         } else {
-         viewport.width = tree.surface.width;
-         viewport.height = tree.surface.height;
-         }
-         }
-         } else {
-         viewport.width = assets.actualWidth;
-         viewport.height = assets.actualHeight;
-         }
-         }
-         function shiftViewport (viewport: Rect) {
-         //NOTE: Coercing undefined, null, NaN, and 0 to 0
-         viewport.x = updater.getAttachedValue("Canvas.Left") || 0;
-         viewport.y = updater.getAttachedValue("Canvas.Top") || 0;
-         }
-         */
-
-        return function (): boolean {
-            var last = state.layoutSlot || undefined;
-            /*
-             TODO: This is intended to expand a top-level node to consume entire surface area
-             - Do we need this?
-             - Can we do this other ways?
-             if (!tree.parent) {
-             last = new Rect();
-             expandViewport(last);
-             shiftViewport(last);
-             }
-             */
-
-            if (last) {
-                return arranger(last);
-            } else if (tree.parent) {
-                tree.parent.invalidateArrange();
-            }
-            return false;
-        };
-    }
 
     export interface IArranger {
         (finalRect: Rect): boolean;
@@ -111,7 +58,7 @@ namespace mirage.core {
             }
 
             // Check need to arrange
-            if ((state.flags & LayoutFlags.Arrange) <= 0) {
+            if ((state.flags & LayoutFlags.arrange) <= 0) {
                 return false;
             }
             if (Rect.isEqual(state.layoutSlot, childRect)) {
@@ -127,10 +74,10 @@ namespace mirage.core {
             // Prepare override
             var framework = new Size();
             coerceSize(framework, inputs);
-            if (inputs.horizontalAlignment === HorizontalAlignment.Stretch) {
+            if (inputs.horizontalAlignment === HorizontalAlignment.stretch) {
                 framework.width = Math.max(framework.width, stretched.width);
             }
-            if (inputs.verticalAlignment === VerticalAlignment.Stretch) {
+            if (inputs.verticalAlignment === VerticalAlignment.stretch) {
                 framework.height = Math.max(framework.height, stretched.height);
             }
             var offer = new Size(state.hiddenDesire.width, state.hiddenDesire.height);
@@ -140,7 +87,7 @@ namespace mirage.core {
             var arranged = override(offer);
 
             // Complete override
-            state.flags &= ~LayoutFlags.Arrange;
+            state.flags &= ~LayoutFlags.arrange;
             if (inputs.useLayoutRounding) {
                 Size.round(arranged);
             }
@@ -151,46 +98,46 @@ namespace mirage.core {
             Size.min(constrained, arranged);
 
             // Calculate visual offset
-            var vo = state.visualOffset;
-            Point.copyTo(childRect, vo);
+            var as = state.arrangedSlot;
+            Point.copyTo(childRect, as);
             switch (inputs.horizontalAlignment) {
-                case HorizontalAlignment.Left:
+                case HorizontalAlignment.left:
                     break;
-                case HorizontalAlignment.Right:
-                    vo.x += childRect.width - constrained.width;
+                case HorizontalAlignment.right:
+                    as.x += childRect.width - constrained.width;
                     break;
-                case HorizontalAlignment.Center:
-                    vo.x += (childRect.width - constrained.width) * 0.5;
+                case HorizontalAlignment.center:
+                    as.x += (childRect.width - constrained.width) * 0.5;
                     break;
                 default:
-                    vo.x += Math.max((childRect.width - constrained.width) * 0.5, 0);
+                    as.x += Math.max((childRect.width - constrained.width) * 0.5, 0);
                     break;
             }
             switch (inputs.verticalAlignment) {
-                case VerticalAlignment.Top:
+                case VerticalAlignment.top:
                     break;
-                case VerticalAlignment.Bottom:
-                    vo.y += childRect.height - constrained.height;
+                case VerticalAlignment.bottom:
+                    as.y += childRect.height - constrained.height;
                     break;
-                case VerticalAlignment.Center:
-                    vo.y += (childRect.height - constrained.height) * 0.5;
+                case VerticalAlignment.center:
+                    as.y += (childRect.height - constrained.height) * 0.5;
                     break;
                 default:
-                    vo.y += Math.max((childRect.height - constrained.height) * 0.5, 0);
+                    as.y += Math.max((childRect.height - constrained.height) * 0.5, 0);
                     break;
             }
             if (inputs.useLayoutRounding) {
-                Point.round(vo);
+                Point.round(as);
             }
 
             // Cycle old + current arranged for sizing
-            var oldArrange = state.arranged;
+            var oldArrange = state.arrangedSlot;
             if (!Size.isEqual(oldArrange, arranged)) {
                 Size.copyTo(oldArrange, state.lastArranged);
-                state.flags |= LayoutFlags.SizeHint;
-                tree.propagateFlagUp(LayoutFlags.SizeHint);
+                state.flags |= LayoutFlags.sizeHint;
+                tree.propagateFlagUp(LayoutFlags.sizeHint);
             }
-            Size.copyTo(arranged, state.arranged);
+            Size.copyTo(arranged, state.arrangedSlot);
 
             return true;
         }

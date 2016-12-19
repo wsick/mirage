@@ -18,34 +18,6 @@ namespace mirage.core {
         hiddenDesire: ISize;
     }
 
-    export interface IMeasureBinder {
-        (): boolean;
-    }
-
-    export function NewMeasureBinder(state: IMeasureState, tree: ILayoutTree, measurer: IMeasurer): IMeasureBinder {
-        return function (): boolean {
-            var last = state.previousAvailable;
-
-            if (Size.isUndef(last) && !tree.parent && tree.isLayoutContainer)
-                last.width = last.height = Number.POSITIVE_INFINITY;
-
-            var success = false;
-            if (!Size.isUndef(last)) {
-                var old = new Size();
-                Size.copyTo(state.desiredSize, old);
-                success = measurer(last);
-                if (Size.isEqual(old, state.desiredSize))
-                    return success;
-            }
-
-            if (tree.parent)
-                tree.parent.invalidateMeasure();
-
-            state.flags &= ~LayoutFlags.Measure;
-            return success;
-        };
-    }
-
     export interface IMeasurer {
         (availableSize: ISize): boolean;
     }
@@ -68,7 +40,7 @@ namespace mirage.core {
             tree.applyTemplate();
 
             // Check need to measure
-            if ((state.flags & LayoutFlags.Measure) <= 0) {
+            if ((state.flags & LayoutFlags.measure) <= 0) {
                 return false;
             }
             var pc = state.previousAvailable;
@@ -77,7 +49,7 @@ namespace mirage.core {
             }
 
             // Invalidate downstream
-            state.flags |= (LayoutFlags.Arrange | LayoutFlags.ArrangeHint);
+            state.flags |= (LayoutFlags.arrange | LayoutFlags.arrangeHint);
 
             // Prepare for override
             var framedSize = new Size(availableSize.width, availableSize.height);
@@ -88,7 +60,7 @@ namespace mirage.core {
             var desired = override(framedSize);
 
             // Complete override
-            state.flags &= ~LayoutFlags.Measure;
+            state.flags &= ~LayoutFlags.measure;
             Size.copyTo(desired, state.hiddenDesire);
 
             // Finish desired
