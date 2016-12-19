@@ -11,6 +11,11 @@ namespace mirage.core {
         maxHeight: number;
         horizontalAlignment: HorizontalAlignment;
         verticalAlignment: VerticalAlignment;
+        attached: ILayoutNodeAttachedInputs;
+    }
+
+    export interface ILayoutNodeAttachedInputs {
+        [property: string]: any;
     }
 
     export interface ILayoutNodeState {
@@ -48,6 +53,7 @@ namespace mirage.core {
                 "inputs": {value: this.createInputs(), writable: false},
                 "state": {value: this.createState(), writable: false},
                 "tree": {value: this.createTree(), writable: false},
+                "attached": {value: {}, writable: false},
             });
             this.$measurer = this.createMeasurer();
             this.$arranger = this.createArranger();
@@ -68,6 +74,7 @@ namespace mirage.core {
                 maxHeight: Number.POSITIVE_INFINITY,
                 horizontalAlignment: HorizontalAlignment.Stretch,
                 verticalAlignment: VerticalAlignment.Stretch,
+                attached: {},
             };
         }
 
@@ -93,6 +100,16 @@ namespace mirage.core {
 
         protected createArranger(): core.IArranger {
             return core.NewArranger(this.inputs, this.state, this.tree, arrangeSize => this.arrangeOverride(arrangeSize));
+        }
+
+        // ATTACHED
+
+        getAttached(property: string): any {
+            return this.inputs.attached[property];
+        }
+
+        setAttached(property: string, value: any) {
+            this.inputs.attached[property] = value;
         }
 
         // TREE

@@ -12,23 +12,35 @@ namespace mirage {
 
     export class Grid extends Panel {
         static getColumn(node: core.LayoutNode): number {
-            //TODO:
-            return 0;
+            return node.getAttached("grid.column");
+        }
+
+        static setColumn(node: core.LayoutNode, value: number) {
+            node.setAttached("grid.column", value);
         }
 
         static getColumnSpan(node: core.LayoutNode): number {
-            //TODO:
-            return 1;
+            return node.getAttached("grid.column-span");
+        }
+
+        static setColumnSpan(node: core.LayoutNode, value: number) {
+            node.setAttached("grid.column-span", value);
         }
 
         static getRow(node: core.LayoutNode): number {
-            //TODO:
-            return 0;
+            return node.getAttached("grid.row");
+        }
+
+        static setRow(node: core.LayoutNode, value: number) {
+            node.setAttached("grid.row", value);
         }
 
         static getRowSpan(node: core.LayoutNode): number {
-            //TODO:
-            return 1;
+            return node.getAttached("grid.row-span");
+        }
+
+        static setRowSpan(node: core.LayoutNode, value: number) {
+            node.setAttached("grid.row-span", value);
         }
 
         inputs: IGridInputs;
