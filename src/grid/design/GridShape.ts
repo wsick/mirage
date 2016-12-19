@@ -81,7 +81,7 @@ namespace mirage.grid.design {
             childSize.width = childSize.height = 0;
 
             if (this.autoRow && this.autoCol && !this.starRow && !this.starCol) {
-                if (pass !== MeasureOverridePass.AutoAuto)
+                if (pass !== MeasureOverridePass.autoAuto)
                     return false;
                 childSize.width = Number.POSITIVE_INFINITY;
                 childSize.height = Number.POSITIVE_INFINITY;
@@ -89,23 +89,23 @@ namespace mirage.grid.design {
             }
 
             if (this.starRow && this.autoCol && !this.starCol) {
-                if (pass !== MeasureOverridePass.StarAuto && pass !== MeasureOverridePass.StarAutoAgain)
+                if (pass !== MeasureOverridePass.starAuto && pass !== MeasureOverridePass.starAutoAgain)
                     return false;
-                if (pass === MeasureOverridePass.AutoAuto && gridShape.hasAutoStar)
+                if (pass === MeasureOverridePass.autoAuto && gridShape.hasAutoStar)
                     childSize.height = Number.POSITIVE_INFINITY;
                 childSize.width = Number.POSITIVE_INFINITY;
                 return true;
             }
 
             if (this.autoRow && this.starCol && !this.starRow) {
-                if (pass !== MeasureOverridePass.AutoStar)
+                if (pass !== MeasureOverridePass.autoStar)
                     return false;
                 childSize.height = Number.POSITIVE_INFINITY;
                 return true;
             }
 
             if ((this.autoRow || this.autoCol) && !(this.starRow || this.starCol)) {
-                if (pass !== MeasureOverridePass.NonStar)
+                if (pass !== MeasureOverridePass.nonStar)
                     return false;
                 if (this.autoRow)
                     childSize.height = Number.POSITIVE_INFINITY;
@@ -115,9 +115,9 @@ namespace mirage.grid.design {
             }
 
             if (!(this.starRow || this.starCol))
-                return pass === MeasureOverridePass.NonStar;
+                return pass === MeasureOverridePass.nonStar;
 
-            return pass === MeasureOverridePass.RemainingStar;
+            return pass === MeasureOverridePass.remainingStar;
         }
 
         calcConstraint(childSize: ISize, cm: Segment[][], rm: Segment[][]) {

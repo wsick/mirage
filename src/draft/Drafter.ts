@@ -24,15 +24,15 @@ namespace mirage.draft {
             size.flush();
 
             var flags = node.state.flags;
-            if ((flags & LayoutFlags.MeasureHint) > 0) {
+            if ((flags & LayoutFlags.measureHint) > 0) {
                 return measure.prepare()
                     && measure.draft();
             }
-            if ((flags & LayoutFlags.ArrangeHint) > 0) {
+            if ((flags & LayoutFlags.arrangeHint) > 0) {
                 return arrange.prepare()
                     && arrange.draft();
             }
-            if ((flags & LayoutFlags.SizeHint) > 0) {
+            if ((flags & LayoutFlags.sizeHint) > 0) {
                 return size.prepare()
                     && size.draft()
                     && size.notify();
@@ -42,7 +42,7 @@ namespace mirage.draft {
         }
 
         return function (): boolean {
-            if ((node.state.flags & LayoutFlags.Hints) === 0)
+            if ((node.state.flags & LayoutFlags.hints) === 0)
                 return false;
             var updated = false;
             for (var count = 0; count < MAX_COUNT; count++) {

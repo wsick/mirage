@@ -8,12 +8,12 @@ namespace mirage {
 
         protected createInputs(): IStackPanelInputs {
             var inputs = <IStackPanelInputs>super.createInputs();
-            inputs.orientation = Orientation.Horizontal;
+            inputs.orientation = Orientation.horizontal;
             return inputs;
         }
 
         protected measureOverride(constraint: ISize): ISize {
-            if (this.inputs.orientation === Orientation.Vertical) {
+            if (this.inputs.orientation === Orientation.vertical) {
                 return this.measureVertical(constraint);
             } else {
                 return this.measureHorizontal(constraint);
@@ -67,7 +67,7 @@ namespace mirage {
         }
 
         protected arrangeOverride(arrangeSize: ISize): ISize {
-            if (this.inputs.orientation === Orientation.Vertical) {
+            if (this.inputs.orientation === Orientation.vertical) {
                 return this.arrangeVertical(arrangeSize);
             } else {
                 return this.arrangeHorizontal(arrangeSize);

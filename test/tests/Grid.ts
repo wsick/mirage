@@ -58,25 +58,25 @@ namespace mirage.tests {
         var child2 = new core.LayoutNode();
         child2.inputs.width = 50;
         child2.inputs.height = 50;
-        child2.inputs.horizontalAlignment = HorizontalAlignment.Center;
-        child2.inputs.verticalAlignment = VerticalAlignment.Center;
+        child2.inputs.horizontalAlignment = HorizontalAlignment.center;
+        child2.inputs.verticalAlignment = VerticalAlignment.center;
         grid.appendChild(child2);
 
         var child3 = new core.LayoutNode();
         child3.inputs.width = 75;
         child3.inputs.height = 50;
-        child3.inputs.horizontalAlignment = HorizontalAlignment.Right;
-        child3.inputs.verticalAlignment = VerticalAlignment.Bottom;
+        child3.inputs.horizontalAlignment = HorizontalAlignment.right;
+        child3.inputs.verticalAlignment = VerticalAlignment.bottom;
         grid.appendChild(child3);
 
         // measure
         ok(grid.measure(new Size(200, 200)), "measure changed");
-        strictEqual(grid.state.flags & LayoutFlags.Measure, 0, "measure flag cleared");
+        strictEqual(grid.state.flags & LayoutFlags.measure, 0, "measure flag cleared");
         deepEqual(grid.state.desiredSize, new Size(100, 50), "desiredSize");
 
         // arrange
         ok(grid.arrange(new Rect(0, 0, 200, 200)), "arrange changed");
-        strictEqual(grid.state.flags & LayoutFlags.Arrange, 0, "arrange flag cleared");
+        strictEqual(grid.state.flags & LayoutFlags.arrange, 0, "arrange flag cleared");
         arrangeState(grid, new Rect(0, 0, 200, 200), new Rect(0, 0, 200, 200), "root");
         arrangeState(child1, new Rect(0, 0, 200, 200), new Rect(50, 75, 100, 50), "child1");
         arrangeState(child2, new Rect(0, 0, 200, 200), new Rect(75, 75, 50, 50), "child2");

@@ -2,9 +2,9 @@
 
 namespace mirage {
     export enum RectOverlap {
-        Out,
-        In,
-        Part,
+        outside,
+        inside,
+        part,
     }
 
     var p1 = vec2.create(0, 0);
@@ -174,10 +174,10 @@ namespace mirage {
             Rect.copyTo(rect1, copy);
             Rect.intersection(copy, rect2);
             if (Rect.isEmpty(copy))
-                return RectOverlap.Out;
+                return RectOverlap.outside;
             if (Rect.isEqual(copy, rect2))
-                return RectOverlap.In;
-            return RectOverlap.Part;
+                return RectOverlap.inside;
+            return RectOverlap.part;
         }
 
         static transform(dest: IRect, mat: number[]) {

@@ -52,7 +52,7 @@ namespace mirage.grid.design {
                 child.measure(childSize);
 
                 var desired = child.state.desiredSize;
-                if (pass !== MeasureOverridePass.StarAuto)
+                if (pass !== MeasureOverridePass.starAuto)
                     placement.add(true, childShape.row, childShape.rowspan, desired.height);
                 placement.add(false, childShape.col, childShape.colspan, desired.width);
             },

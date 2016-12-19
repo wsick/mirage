@@ -72,15 +72,15 @@ namespace mirage.core {
                 minHeight: 0.0,
                 maxWidth: Number.POSITIVE_INFINITY,
                 maxHeight: Number.POSITIVE_INFINITY,
-                horizontalAlignment: HorizontalAlignment.Stretch,
-                verticalAlignment: VerticalAlignment.Stretch,
+                horizontalAlignment: HorizontalAlignment.stretch,
+                verticalAlignment: VerticalAlignment.stretch,
                 attached: {},
             };
         }
 
         protected createState(): ILayoutNodeState {
             return {
-                flags: LayoutFlags.None,
+                flags: LayoutFlags.none,
                 previousAvailable: new Size(),
                 desiredSize: new Size(),
                 hiddenDesire: new Size(),
@@ -143,8 +143,8 @@ namespace mirage.core {
             Size.clear(state.arrangedSlot);
             this.invalidateMeasure();
             this.invalidateArrange();
-            if ((state.flags & LayoutFlags.SizeHint) > 0 || state.lastArranged !== undefined) {
-                this.tree.propagateFlagUp(LayoutFlags.SizeHint);
+            if ((state.flags & LayoutFlags.sizeHint) > 0 || state.lastArranged !== undefined) {
+                this.tree.propagateFlagUp(LayoutFlags.sizeHint);
             }
         }
 
@@ -173,8 +173,8 @@ namespace mirage.core {
         // LAYOUT
 
         invalidateMeasure() {
-            this.state.flags |= LayoutFlags.Measure | LayoutFlags.MeasureHint;
-            this.tree.propagateFlagUp(LayoutFlags.MeasureHint);
+            this.state.flags |= LayoutFlags.measure | LayoutFlags.measureHint;
+            this.tree.propagateFlagUp(LayoutFlags.measureHint);
         }
 
         doMeasure(): boolean {
@@ -195,8 +195,8 @@ namespace mirage.core {
         }
 
         invalidateArrange() {
-            this.state.flags |= LayoutFlags.Arrange | LayoutFlags.ArrangeHint;
-            this.tree.propagateFlagUp(LayoutFlags.ArrangeHint);
+            this.state.flags |= LayoutFlags.arrange | LayoutFlags.arrangeHint;
+            this.tree.propagateFlagUp(LayoutFlags.arrangeHint);
         }
 
         doArrange(): boolean {

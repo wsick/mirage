@@ -1,11 +1,11 @@
 namespace mirage.grid.design {
     export enum MeasureOverridePass {
-        AutoAuto, //Child in auto row, auto col
-        StarAuto, //Child in star row, auto col
-        AutoStar, //Child in auto row, star col
-        StarAutoAgain, //star row, auto col repeated
-        NonStar, //Child in auto/pixel row, auto/pixel col
-        RemainingStar, //Child in ?
+        autoAuto, //Child in auto row, auto col
+        starAuto, //Child in star row, auto col
+        autoStar, //Child in auto row, star col
+        starAutoAgain, //star row, auto col repeated
+        nonStar, //Child in auto/pixel row, auto/pixel col
+        remainingStar, //Child in ?
     }
 
     export function NewMeasureOverridePass(pass: MeasureOverridePass, des: IGridMeasureDesign, tree: IPanelTree) {

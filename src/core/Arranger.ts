@@ -110,7 +110,7 @@ namespace mirage.core {
             }
 
             // Check need to arrange
-            if ((state.flags & LayoutFlags.Arrange) <= 0) {
+            if ((state.flags & LayoutFlags.arrange) <= 0) {
                 return false;
             }
             if (Rect.isEqual(state.layoutSlot, childRect)) {
@@ -126,10 +126,10 @@ namespace mirage.core {
             // Prepare override
             var framework = new Size();
             coerceSize(framework, inputs);
-            if (inputs.horizontalAlignment === HorizontalAlignment.Stretch) {
+            if (inputs.horizontalAlignment === HorizontalAlignment.stretch) {
                 framework.width = Math.max(framework.width, stretched.width);
             }
-            if (inputs.verticalAlignment === VerticalAlignment.Stretch) {
+            if (inputs.verticalAlignment === VerticalAlignment.stretch) {
                 framework.height = Math.max(framework.height, stretched.height);
             }
             var offer = new Size(state.hiddenDesire.width, state.hiddenDesire.height);
@@ -139,7 +139,7 @@ namespace mirage.core {
             var arranged = override(offer);
 
             // Complete override
-            state.flags &= ~LayoutFlags.Arrange;
+            state.flags &= ~LayoutFlags.arrange;
             if (inputs.useLayoutRounding) {
                 Size.round(arranged);
             }
@@ -153,12 +153,12 @@ namespace mirage.core {
             var as = state.arrangedSlot;
             Point.copyTo(childRect, as);
             switch (inputs.horizontalAlignment) {
-                case HorizontalAlignment.Left:
+                case HorizontalAlignment.left:
                     break;
-                case HorizontalAlignment.Right:
+                case HorizontalAlignment.right:
                     as.x += childRect.width - constrained.width;
                     break;
-                case HorizontalAlignment.Center:
+                case HorizontalAlignment.center:
                     as.x += (childRect.width - constrained.width) * 0.5;
                     break;
                 default:
@@ -166,12 +166,12 @@ namespace mirage.core {
                     break;
             }
             switch (inputs.verticalAlignment) {
-                case VerticalAlignment.Top:
+                case VerticalAlignment.top:
                     break;
-                case VerticalAlignment.Bottom:
+                case VerticalAlignment.bottom:
                     as.y += childRect.height - constrained.height;
                     break;
-                case VerticalAlignment.Center:
+                case VerticalAlignment.center:
                     as.y += (childRect.height - constrained.height) * 0.5;
                     break;
                 default:
@@ -186,8 +186,8 @@ namespace mirage.core {
             var oldArrange = state.arrangedSlot;
             if (!Size.isEqual(oldArrange, arranged)) {
                 Size.copyTo(oldArrange, state.lastArranged);
-                state.flags |= LayoutFlags.SizeHint;
-                tree.propagateFlagUp(LayoutFlags.SizeHint);
+                state.flags |= LayoutFlags.sizeHint;
+                tree.propagateFlagUp(LayoutFlags.sizeHint);
             }
             Size.copyTo(arranged, state.arrangedSlot);
 

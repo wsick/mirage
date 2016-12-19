@@ -41,7 +41,7 @@ namespace mirage.core {
             if (tree.parent)
                 tree.parent.invalidateMeasure();
 
-            state.flags &= ~LayoutFlags.Measure;
+            state.flags &= ~LayoutFlags.measure;
             return success;
         };
     }
@@ -68,7 +68,7 @@ namespace mirage.core {
             tree.applyTemplate();
 
             // Check need to measure
-            if ((state.flags & LayoutFlags.Measure) <= 0) {
+            if ((state.flags & LayoutFlags.measure) <= 0) {
                 return false;
             }
             var pc = state.previousAvailable;
@@ -77,7 +77,7 @@ namespace mirage.core {
             }
 
             // Invalidate downstream
-            state.flags |= (LayoutFlags.Arrange | LayoutFlags.ArrangeHint);
+            state.flags |= (LayoutFlags.arrange | LayoutFlags.arrangeHint);
 
             // Prepare for override
             var framedSize = new Size(availableSize.width, availableSize.height);
@@ -88,7 +88,7 @@ namespace mirage.core {
             var desired = override(framedSize);
 
             // Complete override
-            state.flags &= ~LayoutFlags.Measure;
+            state.flags &= ~LayoutFlags.measure;
             Size.copyTo(desired, state.hiddenDesire);
 
             // Finish desired
