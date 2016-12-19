@@ -43,4 +43,43 @@ namespace mirage.tests {
         sameColDef(NewColumnDefinition("auto", 10, 50), {value: 0, type: GridUnitType.auto}, 10, 50, "3");
         sameColDef(NewColumnDefinition(0, GridUnitType.auto, 10, 50), {value: 0, type: GridUnitType.auto}, 10, 50, "4");
     });
+
+    QUnit.test("scenario1", () => {
+        var grid = new Grid();
+        // no defined row defs => 1 "auto" row
+        // no defined col defs => 1 "auto" col
+        grid.invalidateMeasure();
+
+        var child1 = new core.LayoutNode();
+        child1.inputs.width = 100;
+        child1.inputs.height = 50;
+        grid.appendChild(child1);
+
+        var child2 = new core.LayoutNode();
+        child2.inputs.width = 50;
+        child2.inputs.height = 50;
+        child2.inputs.horizontalAlignment = HorizontalAlignment.Center;
+        child2.inputs.verticalAlignment = VerticalAlignment.Center;
+        grid.appendChild(child2);
+
+        var child3 = new core.LayoutNode();
+        child3.inputs.width = 75;
+        child3.inputs.height = 50;
+        child3.inputs.horizontalAlignment = HorizontalAlignment.Right;
+        child3.inputs.verticalAlignment = VerticalAlignment.Bottom;
+        grid.appendChild(child3);
+
+        // measure
+        ok(grid.measure(new Size(200, 200)), "measure changed");
+        strictEqual(grid.state.flags & LayoutFlags.Measure, 0, "measure flag cleared");
+        deepEqual(grid.state.desiredSize, new Size(100, 50), "desiredSize");
+
+        // arrange
+        ok(grid.arrange(new Rect(0, 0, 200, 200)), "arrange changed");
+        strictEqual(grid.state.flags & LayoutFlags.Arrange, 0, "arrange flag cleared");
+        arrangeState(grid, new Rect(0, 0, 200, 200), new Rect(0, 0, 200, 200), "root");
+        arrangeState(child1, new Rect(0, 0, 200, 200), new Rect(50, 75, 100, 50), "child1");
+        arrangeState(child2, new Rect(0, 0, 200, 200), new Rect(75, 75, 50, 50), "child2");
+        arrangeState(child3, new Rect(0, 0, 200, 200), new Rect(125, 150, 75, 50), "child3");
+    });
 }

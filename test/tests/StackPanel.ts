@@ -26,12 +26,12 @@ namespace mirage.tests {
         sp.appendChild(child3);
 
         // measure
-        ok(sp.measure(new Size(200, Number.POSITIVE_INFINITY)), "measure change");
+        ok(sp.measure(new Size(200, Number.POSITIVE_INFINITY)), "measure changed");
         strictEqual(sp.state.flags & LayoutFlags.Measure, 0, "measure flag cleared");
         deepEqual(sp.state.desiredSize, new Size(100, 150), "desiredSize");
 
         // arrange
-        ok(sp.arrange(new Rect(0, 0, 200, 200)), "arrange change");
+        ok(sp.arrange(new Rect(0, 0, 200, 200)), "arrange changed");
         strictEqual(sp.state.flags & LayoutFlags.Arrange, 0, "arrange flag cleared");
         arrangeState(sp, new Rect(0, 0, 200, 200), new Rect(0, 0, 200, 200), "root");
         arrangeState(child1, new Rect(0, 0, 200, 50), new Rect(50, 0, 100, 50), "child1");
