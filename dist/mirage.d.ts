@@ -22,20 +22,20 @@ declare namespace mirage {
 }
 declare namespace mirage {
     enum HorizontalAlignment {
-        Left = 0,
-        Center = 1,
-        Right = 2,
-        Stretch = 3,
+        left = 0,
+        center = 1,
+        right = 2,
+        stretch = 3,
     }
     enum VerticalAlignment {
-        Top = 0,
-        Center = 1,
-        Bottom = 2,
-        Stretch = 3,
+        top = 0,
+        center = 1,
+        bottom = 2,
+        stretch = 3,
     }
     enum Orientation {
-        Horizontal = 0,
-        Vertical = 1,
+        horizontal = 0,
+        vertical = 1,
     }
 }
 declare namespace mirage.core {
@@ -51,15 +51,18 @@ declare namespace mirage.core {
         maxHeight: number;
         horizontalAlignment: HorizontalAlignment;
         verticalAlignment: VerticalAlignment;
+        attached: ILayoutNodeAttachedInputs;
+    }
+    interface ILayoutNodeAttachedInputs {
+        [property: string]: any;
     }
     interface ILayoutNodeState {
         flags: LayoutFlags;
         previousAvailable: ISize;
         desiredSize: ISize;
         hiddenDesire: ISize;
-        layoutSlot: Rect;
-        visualOffset: Point;
-        arranged: ISize;
+        layoutSlot: IRect;
+        arrangedSlot: IRect;
         lastArranged: ISize;
     }
     interface ILayoutTreeDeepWalker {
@@ -82,6 +85,19 @@ declare namespace mirage.core {
         protected createTree(): ILayoutTree;
         protected createMeasurer(): core.IMeasurer;
         protected createArranger(): core.IArranger;
+        visible: boolean;
+        useLayoutRounding: boolean;
+        margin: Thickness;
+        width: number;
+        height: number;
+        minWidth: number;
+        minHeight: number;
+        maxWidth: number;
+        maxHeight: number;
+        horizontalAlignment: HorizontalAlignment;
+        verticalAlignment: VerticalAlignment;
+        getAttached(property: string): any;
+        setAttached(property: string, value: any): void;
         setParent(parent: LayoutNode): void;
         protected onDetached(): void;
         protected onAttached(): void;
@@ -92,7 +108,7 @@ declare namespace mirage.core {
         protected measureOverride(constraint: ISize): ISize;
         invalidateArrange(): void;
         doArrange(): boolean;
-        arrange(finalRect: Rect): boolean;
+        arrange(finalRect: IRect): boolean;
         protected arrangeOverride(arrangeSize: ISize): ISize;
         sizing(oldSize: ISize, newSize: ISize): boolean;
         onSizeChanged(oldSize: ISize, newSize: ISize): void;
@@ -118,6 +134,78 @@ declare namespace mirage {
     function NewPanelTree(): IPanelTree;
 }
 declare namespace mirage {
+    interface IGridInputs extends core.ILayoutNodeInputs {
+        rowDefinitions: IRowDefinition[];
+        columnDefinitions: IColumnDefinition[];
+    }
+    interface IGridState extends core.ILayoutNodeState {
+        design: grid.design.IGridDesign;
+    }
+    class Grid extends Panel {
+        static getColumn(node: core.LayoutNode): number;
+        static setColumn(node: core.LayoutNode, value: number): void;
+        static getColumnSpan(node: core.LayoutNode): number;
+        static setColumnSpan(node: core.LayoutNode, value: number): void;
+        static getRow(node: core.LayoutNode): number;
+        static setRow(node: core.LayoutNode, value: number): void;
+        static getRowSpan(node: core.LayoutNode): number;
+        static setRowSpan(node: core.LayoutNode, value: number): void;
+        inputs: IGridInputs;
+        state: IGridState;
+        private $measureOverride;
+        private $arrangeOverride;
+        init(): void;
+        rowDefinitions: IRowDefinition[];
+        columnDefinitions: IColumnDefinition[];
+        protected createInputs(): IGridInputs;
+        protected createState(): IGridState;
+        protected measureOverride(constraint: ISize): ISize;
+        protected arrangeOverride(arrangeSize: ISize): ISize;
+    }
+}
+declare namespace mirage {
+    interface IColumnDefinition {
+        width: IGridLength;
+        minWidth: number;
+        maxWidth: number;
+        getActualWidth(): number;
+        setActualWidth(value: number): any;
+    }
+    function NewColumnDefinitions(defs: string): IColumnDefinition[];
+    function NewColumnDefinition(): IColumnDefinition;
+    function NewColumnDefinition(width: string): IColumnDefinition;
+    function NewColumnDefinition(widthValue: number, widthType: GridUnitType): IColumnDefinition;
+    function NewColumnDefinition(width: string, minWidth: number, maxWidth: number): IColumnDefinition;
+    function NewColumnDefinition(widthValue: number, widthType: GridUnitType, minWidth: number, maxWidth: number): IColumnDefinition;
+}
+declare namespace mirage {
+    enum GridUnitType {
+        auto = 0,
+        pixel = 1,
+        star = 2,
+    }
+    interface IGridLength {
+        value: number;
+        type: GridUnitType;
+    }
+    function parseGridLength(s: string): IGridLength;
+}
+declare namespace mirage {
+    interface IRowDefinition {
+        height: IGridLength;
+        minHeight: number;
+        maxHeight: number;
+        getActualHeight(): number;
+        setActualHeight(value: number): any;
+    }
+    function NewRowDefinitions(defs: string): IRowDefinition[];
+    function NewRowDefinition(): IRowDefinition;
+    function NewRowDefinition(height: string): IRowDefinition;
+    function NewRowDefinition(heightValue: number, heightType: GridUnitType): IRowDefinition;
+    function NewRowDefinition(height: string, minHeight: number, maxHeight: number): IRowDefinition;
+    function NewRowDefinition(heightValue: number, heightType: GridUnitType, minHeight: number, maxHeight: number): IRowDefinition;
+}
+declare namespace mirage {
     interface IPoint {
         x: number;
         y: number;
@@ -131,44 +219,36 @@ declare namespace mirage {
         static round(dest: IPoint): void;
     }
 }
-interface IVector2Static {
-    create(x: number, y: number): number[];
-    init(x: number, y: number, dest?: number[]): number[];
-}
-declare namespace mirage {
-    var vec2: IVector2Static;
-}
-declare var vec2: IVector2Static;
 declare namespace mirage {
     enum RectOverlap {
-        Out = 0,
-        In = 1,
-        Part = 2,
+        outside = 0,
+        inside = 1,
+        part = 2,
     }
-    class Rect implements IPoint, ISize {
+    interface IRect extends IPoint, ISize {
+    }
+    class Rect implements IRect {
         x: number;
         y: number;
         width: number;
         height: number;
         constructor(x?: number, y?: number, width?: number, height?: number);
-        static clear(rect: Rect): void;
-        static getBottom(rect: Rect): number;
-        static getRight(rect: Rect): number;
-        static isEqual(rect1: Rect, rect2: Rect): boolean;
-        static isEmpty(src: Rect): boolean;
-        static copyTo(src: Rect, dest: Rect): void;
-        static roundOut(dest: Rect): void;
-        static roundIn(dest: Rect): Rect;
-        static intersection(dest: Rect, rect2: Rect): void;
-        static union(dest: Rect, rect2: Rect): void;
-        static isContainedIn(src: Rect, test: Rect): boolean;
-        static containsPoint(rect1: Rect, p: Point): boolean;
-        static extendTo(dest: Rect, x: number, y: number): void;
-        static grow(dest: Rect, left: number, top: number, right: number, bottom: number): Rect;
-        static shrink(dest: Rect, left: number, top: number, right: number, bottom: number): void;
-        static rectIn(rect1: Rect, rect2: Rect): RectOverlap;
-        static transform(dest: Rect, mat: number[]): Rect;
-        static transform4(dest: Rect, projection: number[]): void;
+        static clear(rect: IRect): void;
+        static getBottom(rect: IRect): number;
+        static getRight(rect: IRect): number;
+        static isEqual(rect1: IRect, rect2: IRect): boolean;
+        static isEmpty(src: IRect): boolean;
+        static copyTo(src: IRect, dest: IRect): void;
+        static roundOut(dest: IRect): void;
+        static roundIn(dest: IRect): IRect;
+        static intersection(dest: IRect, rect2: IRect): void;
+        static union(dest: IRect, rect2: IRect): void;
+        static isContainedIn(src: IRect, test: IRect): boolean;
+        static containsPoint(rect1: IRect, p: Point): boolean;
+        static extendTo(dest: IRect, x: number, y: number): void;
+        static grow(dest: IRect, left: number, top: number, right: number, bottom: number): IRect;
+        static shrink(dest: IRect, left: number, top: number, right: number, bottom: number): void;
+        static rectIn(rect1: IRect, rect2: IRect): RectOverlap;
     }
 }
 declare namespace mirage {
@@ -197,6 +277,7 @@ declare namespace mirage {
     }
     class StackPanel extends Panel {
         inputs: IStackPanelInputs;
+        orientation: Orientation;
         protected createInputs(): IStackPanelInputs;
         protected measureOverride(constraint: ISize): ISize;
         private measureVertical(constraint);
@@ -216,30 +297,22 @@ declare namespace mirage {
         static add(dest: Thickness, t2: Thickness): void;
         static copyTo(thickness: Thickness, dest: Thickness): void;
         static isEmpty(thickness: Thickness): boolean;
+        static isEqual(t1: Thickness, t2: Thickness): boolean;
         static isBalanced(thickness: Thickness): boolean;
         static shrinkSize(thickness: Thickness, dest: Size): Size;
-        static shrinkRect(thickness: Thickness, dest: Rect): void;
+        static shrinkRect(thickness: Thickness, dest: IRect): void;
         static shrinkCornerRadius(thickness: Thickness, dest: ICornerRadius): void;
         static growSize(thickness: Thickness, dest: Size): Size;
-        static growRect(thickness: Thickness, dest: Rect): void;
+        static growRect(thickness: Thickness, dest: IRect): void;
         static growCornerRadius(thickness: Thickness, dest: ICornerRadius): void;
     }
 }
-declare namespace mirage.Vector {
-    function create(x: number, y: number): number[];
-    function reverse(v: number[]): number[];
-    function orthogonal(v: number[]): number[];
-    function normalize(v: number[]): number[];
-    function rotate(v: number[], theta: number): number[];
-    function angleBetween(u: number[], v: number[]): number;
-    function isClockwiseTo(v1: number[], v2: number[]): boolean;
-    function intersection(s1: number[], d1: number[], s2: number[], d2: number[]): number[];
-}
-declare namespace mirage {
-    enum Visibility {
-        Visible = 0,
-        Collapsed = 1,
+declare namespace mirage.core {
+    interface IArrangeBinder {
+        (): boolean;
     }
+    function NewArrangeBinder(state: IArrangeState, tree: ILayoutTree, arranger: IArranger): IArrangeBinder;
+    function NewSpecialArrangeBinder(node: core.LayoutNode, arranger: IArranger): IArrangeBinder;
 }
 declare namespace mirage.core {
     interface IArrangeInputs {
@@ -260,15 +333,10 @@ declare namespace mirage.core {
         previousAvailable: ISize;
         desiredSize: ISize;
         hiddenDesire: ISize;
-        layoutSlot: Rect;
-        visualOffset: Point;
-        arranged: ISize;
+        layoutSlot: IRect;
+        arrangedSlot: IRect;
         lastArranged: ISize;
     }
-    interface IArrangeBinder {
-        (): boolean;
-    }
-    function NewArrangeBinder(state: IArrangeState, tree: ILayoutTree, arranger: IArranger): IArrangeBinder;
     interface IArranger {
         (finalRect: Rect): boolean;
     }
@@ -296,14 +364,20 @@ declare namespace mirage.core {
 }
 declare namespace mirage.core {
     enum LayoutFlags {
-        None = 0,
-        Measure = 2,
-        Arrange = 4,
-        MeasureHint = 8,
-        ArrangeHint = 16,
-        SizeHint = 32,
-        Hints = 56,
+        none = 0,
+        measure = 2,
+        arrange = 4,
+        measureHint = 8,
+        arrangeHint = 16,
+        sizeHint = 32,
+        hints = 56,
     }
+}
+declare namespace mirage.core {
+    interface IMeasureBinder {
+        (): boolean;
+    }
+    function NewMeasureBinder(state: IMeasureState, tree: ILayoutTree, measurer: IMeasurer): IMeasureBinder;
 }
 declare namespace mirage.core {
     interface IMeasureInputs {
@@ -323,10 +397,6 @@ declare namespace mirage.core {
         desiredSize: ISize;
         hiddenDesire: ISize;
     }
-    interface IMeasureBinder {
-        (): boolean;
-    }
-    function NewMeasureBinder(state: IMeasureState, tree: ILayoutTree, measurer: IMeasurer): IMeasureBinder;
     interface IMeasurer {
         (availableSize: ISize): boolean;
     }
@@ -377,56 +447,104 @@ declare namespace mirage.draft {
     }
     function NewSizeDrafter(node: core.LayoutNode): ISizeDrafter;
 }
-interface IMatrix3Static {
-    create(src?: number[]): number[];
-    copyTo(src: number[], dest: number[]): number[];
-    init(dest: number[], m11: number, m12: number, m21: number, m22: number, x0: number, y0: number): number[];
-    identity(dest?: number[]): number[];
-    equal(a: number[], b: number[]): boolean;
-    multiply(a: number[], b: number[], dest?: number[]): number[];
-    inverse(mat: number[], dest?: number[]): number[];
-    transformVec2(mat: number[], vec: number[], dest?: number[]): number[];
-    createTranslate(x: number, y: number, dest?: number[]): number[];
-    translate(mat: number[], x: number, y: number): number[];
-    createScale(sx: number, sy: number, dest?: number[]): number[];
-    scale(mat: number[], sx: number, sy: number): number[];
-    createRotate(angleRad: number, dest?: number[]): number[];
-    createSkew(angleRadX: number, angleRadY: number, dest?: number[]): number[];
-    preapply(dest: number[], mat: number[]): number[];
-    apply(dest: number[], mat: number[]): number[];
+declare namespace mirage.grid {
+    function NewGridArrangeOverride(inputs: IGridInputs, state: IGridState, tree: IPanelTree): core.IArrangeOverride;
 }
-declare namespace mirage {
-    var mat3: IMatrix3Static;
+declare namespace mirage.grid {
+    function NewGridMeasureOverride(inputs: IGridInputs, state: IGridState, tree: IPanelTree): core.IMeasureOverride;
 }
-declare var mat3: IMatrix3Static;
-interface IMatrix4Static {
-    create(src?: number[]): number[];
-    copyTo(src: number[], dest: number[]): number[];
-    identity(dest?: number[]): number[];
-    equal(a: number[], b: number[]): boolean;
-    multiply(a: number[], b: number[], dest?: number[]): number[];
-    inverse(mat: number[], dest?: number[]): number[];
-    transpose(mat: number[], dest?: number[]): number[];
-    transformVec4(mat: number[], vec: number[], dest?: number[]): number[];
-    createTranslate(x: number, y: number, z: number, dest?: number[]): number[];
-    createScale(x: number, y: number, z: number, dest?: number[]): number[];
-    createRotateX(theta: number, dest?: number[]): number[];
-    createRotateY(theta: number, dest?: number[]): number[];
-    createRotateZ(theta: number, dest?: number[]): number[];
-    createPerspective(fieldOfViewY: number, aspectRatio: number, zNearPlane: number, zFarPlane: number, dest?: number[]): number[];
-    createViewport(width: number, height: number, dest?: number[]): number[];
+declare namespace mirage.grid.design {
+    interface IGridArrangeDesign {
+        init(arrangeSize: ISize, coldefs: IColumnDefinition[], rowdefs: IRowDefinition[]): any;
+        calcChildRect(childRect: IRect, child: core.LayoutNode): any;
+    }
+    function NewGridArrangeDesign(cm: Segment[][], rm: Segment[][]): IGridArrangeDesign;
 }
-declare namespace mirage {
-    var mat4: IMatrix4Static;
+declare namespace mirage.grid.design {
+    interface IGridPlacement {
+        init(): any;
+        add(isRow: boolean, start: number, span: number, size: number): any;
+        allocate(allocFunc: () => void): any;
+    }
+    function NewGridPlacement(cm: Segment[][], rm: Segment[][]): IGridPlacement;
 }
-declare var mat4: IMatrix4Static;
-declare namespace mirage {
+declare namespace mirage.grid.design {
+    interface IGridShape {
+        hasAutoAuto: boolean;
+        hasStarAuto: boolean;
+        hasAutoStar: boolean;
+    }
+    function NewGridShape(childShapes: IGridChildShape[]): IGridShape;
+    interface IGridChildShape {
+        starRow: boolean;
+        autoRow: boolean;
+        starCol: boolean;
+        autoCol: boolean;
+        col: number;
+        row: number;
+        colspan: number;
+        rowspan: number;
+        init(child: core.LayoutNode, rm: Segment[][], cm: Segment[][]): any;
+        shouldMeasurePass(gridShape: IGridShape, childSize: ISize, pass: MeasureOverridePass): boolean;
+        calcConstraint(childSize: ISize, cm: Segment[][], rm: Segment[][]): any;
+    }
+    class GridChildShape implements IGridChildShape {
+        starRow: boolean;
+        autoRow: boolean;
+        starCol: boolean;
+        autoCol: boolean;
+        col: number;
+        row: number;
+        colspan: number;
+        rowspan: number;
+        init(child: core.LayoutNode, cm: Segment[][], rm: Segment[][]): void;
+        shouldMeasurePass(gridShape: IGridShape, childSize: ISize, pass: MeasureOverridePass): boolean;
+        calcConstraint(childSize: ISize, cm: Segment[][], rm: Segment[][]): void;
+    }
 }
-interface IVector4Static {
-    create(x: number, y: number, z: number, w: number): number[];
-    init(x: number, y: number, z: number, w: number, dest?: number[]): number[];
+declare namespace mirage.grid.design.helpers {
+    function expand(available: number, mat: Segment[][]): void;
+    function assignSize(mat: Segment[][], start: number, end: number, size: number, unitType: GridUnitType, desiredSize: boolean): number;
+    function calcDesiredToOffered(matrix: Segment[][]): number;
 }
-declare namespace mirage {
-    var vec4: IVector4Static;
+declare namespace mirage.grid.design {
+    interface IGridDesign {
+        measure: IGridMeasureDesign;
+        arrange: IGridArrangeDesign;
+    }
+    function NewGridDesign(): IGridDesign;
 }
-declare var vec4: IVector4Static;
+declare namespace mirage.grid.design {
+    interface IGridMeasureDesign {
+        init(constraint: ISize, coldefs: IColumnDefinition[], rowdefs: IRowDefinition[], tree: IPanelTree): any;
+        measureChild(pass: MeasureOverridePass, index: number, child: core.LayoutNode): any;
+        finishPass(): any;
+        finish(): any;
+        getDesired(): ISize;
+    }
+    function NewGridMeasureDesign(cm: Segment[][], rm: Segment[][]): IGridMeasureDesign;
+}
+declare namespace mirage.grid.design {
+    enum MeasureOverridePass {
+        autoAuto = 0,
+        starAuto = 1,
+        autoStar = 2,
+        starAutoAgain = 3,
+        nonStar = 4,
+        remainingStar = 5,
+    }
+    function NewMeasureOverridePass(pass: MeasureOverridePass, des: IGridMeasureDesign, tree: IPanelTree): () => void;
+}
+declare module mirage.grid.design {
+    class Segment {
+        desired: number;
+        offered: number;
+        original: number;
+        min: number;
+        max: number;
+        stars: number;
+        type: GridUnitType;
+        clamp(value: number): number;
+        static init(segment: Segment, offered?: number, min?: number, max?: number, unitType?: GridUnitType): Segment;
+    }
+}
