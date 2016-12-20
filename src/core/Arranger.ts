@@ -23,7 +23,6 @@ namespace mirage.core {
         lastArrangedSlot: IRect;
     }
 
-
     export interface IArranger {
         (finalRect: Rect): boolean;
     }
@@ -32,6 +31,62 @@ namespace mirage.core {
     }
 
     export function NewArranger(inputs: IArrangeInputs, state: IArrangeState, tree: ILayoutTree, override: IArrangeOverride): IArranger {
+        function calcOffer(childRect: IRect): ISize {
+            var stretched = new Size(childRect.width, childRect.height);
+            coerceSize(stretched, inputs);
+
+            var framework = new Size();
+            coerceSize(framework, inputs);
+            if (inputs.horizontalAlignment === HorizontalAlignment.stretch) {
+                framework.width = Math.max(framework.width, stretched.width);
+            }
+            if (inputs.verticalAlignment === VerticalAlignment.stretch) {
+                framework.height = Math.max(framework.height, stretched.height);
+            }
+            var offer = new Size(state.hiddenDesire.width, state.hiddenDesire.height);
+            Size.max(offer, framework);
+            return offer;
+        }
+
+        function calcVisualOffset(childRect: IRect, arranged: ISize): IPoint {
+            var constrained = new Size(arranged.width, arranged.height);
+            coerceSize(constrained, inputs);
+            Size.min(constrained, arranged);
+
+            var vo = new Point();
+            Point.copyTo(childRect, vo);
+            switch (inputs.horizontalAlignment) {
+                case HorizontalAlignment.left:
+                    break;
+                case HorizontalAlignment.right:
+                    vo.x += childRect.width - constrained.width;
+                    break;
+                case HorizontalAlignment.center:
+                    vo.x += (childRect.width - constrained.width) * 0.5;
+                    break;
+                default:
+                    vo.x += Math.max((childRect.width - constrained.width) * 0.5, 0);
+                    break;
+            }
+            switch (inputs.verticalAlignment) {
+                case VerticalAlignment.top:
+                    break;
+                case VerticalAlignment.bottom:
+                    vo.y += childRect.height - constrained.height;
+                    break;
+                case VerticalAlignment.center:
+                    vo.y += (childRect.height - constrained.height) * 0.5;
+                    break;
+                default:
+                    vo.y += Math.max((childRect.height - constrained.height) * 0.5, 0);
+                    break;
+            }
+            if (inputs.useLayoutRounding) {
+                Point.round(vo);
+            }
+            return vo;
+        }
+
         return function (finalRect: Rect): boolean {
             if (inputs.visible !== true) {
                 return false;
@@ -66,22 +121,9 @@ namespace mirage.core {
             }
             Rect.copyTo(childRect, state.layoutSlot);
 
-            // Calculate stretched
+            // Prepare offer
             Thickness.shrinkRect(inputs.margin, childRect);
-            var stretched = new Size(childRect.width, childRect.height);
-            coerceSize(stretched, inputs);
-
-            // Prepare override
-            var framework = new Size();
-            coerceSize(framework, inputs);
-            if (inputs.horizontalAlignment === HorizontalAlignment.stretch) {
-                framework.width = Math.max(framework.width, stretched.width);
-            }
-            if (inputs.verticalAlignment === VerticalAlignment.stretch) {
-                framework.height = Math.max(framework.height, stretched.height);
-            }
-            var offer = new Size(state.hiddenDesire.width, state.hiddenDesire.height);
-            Size.max(offer, framework);
+            var offer = calcOffer(childRect);
 
             // Do override
             var arranged = override(offer);
@@ -92,52 +134,19 @@ namespace mirage.core {
                 Size.round(arranged);
             }
 
-            // Constrain
-            var constrained = new Size(arranged.width, arranged.height);
-            coerceSize(constrained, inputs);
-            Size.min(constrained, arranged);
-
             // Calculate visual offset
-            var as = state.arrangedSlot;
-            Point.copyTo(childRect, as);
-            switch (inputs.horizontalAlignment) {
-                case HorizontalAlignment.left:
-                    break;
-                case HorizontalAlignment.right:
-                    as.x += childRect.width - constrained.width;
-                    break;
-                case HorizontalAlignment.center:
-                    as.x += (childRect.width - constrained.width) * 0.5;
-                    break;
-                default:
-                    as.x += Math.max((childRect.width - constrained.width) * 0.5, 0);
-                    break;
-            }
-            switch (inputs.verticalAlignment) {
-                case VerticalAlignment.top:
-                    break;
-                case VerticalAlignment.bottom:
-                    as.y += childRect.height - constrained.height;
-                    break;
-                case VerticalAlignment.center:
-                    as.y += (childRect.height - constrained.height) * 0.5;
-                    break;
-                default:
-                    as.y += Math.max((childRect.height - constrained.height) * 0.5, 0);
-                    break;
-            }
-            if (inputs.useLayoutRounding) {
-                Point.round(as);
-            }
+            var vo = calcVisualOffset(childRect, arranged);
 
-            // Cycle old + current arranged for sizing
-            var oldArrange = state.arrangedSlot;
-            if (!Size.isEqual(oldArrange, arranged)) {
-                Size.copyTo(oldArrange, state.lastArrangedSlot);
+            // If arranged slot moved, invalidate slotting
+            if (!Point.isEqual(vo, state.arrangedSlot) || !Size.isEqual(arranged, state.arrangedSlot)) {
+                Rect.copyTo(state.arrangedSlot, state.lastArrangedSlot);
                 state.flags |= LayoutFlags.slotHint;
                 tree.propagateFlagUp(LayoutFlags.slotHint);
             }
+
+            // Finalize arrangedSlot
             Size.copyTo(arranged, state.arrangedSlot);
+            Point.copyTo(vo, state.arrangedSlot);
 
             return true;
         }
