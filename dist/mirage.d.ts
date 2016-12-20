@@ -1,43 +1,6 @@
 declare module mirage {
     var version: string;
 }
-declare namespace mirage {
-    interface ICornerRadius {
-        topLeft: number;
-        topRight: number;
-        bottomRight: number;
-        bottomLeft: number;
-    }
-    class CornerRadius implements ICornerRadius {
-        topLeft: number;
-        topRight: number;
-        bottomRight: number;
-        bottomLeft: number;
-        constructor(topLeft?: number, topRight?: number, bottomRight?: number, bottomLeft?: number);
-        static isEmpty(cr: ICornerRadius): boolean;
-        static isEqual(cr1: ICornerRadius, cr2: ICornerRadius): boolean;
-        static clear(dest: ICornerRadius): void;
-        static copyTo(cr2: ICornerRadius, dest: ICornerRadius): void;
-    }
-}
-declare namespace mirage {
-    enum HorizontalAlignment {
-        left = 0,
-        center = 1,
-        right = 2,
-        stretch = 3,
-    }
-    enum VerticalAlignment {
-        top = 0,
-        center = 1,
-        bottom = 2,
-        stretch = 3,
-    }
-    enum Orientation {
-        horizontal = 0,
-        vertical = 1,
-    }
-}
 declare namespace mirage.core {
     interface ILayoutNodeInputs {
         visible: boolean;
@@ -63,7 +26,7 @@ declare namespace mirage.core {
         hiddenDesire: ISize;
         layoutSlot: IRect;
         arrangedSlot: IRect;
-        lastArranged: ISize;
+        lastArrangedSlot: IRect;
     }
     interface ILayoutTreeDeepWalker {
         current: LayoutNode;
@@ -110,8 +73,8 @@ declare namespace mirage.core {
         doArrange(): boolean;
         arrange(finalRect: IRect): boolean;
         protected arrangeOverride(arrangeSize: ISize): ISize;
-        sizing(oldSize: ISize, newSize: ISize): boolean;
-        onSizeChanged(oldSize: ISize, newSize: ISize): void;
+        slot(oldRect: IRect, newRect: IRect): boolean;
+        onSlotChanged(oldRect: IRect, newRect: IRect): void;
     }
 }
 declare namespace mirage {
@@ -132,6 +95,53 @@ declare namespace mirage {
         children: core.LayoutNode[];
     }
     function NewPanelTree(): IPanelTree;
+}
+declare namespace mirage {
+    class Canvas extends Panel {
+        static getLeft(node: core.LayoutNode): number;
+        static setLeft(node: core.LayoutNode, value: number): void;
+        static getTop(node: core.LayoutNode): number;
+        static setTop(node: core.LayoutNode, value: number): void;
+        protected measureOverride(constraint: ISize): ISize;
+        protected arrangeOverride(arrangeSize: ISize): ISize;
+    }
+}
+declare namespace mirage {
+    interface ICornerRadius {
+        topLeft: number;
+        topRight: number;
+        bottomRight: number;
+        bottomLeft: number;
+    }
+    class CornerRadius implements ICornerRadius {
+        topLeft: number;
+        topRight: number;
+        bottomRight: number;
+        bottomLeft: number;
+        constructor(topLeft?: number, topRight?: number, bottomRight?: number, bottomLeft?: number);
+        static isEmpty(cr: ICornerRadius): boolean;
+        static isEqual(cr1: ICornerRadius, cr2: ICornerRadius): boolean;
+        static clear(dest: ICornerRadius): void;
+        static copyTo(cr2: ICornerRadius, dest: ICornerRadius): void;
+    }
+}
+declare namespace mirage {
+    enum HorizontalAlignment {
+        left = 0,
+        center = 1,
+        right = 2,
+        stretch = 3,
+    }
+    enum VerticalAlignment {
+        top = 0,
+        center = 1,
+        bottom = 2,
+        stretch = 3,
+    }
+    enum Orientation {
+        horizontal = 0,
+        vertical = 1,
+    }
 }
 declare namespace mirage {
     interface IGridInputs extends core.ILayoutNodeInputs {
@@ -335,7 +345,7 @@ declare namespace mirage.core {
         hiddenDesire: ISize;
         layoutSlot: IRect;
         arrangedSlot: IRect;
-        lastArranged: ISize;
+        lastArrangedSlot: IRect;
     }
     interface IArranger {
         (finalRect: Rect): boolean;
@@ -369,7 +379,7 @@ declare namespace mirage.core {
         arrange = 4,
         measureHint = 8,
         arrangeHint = 16,
-        sizeHint = 32,
+        slotHint = 32,
         hints = 56,
     }
 }
@@ -439,13 +449,13 @@ declare namespace mirage.draft {
     function NewMeasureDrafter(node: core.LayoutNode, rootSize: ISize): IMeasureDrafter;
 }
 declare namespace mirage.draft {
-    interface ISizeDrafter {
+    interface ISlotDrafter {
         flush(): any;
         prepare(): boolean;
         draft(): boolean;
         notify(): boolean;
     }
-    function NewSizeDrafter(node: core.LayoutNode): ISizeDrafter;
+    function NewSlotDrafter(node: core.LayoutNode): ISlotDrafter;
 }
 declare namespace mirage.grid {
     function NewGridArrangeOverride(inputs: IGridInputs, state: IGridState, tree: IPanelTree): core.IArrangeOverride;

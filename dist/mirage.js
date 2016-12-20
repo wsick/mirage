@@ -4,62 +4,6 @@ var mirage;
 })(mirage || (mirage = {}));
 var mirage;
 (function (mirage) {
-    var CornerRadius = (function () {
-        function CornerRadius(topLeft, topRight, bottomRight, bottomLeft) {
-            this.topLeft = topLeft == null ? 0 : topLeft;
-            this.topRight = topRight == null ? 0 : topRight;
-            this.bottomRight = bottomRight == null ? 0 : bottomRight;
-            this.bottomLeft = bottomLeft == null ? 0 : bottomLeft;
-        }
-        CornerRadius.isEmpty = function (cr) {
-            return cr.topLeft === 0
-                && cr.topRight === 0
-                && cr.bottomRight === 0
-                && cr.bottomLeft === 0;
-        };
-        CornerRadius.isEqual = function (cr1, cr2) {
-            return cr1.topLeft === cr2.topLeft
-                && cr1.topRight === cr2.topRight
-                && cr1.bottomRight === cr2.bottomRight
-                && cr1.bottomLeft === cr2.bottomLeft;
-        };
-        CornerRadius.clear = function (dest) {
-            dest.topLeft = dest.topRight = dest.bottomRight = dest.bottomLeft = 0;
-        };
-        CornerRadius.copyTo = function (cr2, dest) {
-            dest.topLeft = cr2.topLeft;
-            dest.topRight = cr2.topRight;
-            dest.bottomRight = cr2.bottomRight;
-            dest.bottomLeft = cr2.bottomLeft;
-        };
-        return CornerRadius;
-    })();
-    mirage.CornerRadius = CornerRadius;
-})(mirage || (mirage = {}));
-var mirage;
-(function (mirage) {
-    (function (HorizontalAlignment) {
-        HorizontalAlignment[HorizontalAlignment["left"] = 0] = "left";
-        HorizontalAlignment[HorizontalAlignment["center"] = 1] = "center";
-        HorizontalAlignment[HorizontalAlignment["right"] = 2] = "right";
-        HorizontalAlignment[HorizontalAlignment["stretch"] = 3] = "stretch";
-    })(mirage.HorizontalAlignment || (mirage.HorizontalAlignment = {}));
-    var HorizontalAlignment = mirage.HorizontalAlignment;
-    (function (VerticalAlignment) {
-        VerticalAlignment[VerticalAlignment["top"] = 0] = "top";
-        VerticalAlignment[VerticalAlignment["center"] = 1] = "center";
-        VerticalAlignment[VerticalAlignment["bottom"] = 2] = "bottom";
-        VerticalAlignment[VerticalAlignment["stretch"] = 3] = "stretch";
-    })(mirage.VerticalAlignment || (mirage.VerticalAlignment = {}));
-    var VerticalAlignment = mirage.VerticalAlignment;
-    (function (Orientation) {
-        Orientation[Orientation["horizontal"] = 0] = "horizontal";
-        Orientation[Orientation["vertical"] = 1] = "vertical";
-    })(mirage.Orientation || (mirage.Orientation = {}));
-    var Orientation = mirage.Orientation;
-})(mirage || (mirage = {}));
-var mirage;
-(function (mirage) {
     var core;
     (function (core) {
         var LayoutNode = (function () {
@@ -102,7 +46,7 @@ var mirage;
                     hiddenDesire: new mirage.Size(),
                     layoutSlot: new mirage.Rect(),
                     arrangedSlot: new mirage.Rect(),
-                    lastArranged: new mirage.Size(),
+                    lastArrangedSlot: new mirage.Rect(),
                 };
             };
             LayoutNode.prototype.createTree = function () {
@@ -297,8 +241,8 @@ var mirage;
                 mirage.Size.clear(state.arrangedSlot);
                 this.invalidateMeasure();
                 this.invalidateArrange();
-                if ((state.flags & core.LayoutFlags.sizeHint) > 0 || state.lastArranged !== undefined) {
-                    this.tree.propagateFlagUp(core.LayoutFlags.sizeHint);
+                if ((state.flags & core.LayoutFlags.slotHint) > 0 || state.lastArrangedSlot !== undefined) {
+                    this.tree.propagateFlagUp(core.LayoutFlags.slotHint);
                 }
             };
             LayoutNode.prototype.walkDeep = function (reverse) {
@@ -356,15 +300,15 @@ var mirage;
                 }
                 return arranged;
             };
-            LayoutNode.prototype.sizing = function (oldSize, newSize) {
+            LayoutNode.prototype.slot = function (oldRect, newRect) {
                 var state = this.state;
-                if (state.lastArranged)
-                    mirage.Size.copyTo(state.lastArranged, oldSize);
-                mirage.Size.copyTo(state.arrangedSlot, newSize);
-                state.lastArranged = undefined;
+                if (state.lastArrangedSlot)
+                    mirage.Rect.copyTo(state.lastArrangedSlot, oldRect);
+                mirage.Rect.copyTo(state.arrangedSlot, newRect);
+                state.lastArrangedSlot = undefined;
                 return true;
             };
-            LayoutNode.prototype.onSizeChanged = function (oldSize, newSize) {
+            LayoutNode.prototype.onSlotChanged = function (oldRect, newRect) {
             };
             return LayoutNode;
         })();
@@ -491,6 +435,106 @@ var mirage;
         return tree;
     }
     mirage.NewPanelTree = NewPanelTree;
+})(mirage || (mirage = {}));
+/// <reference path="Panel" />
+var mirage;
+(function (mirage) {
+    var Canvas = (function (_super) {
+        __extends(Canvas, _super);
+        function Canvas() {
+            _super.apply(this, arguments);
+        }
+        Canvas.getLeft = function (node) {
+            return node.getAttached("canvas.left");
+        };
+        Canvas.setLeft = function (node, value) {
+            node.setAttached("canvas.left", value);
+            node.invalidateArrange();
+        };
+        Canvas.getTop = function (node) {
+            return node.getAttached("canvas.top");
+        };
+        Canvas.setTop = function (node, value) {
+            node.setAttached("canvas.top", value);
+            node.invalidateArrange();
+        };
+        Canvas.prototype.measureOverride = function (constraint) {
+            var available = new mirage.Size(Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY);
+            for (var walker = this.tree.walk(); walker.step();) {
+                walker.current.measure(available);
+            }
+            return new mirage.Size();
+        };
+        Canvas.prototype.arrangeOverride = function (arrangeSize) {
+            var cr = new mirage.Rect();
+            for (var walker = this.tree.walk(); walker.step();) {
+                var child = walker.current;
+                cr.x = Canvas.getLeft(child) || 0;
+                cr.y = Canvas.getTop(child) || 0;
+                mirage.Size.copyTo(child.state.desiredSize, cr);
+                child.arrange(cr);
+            }
+            return arrangeSize;
+        };
+        return Canvas;
+    })(mirage.Panel);
+    mirage.Canvas = Canvas;
+})(mirage || (mirage = {}));
+var mirage;
+(function (mirage) {
+    var CornerRadius = (function () {
+        function CornerRadius(topLeft, topRight, bottomRight, bottomLeft) {
+            this.topLeft = topLeft == null ? 0 : topLeft;
+            this.topRight = topRight == null ? 0 : topRight;
+            this.bottomRight = bottomRight == null ? 0 : bottomRight;
+            this.bottomLeft = bottomLeft == null ? 0 : bottomLeft;
+        }
+        CornerRadius.isEmpty = function (cr) {
+            return cr.topLeft === 0
+                && cr.topRight === 0
+                && cr.bottomRight === 0
+                && cr.bottomLeft === 0;
+        };
+        CornerRadius.isEqual = function (cr1, cr2) {
+            return cr1.topLeft === cr2.topLeft
+                && cr1.topRight === cr2.topRight
+                && cr1.bottomRight === cr2.bottomRight
+                && cr1.bottomLeft === cr2.bottomLeft;
+        };
+        CornerRadius.clear = function (dest) {
+            dest.topLeft = dest.topRight = dest.bottomRight = dest.bottomLeft = 0;
+        };
+        CornerRadius.copyTo = function (cr2, dest) {
+            dest.topLeft = cr2.topLeft;
+            dest.topRight = cr2.topRight;
+            dest.bottomRight = cr2.bottomRight;
+            dest.bottomLeft = cr2.bottomLeft;
+        };
+        return CornerRadius;
+    })();
+    mirage.CornerRadius = CornerRadius;
+})(mirage || (mirage = {}));
+var mirage;
+(function (mirage) {
+    (function (HorizontalAlignment) {
+        HorizontalAlignment[HorizontalAlignment["left"] = 0] = "left";
+        HorizontalAlignment[HorizontalAlignment["center"] = 1] = "center";
+        HorizontalAlignment[HorizontalAlignment["right"] = 2] = "right";
+        HorizontalAlignment[HorizontalAlignment["stretch"] = 3] = "stretch";
+    })(mirage.HorizontalAlignment || (mirage.HorizontalAlignment = {}));
+    var HorizontalAlignment = mirage.HorizontalAlignment;
+    (function (VerticalAlignment) {
+        VerticalAlignment[VerticalAlignment["top"] = 0] = "top";
+        VerticalAlignment[VerticalAlignment["center"] = 1] = "center";
+        VerticalAlignment[VerticalAlignment["bottom"] = 2] = "bottom";
+        VerticalAlignment[VerticalAlignment["stretch"] = 3] = "stretch";
+    })(mirage.VerticalAlignment || (mirage.VerticalAlignment = {}));
+    var VerticalAlignment = mirage.VerticalAlignment;
+    (function (Orientation) {
+        Orientation[Orientation["horizontal"] = 0] = "horizontal";
+        Orientation[Orientation["vertical"] = 1] = "vertical";
+    })(mirage.Orientation || (mirage.Orientation = {}));
+    var Orientation = mirage.Orientation;
 })(mirage || (mirage = {}));
 /// <reference path="Panel" />
 var mirage;
@@ -1207,6 +1251,58 @@ var mirage;
     var core;
     (function (core) {
         function NewArranger(inputs, state, tree, override) {
+            function calcOffer(childRect) {
+                var stretched = new mirage.Size(childRect.width, childRect.height);
+                core.coerceSize(stretched, inputs);
+                var framework = new mirage.Size();
+                core.coerceSize(framework, inputs);
+                if (inputs.horizontalAlignment === mirage.HorizontalAlignment.stretch) {
+                    framework.width = Math.max(framework.width, stretched.width);
+                }
+                if (inputs.verticalAlignment === mirage.VerticalAlignment.stretch) {
+                    framework.height = Math.max(framework.height, stretched.height);
+                }
+                var offer = new mirage.Size(state.hiddenDesire.width, state.hiddenDesire.height);
+                mirage.Size.max(offer, framework);
+                return offer;
+            }
+            function calcVisualOffset(childRect, arranged) {
+                var constrained = new mirage.Size(arranged.width, arranged.height);
+                core.coerceSize(constrained, inputs);
+                mirage.Size.min(constrained, arranged);
+                var vo = new mirage.Point();
+                mirage.Point.copyTo(childRect, vo);
+                switch (inputs.horizontalAlignment) {
+                    case mirage.HorizontalAlignment.left:
+                        break;
+                    case mirage.HorizontalAlignment.right:
+                        vo.x += childRect.width - constrained.width;
+                        break;
+                    case mirage.HorizontalAlignment.center:
+                        vo.x += (childRect.width - constrained.width) * 0.5;
+                        break;
+                    default:
+                        vo.x += Math.max((childRect.width - constrained.width) * 0.5, 0);
+                        break;
+                }
+                switch (inputs.verticalAlignment) {
+                    case mirage.VerticalAlignment.top:
+                        break;
+                    case mirage.VerticalAlignment.bottom:
+                        vo.y += childRect.height - constrained.height;
+                        break;
+                    case mirage.VerticalAlignment.center:
+                        vo.y += (childRect.height - constrained.height) * 0.5;
+                        break;
+                    default:
+                        vo.y += Math.max((childRect.height - constrained.height) * 0.5, 0);
+                        break;
+                }
+                if (inputs.useLayoutRounding) {
+                    mirage.Point.round(vo);
+                }
+                return vo;
+            }
             return function (finalRect) {
                 if (inputs.visible !== true) {
                     return false;
@@ -1236,64 +1332,20 @@ var mirage;
                 }
                 mirage.Rect.copyTo(childRect, state.layoutSlot);
                 mirage.Thickness.shrinkRect(inputs.margin, childRect);
-                var stretched = new mirage.Size(childRect.width, childRect.height);
-                core.coerceSize(stretched, inputs);
-                var framework = new mirage.Size();
-                core.coerceSize(framework, inputs);
-                if (inputs.horizontalAlignment === mirage.HorizontalAlignment.stretch) {
-                    framework.width = Math.max(framework.width, stretched.width);
-                }
-                if (inputs.verticalAlignment === mirage.VerticalAlignment.stretch) {
-                    framework.height = Math.max(framework.height, stretched.height);
-                }
-                var offer = new mirage.Size(state.hiddenDesire.width, state.hiddenDesire.height);
-                mirage.Size.max(offer, framework);
+                var offer = calcOffer(childRect);
                 var arranged = override(offer);
                 state.flags &= ~core.LayoutFlags.arrange;
                 if (inputs.useLayoutRounding) {
                     mirage.Size.round(arranged);
                 }
-                var constrained = new mirage.Size(arranged.width, arranged.height);
-                core.coerceSize(constrained, inputs);
-                mirage.Size.min(constrained, arranged);
-                var as = state.arrangedSlot;
-                mirage.Point.copyTo(childRect, as);
-                switch (inputs.horizontalAlignment) {
-                    case mirage.HorizontalAlignment.left:
-                        break;
-                    case mirage.HorizontalAlignment.right:
-                        as.x += childRect.width - constrained.width;
-                        break;
-                    case mirage.HorizontalAlignment.center:
-                        as.x += (childRect.width - constrained.width) * 0.5;
-                        break;
-                    default:
-                        as.x += Math.max((childRect.width - constrained.width) * 0.5, 0);
-                        break;
-                }
-                switch (inputs.verticalAlignment) {
-                    case mirage.VerticalAlignment.top:
-                        break;
-                    case mirage.VerticalAlignment.bottom:
-                        as.y += childRect.height - constrained.height;
-                        break;
-                    case mirage.VerticalAlignment.center:
-                        as.y += (childRect.height - constrained.height) * 0.5;
-                        break;
-                    default:
-                        as.y += Math.max((childRect.height - constrained.height) * 0.5, 0);
-                        break;
-                }
-                if (inputs.useLayoutRounding) {
-                    mirage.Point.round(as);
-                }
-                var oldArrange = state.arrangedSlot;
-                if (!mirage.Size.isEqual(oldArrange, arranged)) {
-                    mirage.Size.copyTo(oldArrange, state.lastArranged);
-                    state.flags |= core.LayoutFlags.sizeHint;
-                    tree.propagateFlagUp(core.LayoutFlags.sizeHint);
+                var vo = calcVisualOffset(childRect, arranged);
+                if (!mirage.Point.isEqual(vo, state.arrangedSlot) || !mirage.Size.isEqual(arranged, state.arrangedSlot)) {
+                    mirage.Rect.copyTo(state.arrangedSlot, state.lastArrangedSlot);
+                    state.flags |= core.LayoutFlags.slotHint;
+                    tree.propagateFlagUp(core.LayoutFlags.slotHint);
                 }
                 mirage.Size.copyTo(arranged, state.arrangedSlot);
+                mirage.Point.copyTo(vo, state.arrangedSlot);
                 return true;
             };
         }
@@ -1340,7 +1392,7 @@ var mirage;
             LayoutFlags[LayoutFlags["arrange"] = 4] = "arrange";
             LayoutFlags[LayoutFlags["measureHint"] = 8] = "measureHint";
             LayoutFlags[LayoutFlags["arrangeHint"] = 16] = "arrangeHint";
-            LayoutFlags[LayoutFlags["sizeHint"] = 32] = "sizeHint";
+            LayoutFlags[LayoutFlags["slotHint"] = 32] = "slotHint";
             LayoutFlags[LayoutFlags["hints"] = 56] = "hints";
         })(core.LayoutFlags || (core.LayoutFlags = {}));
         var LayoutFlags = core.LayoutFlags;
@@ -1492,12 +1544,12 @@ var mirage;
         function NewDrafter(node, rootSize) {
             var measure = draft.NewMeasureDrafter(node, rootSize);
             var arrange = draft.NewArrangeDrafter(node);
-            var size = draft.NewSizeDrafter(node);
+            var slot = draft.NewSlotDrafter(node);
             function runDraft() {
                 if (!node.inputs.visible)
                     return false;
                 arrange.flush();
-                size.flush();
+                slot.flush();
                 var flags = node.state.flags;
                 if ((flags & LayoutFlags.measureHint) > 0) {
                     return measure.prepare()
@@ -1507,10 +1559,10 @@ var mirage;
                     return arrange.prepare()
                         && arrange.draft();
                 }
-                if ((flags & LayoutFlags.sizeHint) > 0) {
-                    return size.prepare()
-                        && size.draft()
-                        && size.notify();
+                if ((flags & LayoutFlags.slotHint) > 0) {
+                    return slot.prepare()
+                        && slot.draft()
+                        && slot.notify();
                 }
                 return false;
             }
@@ -1582,14 +1634,14 @@ var mirage;
     var draft;
     (function (draft) {
         var LayoutFlags = mirage.core.LayoutFlags;
-        function NewSizeDrafter(node) {
-            var sizingList = [];
-            var sizingUpdates = [];
+        function NewSlotDrafter(node) {
+            var slotList = [];
+            var slotUpdates = [];
             return {
                 flush: function () {
                     var cur;
-                    while ((cur = sizingList.shift()) != null) {
-                        cur.tree.propagateFlagUp(LayoutFlags.sizeHint);
+                    while ((cur = slotList.shift()) != null) {
+                        cur.tree.propagateFlagUp(LayoutFlags.slotHint);
                     }
                 },
                 prepare: function () {
@@ -1599,45 +1651,45 @@ var mirage;
                             walker.skipBranch();
                             continue;
                         }
-                        if ((cur.state.flags & LayoutFlags.sizeHint) === 0) {
+                        if ((cur.state.flags & LayoutFlags.slotHint) === 0) {
                             walker.skipBranch();
                             continue;
                         }
-                        cur.state.flags &= ~LayoutFlags.sizeHint;
-                        if (cur.state.lastArranged !== undefined) {
-                            sizingList.push(cur);
+                        cur.state.flags &= ~LayoutFlags.slotHint;
+                        if (cur.state.lastArrangedSlot !== undefined) {
+                            slotList.push(cur);
                         }
                     }
-                    return sizingList.length > 0;
+                    return slotList.length > 0;
                 },
                 draft: function () {
-                    var oldSize = new mirage.Size();
-                    var newSize = new mirage.Size();
+                    var oldRect = new mirage.Rect();
+                    var newRect = new mirage.Rect();
                     var cur;
-                    while ((cur = sizingList.pop()) != null) {
-                        cur.sizing(oldSize, newSize);
-                        if (!mirage.Size.isEqual(oldSize, newSize)) {
-                            sizingUpdates.push({
+                    while ((cur = slotList.pop()) != null) {
+                        cur.slot(oldRect, newRect);
+                        if (!mirage.Rect.isEqual(oldRect, newRect)) {
+                            slotUpdates.push({
                                 node: cur,
-                                oldSize: oldSize,
-                                newSize: newSize,
+                                oldRect: oldRect,
+                                newRect: newRect,
                             });
-                            oldSize = new mirage.Size();
-                            newSize = new mirage.Size();
+                            oldRect = new mirage.Rect();
+                            newRect = new mirage.Rect();
                         }
                     }
-                    return sizingUpdates.length > 0;
+                    return slotUpdates.length > 0;
                 },
                 notify: function () {
                     var update;
-                    while ((update = sizingUpdates.pop()) != null) {
-                        update.node.onSizeChanged(update.oldSize, update.newSize);
+                    while ((update = slotUpdates.pop()) != null) {
+                        update.node.onSlotChanged(update.oldRect, update.newRect);
                     }
                     return true;
                 }
             };
         }
-        draft.NewSizeDrafter = NewSizeDrafter;
+        draft.NewSlotDrafter = NewSlotDrafter;
     })(draft = mirage.draft || (mirage.draft = {}));
 })(mirage || (mirage = {}));
 var mirage;
