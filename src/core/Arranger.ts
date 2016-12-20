@@ -20,7 +20,7 @@ namespace mirage.core {
         hiddenDesire: ISize;
         layoutSlot: IRect;
         arrangedSlot: IRect;
-        lastArranged: ISize;
+        lastArrangedSlot: IRect;
     }
 
 
@@ -133,9 +133,9 @@ namespace mirage.core {
             // Cycle old + current arranged for sizing
             var oldArrange = state.arrangedSlot;
             if (!Size.isEqual(oldArrange, arranged)) {
-                Size.copyTo(oldArrange, state.lastArranged);
-                state.flags |= LayoutFlags.sizeHint;
-                tree.propagateFlagUp(LayoutFlags.sizeHint);
+                Size.copyTo(oldArrange, state.lastArrangedSlot);
+                state.flags |= LayoutFlags.slotHint;
+                tree.propagateFlagUp(LayoutFlags.slotHint);
             }
             Size.copyTo(arranged, state.arrangedSlot);
 

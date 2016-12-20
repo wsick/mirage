@@ -7,7 +7,7 @@ namespace mirage.core {
 
         measureHint = 1 << 3,
         arrangeHint = 1 << 4,
-        sizeHint    = 1 << 5,
-        hints       = measureHint | arrangeHint | sizeHint,
+        slotHint    = 1 << 5,
+        hints       = measureHint | arrangeHint | slotHint,
     }
 }

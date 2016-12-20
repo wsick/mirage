@@ -25,7 +25,7 @@ namespace mirage.core {
         hiddenDesire: ISize;
         layoutSlot: IRect;
         arrangedSlot: IRect;
-        lastArranged: ISize;
+        lastArrangedSlot: IRect;
     }
 
     export interface ILayoutTreeDeepWalker {
@@ -86,7 +86,7 @@ namespace mirage.core {
                 hiddenDesire: new Size(),
                 layoutSlot: new Rect(),
                 arrangedSlot: new Rect(),
-                lastArranged: new Size(),
+                lastArrangedSlot: new Rect(),
             };
         }
 
@@ -270,8 +270,8 @@ namespace mirage.core {
             Size.clear(state.arrangedSlot);
             this.invalidateMeasure();
             this.invalidateArrange();
-            if ((state.flags & LayoutFlags.sizeHint) > 0 || state.lastArranged !== undefined) {
-                this.tree.propagateFlagUp(LayoutFlags.sizeHint);
+            if ((state.flags & LayoutFlags.slotHint) > 0 || state.lastArrangedSlot !== undefined) {
+                this.tree.propagateFlagUp(LayoutFlags.slotHint);
             }
         }
 
@@ -343,17 +343,17 @@ namespace mirage.core {
             return arranged;
         }
 
-        sizing(oldSize: ISize, newSize: ISize): boolean {
+        slot(oldRect: IRect, newRect: IRect): boolean {
             var state = this.state;
-            if (state.lastArranged)
-                Size.copyTo(state.lastArranged, oldSize);
-            Size.copyTo(state.arrangedSlot, newSize);
-            state.lastArranged = undefined;
+            if (state.lastArrangedSlot)
+                Rect.copyTo(state.lastArrangedSlot, oldRect);
+            Rect.copyTo(state.arrangedSlot, newRect);
+            state.lastArrangedSlot = undefined;
             // TODO: Set actualWidth, actualHeight
             return true;
         }
 
-        onSizeChanged(oldSize: ISize, newSize: ISize) {
+        onSlotChanged(oldRect: IRect, newRect: IRect) {
             // Placeholder for sizing notifications
         }
     }
