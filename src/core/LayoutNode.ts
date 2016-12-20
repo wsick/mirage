@@ -352,10 +352,6 @@ namespace mirage.core {
             // TODO: Set actualWidth, actualHeight
             return true;
         }
-
-        onSlotChanged(oldRect: IRect, newRect: IRect) {
-            // Placeholder for sizing notifications
-        }
     }
 
     function onNodeSizeInputsChanged(node: core.LayoutNode) {
