@@ -21,7 +21,7 @@ declare namespace mirage.core {
     }
     interface ILayoutNodeState {
         flags: LayoutFlags;
-        previousAvailable: ISize;
+        lastAvailable: ISize;
         desiredSize: ISize;
         hiddenDesire: ISize;
         layoutSlot: IRect;
@@ -39,8 +39,6 @@ declare namespace mirage.core {
         tree: ILayoutTree;
         private $measurer;
         private $arranger;
-        private $measureBinder;
-        private $arrangeBinder;
         constructor();
         init(): void;
         protected createInputs(): ILayoutNodeInputs;
@@ -70,11 +68,10 @@ declare namespace mirage.core {
         measure(availableSize: ISize): boolean;
         protected measureOverride(constraint: ISize): ISize;
         invalidateArrange(): void;
-        doArrange(): boolean;
+        doArrange(rootSize: ISize): boolean;
         arrange(finalRect: IRect): boolean;
         protected arrangeOverride(arrangeSize: ISize): ISize;
         slot(oldRect: IRect, newRect: IRect): boolean;
-        onSlotChanged(oldRect: IRect, newRect: IRect): void;
     }
 }
 declare namespace mirage {
@@ -200,6 +197,14 @@ declare namespace mirage {
     }
     function parseGridLength(s: string): IGridLength;
 }
+declare namespace mirage.adapters {
+    interface IRenderAdapter {
+        updateSlots(updates: draft.ISlotUpdate[]): any;
+    }
+    function register(adapter: IRenderAdapter): void;
+    function unregister(adapter: IRenderAdapter): void;
+    function updateSlots(updates: draft.ISlotUpdate[]): void;
+}
 declare namespace mirage {
     interface IRowDefinition {
         height: IGridLength;
@@ -230,11 +235,6 @@ declare namespace mirage {
     }
 }
 declare namespace mirage {
-    enum RectOverlap {
-        outside = 0,
-        inside = 1,
-        part = 2,
-    }
     interface IRect extends IPoint, ISize {
     }
     class Rect implements IRect {
@@ -244,21 +244,11 @@ declare namespace mirage {
         height: number;
         constructor(x?: number, y?: number, width?: number, height?: number);
         static clear(rect: IRect): void;
-        static getBottom(rect: IRect): number;
-        static getRight(rect: IRect): number;
         static isEqual(rect1: IRect, rect2: IRect): boolean;
         static isEmpty(src: IRect): boolean;
         static copyTo(src: IRect, dest: IRect): void;
-        static roundOut(dest: IRect): void;
-        static roundIn(dest: IRect): IRect;
-        static intersection(dest: IRect, rect2: IRect): void;
-        static union(dest: IRect, rect2: IRect): void;
-        static isContainedIn(src: IRect, test: IRect): boolean;
-        static containsPoint(rect1: IRect, p: Point): boolean;
-        static extendTo(dest: IRect, x: number, y: number): void;
-        static grow(dest: IRect, left: number, top: number, right: number, bottom: number): IRect;
-        static shrink(dest: IRect, left: number, top: number, right: number, bottom: number): void;
-        static rectIn(rect1: IRect, rect2: IRect): RectOverlap;
+        static isUndef(rect: IRect): boolean;
+        static undef(rect: IRect): void;
     }
 }
 declare namespace mirage {
@@ -276,8 +266,8 @@ declare namespace mirage {
         static max(dest: ISize, size2: ISize): void;
         static min(dest: ISize, size2: ISize): void;
         static round(size: ISize): void;
-        static isUndef(size: ISize): boolean;
         static clear(size: ISize): void;
+        static isUndef(size: ISize): boolean;
         static undef(size: ISize): void;
     }
 }
@@ -318,42 +308,13 @@ declare namespace mirage {
     }
 }
 declare namespace mirage.core {
-    interface IArrangeBinder {
-        (): boolean;
-    }
-    function NewArrangeBinder(state: IArrangeState, tree: ILayoutTree, arranger: IArranger): IArrangeBinder;
-    function NewSpecialArrangeBinder(node: core.LayoutNode, arranger: IArranger): IArrangeBinder;
-}
-declare namespace mirage.core {
-    interface IArrangeInputs {
-        visible: boolean;
-        margin: Thickness;
-        width: number;
-        height: number;
-        minWidth: number;
-        minHeight: number;
-        maxWidth: number;
-        maxHeight: number;
-        useLayoutRounding: boolean;
-        horizontalAlignment: HorizontalAlignment;
-        verticalAlignment: VerticalAlignment;
-    }
-    interface IArrangeState {
-        flags: LayoutFlags;
-        previousAvailable: ISize;
-        desiredSize: ISize;
-        hiddenDesire: ISize;
-        layoutSlot: IRect;
-        arrangedSlot: IRect;
-        lastArrangedSlot: IRect;
-    }
     interface IArranger {
         (finalRect: Rect): boolean;
     }
     interface IArrangeOverride {
         (finalSize: ISize): ISize;
     }
-    function NewArranger(inputs: IArrangeInputs, state: IArrangeState, tree: ILayoutTree, override: IArrangeOverride): IArranger;
+    function NewArranger(inputs: ILayoutNodeInputs, state: ILayoutNodeState, tree: ILayoutTree, override: IArrangeOverride): IArranger;
 }
 declare namespace mirage.core {
     function DefaultLayoutTree(): ILayoutTree;
@@ -364,8 +325,6 @@ declare namespace mirage.core {
         step(): boolean;
     }
     interface ILayoutTree {
-        isContainer: boolean;
-        isLayoutContainer: boolean;
         parent: LayoutNode;
         applyTemplate(): boolean;
         propagateFlagUp(flag: LayoutFlags): any;
@@ -384,36 +343,13 @@ declare namespace mirage.core {
     }
 }
 declare namespace mirage.core {
-    interface IMeasureBinder {
-        (): boolean;
-    }
-    function NewMeasureBinder(state: IMeasureState, tree: ILayoutTree, measurer: IMeasurer): IMeasureBinder;
-}
-declare namespace mirage.core {
-    interface IMeasureInputs {
-        visible: boolean;
-        margin: Thickness;
-        width: number;
-        height: number;
-        minWidth: number;
-        minHeight: number;
-        maxWidth: number;
-        maxHeight: number;
-        useLayoutRounding: boolean;
-    }
-    interface IMeasureState {
-        flags: LayoutFlags;
-        previousAvailable: ISize;
-        desiredSize: ISize;
-        hiddenDesire: ISize;
-    }
     interface IMeasurer {
         (availableSize: ISize): boolean;
     }
     interface IMeasureOverride {
         (coreSize: ISize): Size;
     }
-    function NewMeasurer(inputs: IMeasureInputs, state: IMeasureState, tree: ILayoutTree, override: IMeasureOverride): IMeasurer;
+    function NewMeasurer(inputs: ILayoutNodeInputs, state: ILayoutNodeState, tree: ILayoutTree, override: IMeasureOverride): IMeasurer;
 }
 declare namespace mirage.core {
     interface ISized {
@@ -433,7 +369,7 @@ declare namespace mirage.draft {
         prepare(): boolean;
         draft(): boolean;
     }
-    function NewArrangeDrafter(node: core.LayoutNode): IArrangeDrafter;
+    function NewArrangeDrafter(node: core.LayoutNode, rootSize: ISize): IArrangeDrafter;
 }
 declare namespace mirage.draft {
     interface IDrafter {
@@ -454,6 +390,11 @@ declare namespace mirage.draft {
         prepare(): boolean;
         draft(): boolean;
         notify(): boolean;
+    }
+    interface ISlotUpdate {
+        node: core.LayoutNode;
+        oldRect: IRect;
+        newRect: IRect;
     }
     function NewSlotDrafter(node: core.LayoutNode): ISlotDrafter;
 }
