@@ -104,25 +104,6 @@ declare namespace mirage {
     }
 }
 declare namespace mirage {
-    interface ICornerRadius {
-        topLeft: number;
-        topRight: number;
-        bottomRight: number;
-        bottomLeft: number;
-    }
-    class CornerRadius implements ICornerRadius {
-        topLeft: number;
-        topRight: number;
-        bottomRight: number;
-        bottomLeft: number;
-        constructor(topLeft?: number, topRight?: number, bottomRight?: number, bottomLeft?: number);
-        static isEmpty(cr: ICornerRadius): boolean;
-        static isEqual(cr1: ICornerRadius, cr2: ICornerRadius): boolean;
-        static clear(dest: ICornerRadius): void;
-        static copyTo(cr2: ICornerRadius, dest: ICornerRadius): void;
-    }
-}
-declare namespace mirage {
     enum HorizontalAlignment {
         left = 0,
         center = 1,
@@ -294,17 +275,10 @@ declare namespace mirage {
         right: number;
         bottom: number;
         constructor(left?: number, top?: number, right?: number, bottom?: number);
-        static add(dest: Thickness, t2: Thickness): void;
-        static copyTo(thickness: Thickness, dest: Thickness): void;
-        static isEmpty(thickness: Thickness): boolean;
         static isEqual(t1: Thickness, t2: Thickness): boolean;
-        static isBalanced(thickness: Thickness): boolean;
+        static growSize(thickness: Thickness, dest: Size): Size;
         static shrinkSize(thickness: Thickness, dest: Size): Size;
         static shrinkRect(thickness: Thickness, dest: IRect): void;
-        static shrinkCornerRadius(thickness: Thickness, dest: ICornerRadius): void;
-        static growSize(thickness: Thickness, dest: Size): Size;
-        static growRect(thickness: Thickness, dest: IRect): void;
-        static growCornerRadius(thickness: Thickness, dest: ICornerRadius): void;
     }
 }
 declare namespace mirage.core {

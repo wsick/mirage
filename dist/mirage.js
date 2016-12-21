@@ -507,40 +507,6 @@ var mirage;
 })(mirage || (mirage = {}));
 var mirage;
 (function (mirage) {
-    var CornerRadius = (function () {
-        function CornerRadius(topLeft, topRight, bottomRight, bottomLeft) {
-            this.topLeft = topLeft == null ? 0 : topLeft;
-            this.topRight = topRight == null ? 0 : topRight;
-            this.bottomRight = bottomRight == null ? 0 : bottomRight;
-            this.bottomLeft = bottomLeft == null ? 0 : bottomLeft;
-        }
-        CornerRadius.isEmpty = function (cr) {
-            return cr.topLeft === 0
-                && cr.topRight === 0
-                && cr.bottomRight === 0
-                && cr.bottomLeft === 0;
-        };
-        CornerRadius.isEqual = function (cr1, cr2) {
-            return cr1.topLeft === cr2.topLeft
-                && cr1.topRight === cr2.topRight
-                && cr1.bottomRight === cr2.bottomRight
-                && cr1.bottomLeft === cr2.bottomLeft;
-        };
-        CornerRadius.clear = function (dest) {
-            dest.topLeft = dest.topRight = dest.bottomRight = dest.bottomLeft = 0;
-        };
-        CornerRadius.copyTo = function (cr2, dest) {
-            dest.topLeft = cr2.topLeft;
-            dest.topRight = cr2.topRight;
-            dest.bottomRight = cr2.bottomRight;
-            dest.bottomLeft = cr2.bottomLeft;
-        };
-        return CornerRadius;
-    })();
-    mirage.CornerRadius = CornerRadius;
-})(mirage || (mirage = {}));
-var mirage;
-(function (mirage) {
     (function (HorizontalAlignment) {
         HorizontalAlignment[HorizontalAlignment["left"] = 0] = "left";
         HorizontalAlignment[HorizontalAlignment["center"] = 1] = "center";
@@ -1063,31 +1029,22 @@ var mirage;
             this.right = right == null ? 0 : right;
             this.bottom = bottom == null ? 0 : bottom;
         }
-        Thickness.add = function (dest, t2) {
-            dest.left += t2.left;
-            dest.top += t2.top;
-            dest.right += t2.right;
-            dest.bottom += t2.bottom;
-        };
-        Thickness.copyTo = function (thickness, dest) {
-            dest.left = thickness.left;
-            dest.top = thickness.top;
-            dest.right = thickness.right;
-            dest.bottom = thickness.bottom;
-        };
-        Thickness.isEmpty = function (thickness) {
-            return thickness.left === 0 && thickness.top === 0 && thickness.right === 0 && thickness.bottom === 0;
-        };
         Thickness.isEqual = function (t1, t2) {
             return t1.left === t2.left
                 && t1.top === t2.top
                 && t1.right === t2.right
                 && t1.bottom === t2.bottom;
         };
-        Thickness.isBalanced = function (thickness) {
-            return thickness.left === thickness.top
-                && thickness.left === thickness.right
-                && thickness.left === thickness.bottom;
+        Thickness.growSize = function (thickness, dest) {
+            var w = dest.width;
+            var h = dest.height;
+            if (w != Number.POSITIVE_INFINITY)
+                w += thickness.left + thickness.right;
+            if (h != Number.POSITIVE_INFINITY)
+                h += thickness.top + thickness.bottom;
+            dest.width = w > 0 ? w : 0;
+            dest.height = h > 0 ? h : 0;
+            return dest;
         };
         Thickness.shrinkSize = function (thickness, dest) {
             var w = dest.width;
@@ -1109,39 +1066,6 @@ var mirage;
                 dest.width = 0;
             if (dest.height < 0)
                 dest.height = 0;
-        };
-        Thickness.shrinkCornerRadius = function (thickness, dest) {
-            dest.topLeft = Math.max(dest.topLeft - Math.max(thickness.left, thickness.top) * 0.5, 0);
-            dest.topRight = Math.max(dest.topRight - Math.max(thickness.right, thickness.top) * 0.5, 0);
-            dest.bottomRight = Math.max(dest.bottomRight - Math.max(thickness.right, thickness.bottom) * 0.5, 0);
-            dest.bottomLeft = Math.max(dest.bottomLeft - Math.max(thickness.left, thickness.bottom) * 0.5, 0);
-        };
-        Thickness.growSize = function (thickness, dest) {
-            var w = dest.width;
-            var h = dest.height;
-            if (w != Number.POSITIVE_INFINITY)
-                w += thickness.left + thickness.right;
-            if (h != Number.POSITIVE_INFINITY)
-                h += thickness.top + thickness.bottom;
-            dest.width = w > 0 ? w : 0;
-            dest.height = h > 0 ? h : 0;
-            return dest;
-        };
-        Thickness.growRect = function (thickness, dest) {
-            dest.x -= thickness.left;
-            dest.y -= thickness.top;
-            dest.width += thickness.left + thickness.right;
-            dest.height += thickness.top + thickness.bottom;
-            if (dest.width < 0)
-                dest.width = 0;
-            if (dest.height < 0)
-                dest.height = 0;
-        };
-        Thickness.growCornerRadius = function (thickness, dest) {
-            dest.topLeft = dest.topLeft ? Math.max(dest.topLeft + Math.max(thickness.left, thickness.top) * 0.5, 0) : 0;
-            dest.topRight = dest.topRight ? Math.max(dest.topRight + Math.max(thickness.right, thickness.top) * 0.5, 0) : 0;
-            dest.bottomRight = dest.bottomRight ? Math.max(dest.bottomRight + Math.max(thickness.right, thickness.bottom) * 0.5, 0) : 0;
-            dest.bottomLeft = dest.bottomLeft ? Math.max(dest.bottomLeft + Math.max(thickness.left, thickness.bottom) * 0.5, 0) : 0;
         };
         return Thickness;
     })();
