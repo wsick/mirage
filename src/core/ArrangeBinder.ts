@@ -3,7 +3,7 @@ namespace mirage.core {
         (): boolean;
     }
 
-    export function NewArrangeBinder(state: IArrangeState, tree: ILayoutTree, arranger: IArranger): IArrangeBinder {
+    export function NewArrangeBinder(state: ILayoutNodeState, tree: ILayoutTree, arranger: IArranger): IArrangeBinder {
         return function (): boolean {
             var last = state.layoutSlot || undefined;
             if (!tree.parent)

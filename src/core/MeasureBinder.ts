@@ -3,7 +3,7 @@ namespace mirage.core {
         (): boolean;
     }
 
-    export function NewMeasureBinder(state: IMeasureState, tree: ILayoutTree, measurer: IMeasurer): IMeasureBinder {
+    export function NewMeasureBinder(state: ILayoutNodeState, tree: ILayoutTree, measurer: IMeasurer): IMeasureBinder {
         return function (): boolean {
             var last = state.previousAvailable;
 
