@@ -41,7 +41,7 @@ namespace mirage.draft {
                     }
 
                     cur.state.flags &= ~LayoutFlags.slotHint;
-                    if (cur.state.lastArrangedSlot !== undefined) {
+                    if (!Rect.isUndef(cur.state.lastArrangedSlot)) {
                         slotList.push(cur);
                     }
                 }

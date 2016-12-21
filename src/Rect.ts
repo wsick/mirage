@@ -37,5 +37,19 @@ namespace mirage {
             dest.width = src.width;
             dest.height = src.height;
         }
+
+        static isUndef(rect: IRect): boolean {
+            return isNaN(rect.x)
+                && isNaN(rect.y)
+                && isNaN(rect.width)
+                && isNaN(rect.height);
+        }
+
+        static undef(rect: IRect) {
+            rect.x = NaN;
+            rect.y = NaN;
+            rect.width = NaN;
+            rect.height = NaN;
+        }
     }
 }

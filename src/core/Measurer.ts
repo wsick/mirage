@@ -24,8 +24,8 @@ namespace mirage.core {
             if ((state.flags & LayoutFlags.measure) <= 0) {
                 return false;
             }
-            var pc = state.previousAvailable;
-            if (!Size.isUndef(pc) && pc.width === availableSize.width && pc.height === availableSize.height) {
+            var last = state.lastAvailable;
+            if (!Size.isUndef(last) && last.width === availableSize.width && last.height === availableSize.height) {
                 return false;
             }
 

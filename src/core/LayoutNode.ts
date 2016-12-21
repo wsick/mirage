@@ -20,7 +20,7 @@ namespace mirage.core {
 
     export interface ILayoutNodeState {
         flags: LayoutFlags;
-        previousAvailable: ISize;
+        lastAvailable: ISize;
         desiredSize: ISize;
         hiddenDesire: ISize;
         layoutSlot: IRect;
@@ -81,12 +81,12 @@ namespace mirage.core {
         protected createState(): ILayoutNodeState {
             return {
                 flags: LayoutFlags.none,
-                previousAvailable: new Size(),
+                lastAvailable: new Size(NaN, NaN),
                 desiredSize: new Size(),
                 hiddenDesire: new Size(),
                 layoutSlot: new Rect(),
                 arrangedSlot: new Rect(),
-                lastArrangedSlot: new Rect(),
+                lastArrangedSlot: new Rect(NaN, NaN, NaN, NaN),
             };
         }
 
@@ -266,11 +266,11 @@ namespace mirage.core {
 
         protected onAttached() {
             var state = this.state;
-            Size.undef(state.previousAvailable);
+            Size.undef(state.lastAvailable);
             Size.clear(state.arrangedSlot);
             this.invalidateMeasure();
             this.invalidateArrange();
-            if ((state.flags & LayoutFlags.slotHint) > 0 || state.lastArrangedSlot !== undefined) {
+            if ((state.flags & LayoutFlags.slotHint) > 0 || !Rect.isUndef(state.lastArrangedSlot)) {
                 this.tree.propagateFlagUp(LayoutFlags.slotHint);
             }
         }
@@ -345,10 +345,10 @@ namespace mirage.core {
 
         slot(oldRect: IRect, newRect: IRect): boolean {
             var state = this.state;
-            if (state.lastArrangedSlot)
+            if (!Rect.isUndef(state.lastArrangedSlot))
                 Rect.copyTo(state.lastArrangedSlot, oldRect);
             Rect.copyTo(state.arrangedSlot, newRect);
-            state.lastArrangedSlot = undefined;
+            Rect.undef(state.lastArrangedSlot);
             // TODO: Set actualWidth, actualHeight
             return true;
         }

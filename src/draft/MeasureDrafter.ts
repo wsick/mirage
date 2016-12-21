@@ -13,10 +13,10 @@ namespace mirage.draft {
 
         return {
             prepare(): boolean {
-                var last = node.state.previousAvailable;
+                var last = node.state.lastAvailable;
                 if (node.tree.isContainer && (Size.isUndef(last) || !Size.isEqual(last, rootSize))) {
                     node.state.flags |= LayoutFlags.measure;
-                    Size.copyTo(rootSize, node.state.previousAvailable);
+                    Size.copyTo(rootSize, node.state.lastAvailable);
                 }
 
                 // Load up measure list

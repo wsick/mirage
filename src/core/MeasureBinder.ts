@@ -5,8 +5,7 @@ namespace mirage.core {
 
     export function NewMeasureBinder(state: ILayoutNodeState, tree: ILayoutTree, measurer: IMeasurer): IMeasureBinder {
         return function (): boolean {
-            var last = state.previousAvailable;
-
+            var last = state.lastAvailable;
             if (Size.isUndef(last) && !tree.parent && tree.isLayoutContainer)
                 last.width = last.height = Number.POSITIVE_INFINITY;
 
