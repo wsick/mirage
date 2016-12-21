@@ -80,7 +80,7 @@ namespace mirage.core {
                 lastAvailable: new Size(NaN, NaN),
                 desiredSize: new Size(),
                 hiddenDesire: new Size(),
-                layoutSlot: new Rect(),
+                layoutSlot: new Rect(NaN, NaN, NaN, NaN),
                 arrangedSlot: new Rect(),
                 lastArrangedSlot: new Rect(NaN, NaN, NaN, NaN),
             };
@@ -257,12 +257,13 @@ namespace mirage.core {
             this.invalidateMeasure();
             if (this.tree.parent)
                 this.tree.parent.invalidateMeasure();
-            Rect.clear(this.state.layoutSlot);
+            Rect.undef(this.state.layoutSlot);
         }
 
         protected onAttached() {
             var state = this.state;
             Size.undef(state.lastAvailable);
+            Rect.undef(state.layoutSlot);
             Size.clear(state.arrangedSlot);
             this.invalidateMeasure();
             this.invalidateArrange();
@@ -304,7 +305,7 @@ namespace mirage.core {
             var parent = this.tree.parent;
             var available = new Size();
             Size.copyTo(this.state.lastAvailable, available);
-            if (!this.tree.parent && Size.isUndef(available))
+            if (!parent && Size.isUndef(available))
                 available.width = available.height = Number.POSITIVE_INFINITY;
 
             var success = false;
@@ -342,12 +343,23 @@ namespace mirage.core {
             this.tree.propagateFlagUp(LayoutFlags.arrangeHint);
         }
 
-        doArrange(): boolean {
-            var last = this.state.layoutSlot;
-            if (last)
-                return this.$arranger(last);
-
+        doArrange(rootSize: ISize): boolean {
             var parent = this.tree.parent;
+            var final = new Rect();
+            if (!parent) {
+                // A root element will always use root size for arrange
+                Size.copyTo(rootSize, final);
+            } else {
+                // If we are starting an arrange from a non-root element,
+                //   our measure developed a desired size that *did not*
+                //   cause a further invalidation up the tree
+                // This means that our desired size *is* our final for arrange
+                Size.copyTo(this.state.desiredSize, final);
+            }
+
+            if (!Rect.isUndef(final))
+                return this.$arranger(final);
+
             if (parent)
                 parent.invalidateArrange();
 

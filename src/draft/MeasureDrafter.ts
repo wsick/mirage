@@ -13,16 +13,6 @@ namespace mirage.draft {
 
         return {
             prepare(): boolean {
-                // A draft pass relies on `lastAvailable` to dictate starting measure constraint
-                // Since `node` is typically a root element, we need to ensure `lastAvailable`
-                //   is not undefined (first run) and matches the current root size (resizes)
-                var last = node.state.lastAvailable;
-                if (!node.tree.parent && !Size.isEqual(last, rootSize)) {
-                    Size.copyTo(rootSize, last);
-                    node.invalidateMeasure();
-                }
-
-                // Load up measure list
                 for (var walker = node.walkDeep(); walker.step();) {
                     var cur = walker.current;
                     if (!cur.inputs.visible) {

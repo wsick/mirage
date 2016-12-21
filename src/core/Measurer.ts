@@ -17,9 +17,6 @@ namespace mirage.core {
                 return false;
             }
 
-            // Apply Template
-            tree.applyTemplate();
-
             // Check need to measure
             if ((state.flags & LayoutFlags.measure) <= 0) {
                 return false;
@@ -28,6 +25,10 @@ namespace mirage.core {
             if (!Size.isUndef(last) && last.width === availableSize.width && last.height === availableSize.height) {
                 return false;
             }
+            Size.copyTo(availableSize, last);
+
+            // Apply Template
+            tree.applyTemplate();
 
             // Invalidate downstream
             state.flags |= (LayoutFlags.arrange | LayoutFlags.arrangeHint);
