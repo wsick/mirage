@@ -41,8 +41,6 @@ namespace mirage.core {
 
         private $measurer: core.IMeasurer;
         private $arranger: core.IArranger;
-        private $measureBinder: core.IMeasureBinder;
-        private $arrangeBinder: core.IArrangeBinder;
 
         constructor() {
             this.init();
@@ -57,8 +55,6 @@ namespace mirage.core {
             });
             this.$measurer = this.createMeasurer();
             this.$arranger = this.createArranger();
-            this.$measureBinder = NewMeasureBinder(this.state, this.tree, this.$measurer);
-            this.$arrangeBinder = NewArrangeBinder(this.state, this.tree, this.$arranger);
         }
 
         protected createInputs(): ILayoutNodeInputs {
@@ -305,7 +301,27 @@ namespace mirage.core {
         }
 
         doMeasure(): boolean {
-            return this.$measureBinder();
+            var parent = this.tree.parent;
+            var available = new Size();
+            Size.copyTo(this.state.lastAvailable, available);
+            if (!this.tree.parent && Size.isUndef(available))
+                available.width = available.height = Number.POSITIVE_INFINITY;
+
+            var success = false;
+            if (!Size.isUndef(available)) {
+                var oldDesired = new Size();
+                var newDesired = this.state.desiredSize;
+                Size.copyTo(newDesired, oldDesired);
+                success = this.$measurer(available);
+                if (Size.isEqual(oldDesired, newDesired))
+                    return success;
+            }
+
+            if (parent)
+                parent.invalidateMeasure();
+
+            this.state.flags &= ~LayoutFlags.measure;
+            return success;
         }
 
         measure(availableSize: ISize): boolean {
@@ -327,7 +343,15 @@ namespace mirage.core {
         }
 
         doArrange(): boolean {
-            return this.$arrangeBinder();
+            var last = this.state.layoutSlot;
+            if (last)
+                return this.$arranger(last);
+
+            var parent = this.tree.parent;
+            if (parent)
+                parent.invalidateArrange();
+
+            return false;
         }
 
         arrange(finalRect: IRect): boolean {

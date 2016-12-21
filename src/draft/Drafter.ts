@@ -11,7 +11,7 @@ namespace mirage.draft {
 
     export function NewDrafter(node: core.LayoutNode, rootSize: ISize): IDrafter {
         var measure = NewMeasureDrafter(node, rootSize);
-        var arrange = NewArrangeDrafter(node);
+        var arrange = NewArrangeDrafter(node, rootSize);
         var slot = NewSlotDrafter(node);
 
         /// Every pass at runDraft will exclusively run measure, arrange, or size

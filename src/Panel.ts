@@ -73,7 +73,6 @@ namespace mirage {
 
     export function NewPanelTree(): IPanelTree {
         var tree = <IPanelTree>core.DefaultLayoutTree();
-        tree.isLayoutContainer = true;
         tree.children = [];
         tree.walk = (reverse?: boolean): core.ILayoutTreeWalker => {
             if (!reverse) {
