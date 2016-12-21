@@ -20,7 +20,7 @@ namespace mirage.core {
 
     export interface ILayoutNodeState {
         flags: LayoutFlags;
-        previousAvailable: ISize;
+        lastAvailable: ISize;
         desiredSize: ISize;
         hiddenDesire: ISize;
         layoutSlot: IRect;
@@ -41,8 +41,6 @@ namespace mirage.core {
 
         private $measurer: core.IMeasurer;
         private $arranger: core.IArranger;
-        private $measureBinder: core.IMeasureBinder;
-        private $arrangeBinder: core.IArrangeBinder;
 
         constructor() {
             this.init();
@@ -57,8 +55,6 @@ namespace mirage.core {
             });
             this.$measurer = this.createMeasurer();
             this.$arranger = this.createArranger();
-            this.$measureBinder = NewMeasureBinder(this.state, this.tree, this.$measurer);
-            this.$arrangeBinder = NewArrangeBinder(this.state, this.tree, this.$arranger);
         }
 
         protected createInputs(): ILayoutNodeInputs {
@@ -81,12 +77,12 @@ namespace mirage.core {
         protected createState(): ILayoutNodeState {
             return {
                 flags: LayoutFlags.none,
-                previousAvailable: new Size(),
+                lastAvailable: new Size(NaN, NaN),
                 desiredSize: new Size(),
                 hiddenDesire: new Size(),
-                layoutSlot: new Rect(),
+                layoutSlot: new Rect(NaN, NaN, NaN, NaN),
                 arrangedSlot: new Rect(),
-                lastArrangedSlot: new Rect(),
+                lastArrangedSlot: new Rect(NaN, NaN, NaN, NaN),
             };
         }
 
@@ -261,16 +257,17 @@ namespace mirage.core {
             this.invalidateMeasure();
             if (this.tree.parent)
                 this.tree.parent.invalidateMeasure();
-            Rect.clear(this.state.layoutSlot);
+            Rect.undef(this.state.layoutSlot);
         }
 
         protected onAttached() {
             var state = this.state;
-            Size.undef(state.previousAvailable);
+            Size.undef(state.lastAvailable);
+            Rect.undef(state.layoutSlot);
             Size.clear(state.arrangedSlot);
             this.invalidateMeasure();
             this.invalidateArrange();
-            if ((state.flags & LayoutFlags.slotHint) > 0 || state.lastArrangedSlot !== undefined) {
+            if ((state.flags & LayoutFlags.slotHint) > 0 || !Rect.isUndef(state.lastArrangedSlot)) {
                 this.tree.propagateFlagUp(LayoutFlags.slotHint);
             }
         }
@@ -305,7 +302,27 @@ namespace mirage.core {
         }
 
         doMeasure(): boolean {
-            return this.$measureBinder();
+            var parent = this.tree.parent;
+            var available = new Size();
+            Size.copyTo(this.state.lastAvailable, available);
+            if (!parent && Size.isUndef(available))
+                available.width = available.height = Number.POSITIVE_INFINITY;
+
+            var success = false;
+            if (!Size.isUndef(available)) {
+                var oldDesired = new Size();
+                var newDesired = this.state.desiredSize;
+                Size.copyTo(newDesired, oldDesired);
+                success = this.$measurer(available);
+                if (Size.isEqual(oldDesired, newDesired))
+                    return success;
+            }
+
+            if (parent)
+                parent.invalidateMeasure();
+
+            this.state.flags &= ~LayoutFlags.measure;
+            return success;
         }
 
         measure(availableSize: ISize): boolean {
@@ -326,8 +343,27 @@ namespace mirage.core {
             this.tree.propagateFlagUp(LayoutFlags.arrangeHint);
         }
 
-        doArrange(): boolean {
-            return this.$arrangeBinder();
+        doArrange(rootSize: ISize): boolean {
+            var parent = this.tree.parent;
+            var final = new Rect();
+            if (!parent) {
+                // A root element will always use root size for arrange
+                Size.copyTo(rootSize, final);
+            } else {
+                // If we are starting an arrange from a non-root element,
+                //   our measure developed a desired size that *did not*
+                //   cause a further invalidation up the tree
+                // This means that our desired size *is* our final for arrange
+                Size.copyTo(this.state.desiredSize, final);
+            }
+
+            if (!Rect.isUndef(final))
+                return this.$arranger(final);
+
+            if (parent)
+                parent.invalidateArrange();
+
+            return false;
         }
 
         arrange(finalRect: IRect): boolean {
@@ -345,16 +381,12 @@ namespace mirage.core {
 
         slot(oldRect: IRect, newRect: IRect): boolean {
             var state = this.state;
-            if (state.lastArrangedSlot)
+            if (!Rect.isUndef(state.lastArrangedSlot))
                 Rect.copyTo(state.lastArrangedSlot, oldRect);
             Rect.copyTo(state.arrangedSlot, newRect);
-            state.lastArrangedSlot = undefined;
+            Rect.undef(state.lastArrangedSlot);
             // TODO: Set actualWidth, actualHeight
             return true;
-        }
-
-        onSlotChanged(oldRect: IRect, newRect: IRect) {
-            // Placeholder for sizing notifications
         }
     }
 

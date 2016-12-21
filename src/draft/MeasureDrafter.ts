@@ -13,13 +13,6 @@ namespace mirage.draft {
 
         return {
             prepare(): boolean {
-                var last = node.state.previousAvailable;
-                if (node.tree.isContainer && (Size.isUndef(last) || !Size.isEqual(last, rootSize))) {
-                    node.state.flags |= LayoutFlags.measure;
-                    Size.copyTo(rootSize, node.state.previousAvailable);
-                }
-
-                // Load up measure list
                 for (var walker = node.walkDeep(); walker.step();) {
                     var cur = walker.current;
                     if (!cur.inputs.visible) {

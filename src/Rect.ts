@@ -1,10 +1,4 @@
 namespace mirage {
-    export enum RectOverlap {
-        outside,
-        inside,
-        part,
-    }
-
     export interface IRect extends IPoint, ISize {
     }
 
@@ -23,14 +17,6 @@ namespace mirage {
 
         static clear(rect: IRect) {
             rect.x = rect.y = rect.width = rect.height = 0;
-        }
-
-        static getBottom(rect: IRect): number {
-            return rect.y + rect.height;
-        }
-
-        static getRight(rect: IRect): number {
-            return rect.x + rect.width;
         }
 
         static isEqual(rect1: IRect, rect2: IRect): boolean {
@@ -52,125 +38,18 @@ namespace mirage {
             dest.height = src.height;
         }
 
-        static roundOut(dest: IRect) {
-            var x = Math.floor(dest.x);
-            var y = Math.floor(dest.y);
-            dest.width = Math.ceil(dest.x + dest.width) - x;
-            dest.height = Math.ceil(dest.y + dest.height) - y;
-            dest.x = x;
-            dest.y = y;
+        static isUndef(rect: IRect): boolean {
+            return isNaN(rect.x)
+                && isNaN(rect.y)
+                && isNaN(rect.width)
+                && isNaN(rect.height);
         }
 
-        static roundIn(dest: IRect) {
-            var x = Math.ceil(dest.x);
-            var y = Math.ceil(dest.y);
-            dest.width = Math.floor(dest.x + dest.width) - Math.ceil(dest.x);
-            dest.height = Math.floor(dest.y + dest.height) - Math.ceil(dest.y);
-            dest.x = x;
-            dest.y = y;
-            return dest;
-        }
-
-        static intersection(dest: IRect, rect2: IRect) {
-            var x = Math.max(dest.x, rect2.x);
-            var y = Math.max(dest.y, rect2.y);
-            dest.width = Math.max(0, Math.min(dest.x + dest.width, rect2.x + rect2.width) - x);
-            dest.height = Math.max(0, Math.min(dest.y + dest.height, rect2.y + rect2.height) - y);
-            dest.x = x;
-            dest.y = y;
-        }
-
-        static union(dest: IRect, rect2: IRect) {
-            if (rect2.width <= 0 || rect2.height <= 0)
-                return;
-            if (dest.width <= 0 || dest.height <= 0) {
-                Rect.copyTo(rect2, dest);
-                return;
-            }
-
-            var x = Math.min(dest.x, rect2.x);
-            var y = Math.min(dest.y, rect2.y);
-            dest.width = Math.max(dest.x + dest.width, rect2.x + rect2.width) - x;
-            dest.height = Math.max(dest.y + dest.height, rect2.y + rect2.height) - y;
-            dest.x = x;
-            dest.y = y;
-        }
-
-        static isContainedIn(src: IRect, test: IRect) {
-            var sl = src.x;
-            var st = src.y;
-            var sr = src.x + src.width;
-            var sb = src.y + src.height;
-
-            var tl = test.x;
-            var tt = test.y;
-            var tr = test.x + test.width;
-            var tb = test.y + test.height;
-
-            if (sl < tl || st < tt || sl > tr || st > tb) //src top-left is outside test
-                return false;
-            if (sr < tl || sb < tt || sr > tr || sb > tb) //src bottom-right is outside test
-                return false;
-            return true;
-        }
-
-        static containsPoint(rect1: IRect, p: Point): boolean {
-            return rect1.x <= p.x
-                && rect1.y <= p.y
-                && (rect1.x + rect1.width) >= p.x
-                && (rect1.y + rect1.height) >= p.y;
-        }
-
-        static extendTo(dest: IRect, x: number, y: number) {
-            var rx = dest.x;
-            var ry = dest.y;
-            var rw = dest.width;
-            var rh = dest.height;
-
-            if (x < rx || x > (rx + rw))
-                rw = Math.max(Math.abs(x - rx), Math.abs(x - rx - rw));
-            if (y < ry || y > (ry + rh))
-                rh = Math.max(Math.abs(y - ry), Math.abs(y - ry - rh));
-
-            dest.x = Math.min(rx, x);
-            dest.y = Math.min(ry, y);
-            dest.width = rw;
-            dest.height = rh;
-        }
-
-        static grow(dest: IRect, left: number, top: number, right: number, bottom: number) {
-            dest.x -= left;
-            dest.y -= top;
-            dest.width += left + right;
-            dest.height += top + bottom;
-            if (dest.width < 0)
-                dest.width = 0;
-            if (dest.height < 0)
-                dest.height = 0;
-            return dest;
-        }
-
-        static shrink(dest: IRect, left: number, top: number, right: number, bottom: number) {
-            dest.x += left;
-            dest.y += top;
-            dest.width -= left + right;
-            dest.height -= top + bottom;
-            if (dest.width < 0)
-                dest.width = 0;
-            if (dest.height < 0)
-                dest.height = 0;
-        }
-
-        static rectIn(rect1: IRect, rect2: IRect) {
-            //TODO: Implement without creating Rect
-            var copy = new Rect();
-            Rect.copyTo(rect1, copy);
-            Rect.intersection(copy, rect2);
-            if (Rect.isEmpty(copy))
-                return RectOverlap.outside;
-            if (Rect.isEqual(copy, rect2))
-                return RectOverlap.inside;
-            return RectOverlap.part;
+        static undef(rect: IRect) {
+            rect.x = NaN;
+            rect.y = NaN;
+            rect.width = NaN;
+            rect.height = NaN;
         }
     }
 }

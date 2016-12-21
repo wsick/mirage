@@ -19,8 +19,6 @@ var mirage;
                 });
                 this.$measurer = this.createMeasurer();
                 this.$arranger = this.createArranger();
-                this.$measureBinder = core.NewMeasureBinder(this.state, this.tree, this.$measurer);
-                this.$arrangeBinder = core.NewArrangeBinder(this.state, this.tree, this.$arranger);
             };
             LayoutNode.prototype.createInputs = function () {
                 return {
@@ -41,12 +39,12 @@ var mirage;
             LayoutNode.prototype.createState = function () {
                 return {
                     flags: core.LayoutFlags.none,
-                    previousAvailable: new mirage.Size(),
+                    lastAvailable: new mirage.Size(NaN, NaN),
                     desiredSize: new mirage.Size(),
                     hiddenDesire: new mirage.Size(),
-                    layoutSlot: new mirage.Rect(),
+                    layoutSlot: new mirage.Rect(NaN, NaN, NaN, NaN),
                     arrangedSlot: new mirage.Rect(),
-                    lastArrangedSlot: new mirage.Rect(),
+                    lastArrangedSlot: new mirage.Rect(NaN, NaN, NaN, NaN),
                 };
             };
             LayoutNode.prototype.createTree = function () {
@@ -233,15 +231,16 @@ var mirage;
                 this.invalidateMeasure();
                 if (this.tree.parent)
                     this.tree.parent.invalidateMeasure();
-                mirage.Rect.clear(this.state.layoutSlot);
+                mirage.Rect.undef(this.state.layoutSlot);
             };
             LayoutNode.prototype.onAttached = function () {
                 var state = this.state;
-                mirage.Size.undef(state.previousAvailable);
+                mirage.Size.undef(state.lastAvailable);
+                mirage.Rect.undef(state.layoutSlot);
                 mirage.Size.clear(state.arrangedSlot);
                 this.invalidateMeasure();
                 this.invalidateArrange();
-                if ((state.flags & core.LayoutFlags.slotHint) > 0 || state.lastArrangedSlot !== undefined) {
+                if ((state.flags & core.LayoutFlags.slotHint) > 0 || !mirage.Rect.isUndef(state.lastArrangedSlot)) {
                     this.tree.propagateFlagUp(core.LayoutFlags.slotHint);
                 }
             };
@@ -269,7 +268,24 @@ var mirage;
                 this.tree.propagateFlagUp(core.LayoutFlags.measureHint);
             };
             LayoutNode.prototype.doMeasure = function () {
-                return this.$measureBinder();
+                var parent = this.tree.parent;
+                var available = new mirage.Size();
+                mirage.Size.copyTo(this.state.lastAvailable, available);
+                if (!parent && mirage.Size.isUndef(available))
+                    available.width = available.height = Number.POSITIVE_INFINITY;
+                var success = false;
+                if (!mirage.Size.isUndef(available)) {
+                    var oldDesired = new mirage.Size();
+                    var newDesired = this.state.desiredSize;
+                    mirage.Size.copyTo(newDesired, oldDesired);
+                    success = this.$measurer(available);
+                    if (mirage.Size.isEqual(oldDesired, newDesired))
+                        return success;
+                }
+                if (parent)
+                    parent.invalidateMeasure();
+                this.state.flags &= ~core.LayoutFlags.measure;
+                return success;
             };
             LayoutNode.prototype.measure = function (availableSize) {
                 return this.$measurer(availableSize);
@@ -286,8 +302,20 @@ var mirage;
                 this.state.flags |= core.LayoutFlags.arrange | core.LayoutFlags.arrangeHint;
                 this.tree.propagateFlagUp(core.LayoutFlags.arrangeHint);
             };
-            LayoutNode.prototype.doArrange = function () {
-                return this.$arrangeBinder();
+            LayoutNode.prototype.doArrange = function (rootSize) {
+                var parent = this.tree.parent;
+                var final = new mirage.Rect();
+                if (!parent) {
+                    mirage.Size.copyTo(rootSize, final);
+                }
+                else {
+                    mirage.Size.copyTo(this.state.desiredSize, final);
+                }
+                if (!mirage.Rect.isUndef(final))
+                    return this.$arranger(final);
+                if (parent)
+                    parent.invalidateArrange();
+                return false;
             };
             LayoutNode.prototype.arrange = function (finalRect) {
                 return this.$arranger(finalRect);
@@ -302,13 +330,11 @@ var mirage;
             };
             LayoutNode.prototype.slot = function (oldRect, newRect) {
                 var state = this.state;
-                if (state.lastArrangedSlot)
+                if (!mirage.Rect.isUndef(state.lastArrangedSlot))
                     mirage.Rect.copyTo(state.lastArrangedSlot, oldRect);
                 mirage.Rect.copyTo(state.arrangedSlot, newRect);
-                state.lastArrangedSlot = undefined;
+                mirage.Rect.undef(state.lastArrangedSlot);
                 return true;
-            };
-            LayoutNode.prototype.onSlotChanged = function (oldRect, newRect) {
             };
             return LayoutNode;
         })();
@@ -398,7 +424,6 @@ var mirage;
     mirage.Panel = Panel;
     function NewPanelTree() {
         var tree = mirage.core.DefaultLayoutTree();
-        tree.isLayoutContainer = true;
         tree.children = [];
         tree.walk = function (reverse) {
             if (!reverse) {
@@ -718,6 +743,31 @@ var mirage;
 })(mirage || (mirage = {}));
 var mirage;
 (function (mirage) {
+    var adapters;
+    (function (adapters) {
+        var registered = [];
+        function register(adapter) {
+            if (registered.indexOf(adapter) < 0) {
+                registered.push(adapter);
+            }
+        }
+        adapters.register = register;
+        function unregister(adapter) {
+            var index = registered.indexOf(adapter);
+            if (index > -1)
+                registered.splice(index, 1);
+        }
+        adapters.unregister = unregister;
+        function updateSlots(updates) {
+            for (var i = 0; i < registered.length; i++) {
+                registered[i].updateSlots(updates);
+            }
+        }
+        adapters.updateSlots = updateSlots;
+    })(adapters = mirage.adapters || (mirage.adapters = {}));
+})(mirage || (mirage = {}));
+var mirage;
+(function (mirage) {
     function NewRowDefinitions(defs) {
         var rowdefs = [];
         for (var i = 0, tokens = defs.split(" "); i < tokens.length; i++) {
@@ -803,12 +853,6 @@ var mirage;
 })(mirage || (mirage = {}));
 var mirage;
 (function (mirage) {
-    (function (RectOverlap) {
-        RectOverlap[RectOverlap["outside"] = 0] = "outside";
-        RectOverlap[RectOverlap["inside"] = 1] = "inside";
-        RectOverlap[RectOverlap["part"] = 2] = "part";
-    })(mirage.RectOverlap || (mirage.RectOverlap = {}));
-    var RectOverlap = mirage.RectOverlap;
     var Rect = (function () {
         function Rect(x, y, width, height) {
             this.x = x == null ? 0 : x;
@@ -818,12 +862,6 @@ var mirage;
         }
         Rect.clear = function (rect) {
             rect.x = rect.y = rect.width = rect.height = 0;
-        };
-        Rect.getBottom = function (rect) {
-            return rect.y + rect.height;
-        };
-        Rect.getRight = function (rect) {
-            return rect.x + rect.width;
         };
         Rect.isEqual = function (rect1, rect2) {
             return rect1.x === rect2.x
@@ -841,110 +879,17 @@ var mirage;
             dest.width = src.width;
             dest.height = src.height;
         };
-        Rect.roundOut = function (dest) {
-            var x = Math.floor(dest.x);
-            var y = Math.floor(dest.y);
-            dest.width = Math.ceil(dest.x + dest.width) - x;
-            dest.height = Math.ceil(dest.y + dest.height) - y;
-            dest.x = x;
-            dest.y = y;
+        Rect.isUndef = function (rect) {
+            return isNaN(rect.x)
+                && isNaN(rect.y)
+                && isNaN(rect.width)
+                && isNaN(rect.height);
         };
-        Rect.roundIn = function (dest) {
-            var x = Math.ceil(dest.x);
-            var y = Math.ceil(dest.y);
-            dest.width = Math.floor(dest.x + dest.width) - Math.ceil(dest.x);
-            dest.height = Math.floor(dest.y + dest.height) - Math.ceil(dest.y);
-            dest.x = x;
-            dest.y = y;
-            return dest;
-        };
-        Rect.intersection = function (dest, rect2) {
-            var x = Math.max(dest.x, rect2.x);
-            var y = Math.max(dest.y, rect2.y);
-            dest.width = Math.max(0, Math.min(dest.x + dest.width, rect2.x + rect2.width) - x);
-            dest.height = Math.max(0, Math.min(dest.y + dest.height, rect2.y + rect2.height) - y);
-            dest.x = x;
-            dest.y = y;
-        };
-        Rect.union = function (dest, rect2) {
-            if (rect2.width <= 0 || rect2.height <= 0)
-                return;
-            if (dest.width <= 0 || dest.height <= 0) {
-                Rect.copyTo(rect2, dest);
-                return;
-            }
-            var x = Math.min(dest.x, rect2.x);
-            var y = Math.min(dest.y, rect2.y);
-            dest.width = Math.max(dest.x + dest.width, rect2.x + rect2.width) - x;
-            dest.height = Math.max(dest.y + dest.height, rect2.y + rect2.height) - y;
-            dest.x = x;
-            dest.y = y;
-        };
-        Rect.isContainedIn = function (src, test) {
-            var sl = src.x;
-            var st = src.y;
-            var sr = src.x + src.width;
-            var sb = src.y + src.height;
-            var tl = test.x;
-            var tt = test.y;
-            var tr = test.x + test.width;
-            var tb = test.y + test.height;
-            if (sl < tl || st < tt || sl > tr || st > tb)
-                return false;
-            if (sr < tl || sb < tt || sr > tr || sb > tb)
-                return false;
-            return true;
-        };
-        Rect.containsPoint = function (rect1, p) {
-            return rect1.x <= p.x
-                && rect1.y <= p.y
-                && (rect1.x + rect1.width) >= p.x
-                && (rect1.y + rect1.height) >= p.y;
-        };
-        Rect.extendTo = function (dest, x, y) {
-            var rx = dest.x;
-            var ry = dest.y;
-            var rw = dest.width;
-            var rh = dest.height;
-            if (x < rx || x > (rx + rw))
-                rw = Math.max(Math.abs(x - rx), Math.abs(x - rx - rw));
-            if (y < ry || y > (ry + rh))
-                rh = Math.max(Math.abs(y - ry), Math.abs(y - ry - rh));
-            dest.x = Math.min(rx, x);
-            dest.y = Math.min(ry, y);
-            dest.width = rw;
-            dest.height = rh;
-        };
-        Rect.grow = function (dest, left, top, right, bottom) {
-            dest.x -= left;
-            dest.y -= top;
-            dest.width += left + right;
-            dest.height += top + bottom;
-            if (dest.width < 0)
-                dest.width = 0;
-            if (dest.height < 0)
-                dest.height = 0;
-            return dest;
-        };
-        Rect.shrink = function (dest, left, top, right, bottom) {
-            dest.x += left;
-            dest.y += top;
-            dest.width -= left + right;
-            dest.height -= top + bottom;
-            if (dest.width < 0)
-                dest.width = 0;
-            if (dest.height < 0)
-                dest.height = 0;
-        };
-        Rect.rectIn = function (rect1, rect2) {
-            var copy = new Rect();
-            Rect.copyTo(rect1, copy);
-            Rect.intersection(copy, rect2);
-            if (Rect.isEmpty(copy))
-                return RectOverlap.outside;
-            if (Rect.isEqual(copy, rect2))
-                return RectOverlap.inside;
-            return RectOverlap.part;
+        Rect.undef = function (rect) {
+            rect.x = NaN;
+            rect.y = NaN;
+            rect.width = NaN;
+            rect.height = NaN;
         };
         return Rect;
     })();
@@ -981,12 +926,13 @@ var mirage;
             size.width = Math.round(size.width);
             size.height = Math.round(size.height);
         };
-        Size.isUndef = function (size) {
-            return isNaN(size.width) && isNaN(size.height);
-        };
         Size.clear = function (size) {
             size.width = 0;
             size.height = 0;
+        };
+        Size.isUndef = function (size) {
+            return isNaN(size.width)
+                && isNaN(size.height);
         };
         Size.undef = function (size) {
             size.width = NaN;
@@ -1205,51 +1151,6 @@ var mirage;
 (function (mirage) {
     var core;
     (function (core) {
-        function NewArrangeBinder(state, tree, arranger) {
-            return function () {
-                var last = state.layoutSlot || undefined;
-                if (!tree.parent)
-                    last = new mirage.Rect();
-                if (last) {
-                    return arranger(last);
-                }
-                else if (tree.parent) {
-                    tree.parent.invalidateArrange();
-                }
-                return false;
-            };
-        }
-        core.NewArrangeBinder = NewArrangeBinder;
-        function NewSpecialArrangeBinder(node, arranger) {
-            var state = node.state;
-            var tree = node.tree;
-            function expandViewport(viewport) {
-            }
-            function shiftViewport(viewport) {
-            }
-            return function () {
-                var last = state.layoutSlot || undefined;
-                if (!tree.parent) {
-                    last = new mirage.Rect();
-                    expandViewport(last);
-                    shiftViewport(last);
-                }
-                if (last) {
-                    return arranger(last);
-                }
-                else if (tree.parent) {
-                    tree.parent.invalidateArrange();
-                }
-                return false;
-            };
-        }
-        core.NewSpecialArrangeBinder = NewSpecialArrangeBinder;
-    })(core = mirage.core || (mirage.core = {}));
-})(mirage || (mirage = {}));
-var mirage;
-(function (mirage) {
-    var core;
-    (function (core) {
         function NewArranger(inputs, state, tree, override) {
             function calcOffer(childRect) {
                 var stretched = new mirage.Size(childRect.width, childRect.height);
@@ -1358,8 +1259,6 @@ var mirage;
     (function (core) {
         function DefaultLayoutTree() {
             return {
-                isContainer: true,
-                isLayoutContainer: false,
                 parent: null,
                 applyTemplate: function () {
                     return true;
@@ -1402,32 +1301,6 @@ var mirage;
 (function (mirage) {
     var core;
     (function (core) {
-        function NewMeasureBinder(state, tree, measurer) {
-            return function () {
-                var last = state.previousAvailable;
-                if (mirage.Size.isUndef(last) && !tree.parent && tree.isLayoutContainer)
-                    last.width = last.height = Number.POSITIVE_INFINITY;
-                var success = false;
-                if (!mirage.Size.isUndef(last)) {
-                    var old = new mirage.Size();
-                    mirage.Size.copyTo(state.desiredSize, old);
-                    success = measurer(last);
-                    if (mirage.Size.isEqual(old, state.desiredSize))
-                        return success;
-                }
-                if (tree.parent)
-                    tree.parent.invalidateMeasure();
-                state.flags &= ~core.LayoutFlags.measure;
-                return success;
-            };
-        }
-        core.NewMeasureBinder = NewMeasureBinder;
-    })(core = mirage.core || (mirage.core = {}));
-})(mirage || (mirage = {}));
-var mirage;
-(function (mirage) {
-    var core;
-    (function (core) {
         function NewMeasurer(inputs, state, tree, override) {
             return function (availableSize) {
                 if (isNaN(availableSize.width) || isNaN(availableSize.height)) {
@@ -1437,14 +1310,15 @@ var mirage;
                 if (inputs.visible !== true) {
                     return false;
                 }
-                tree.applyTemplate();
                 if ((state.flags & core.LayoutFlags.measure) <= 0) {
                     return false;
                 }
-                var pc = state.previousAvailable;
-                if (!mirage.Size.isUndef(pc) && pc.width === availableSize.width && pc.height === availableSize.height) {
+                var last = state.lastAvailable;
+                if (!mirage.Size.isUndef(last) && last.width === availableSize.width && last.height === availableSize.height) {
                     return false;
                 }
+                mirage.Size.copyTo(availableSize, last);
+                tree.applyTemplate();
                 state.flags |= (core.LayoutFlags.arrange | core.LayoutFlags.arrangeHint);
                 var framedSize = new mirage.Size(availableSize.width, availableSize.height);
                 mirage.Thickness.shrinkSize(inputs.margin, framedSize);
@@ -1495,7 +1369,7 @@ var mirage;
     var draft;
     (function (draft) {
         var LayoutFlags = mirage.core.LayoutFlags;
-        function NewArrangeDrafter(node) {
+        function NewArrangeDrafter(node, rootSize) {
             var arrangeList = [];
             return {
                 flush: function () {
@@ -1525,7 +1399,7 @@ var mirage;
                 draft: function () {
                     var cur;
                     while ((cur = arrangeList.shift()) != null) {
-                        cur.doArrange();
+                        cur.doArrange(rootSize);
                     }
                     return true;
                 },
@@ -1543,7 +1417,7 @@ var mirage;
         var MAX_COUNT = 255;
         function NewDrafter(node, rootSize) {
             var measure = draft.NewMeasureDrafter(node, rootSize);
-            var arrange = draft.NewArrangeDrafter(node);
+            var arrange = draft.NewArrangeDrafter(node, rootSize);
             var slot = draft.NewSlotDrafter(node);
             function runDraft() {
                 if (!node.inputs.visible)
@@ -1594,11 +1468,6 @@ var mirage;
             var measureList = [];
             return {
                 prepare: function () {
-                    var last = node.state.previousAvailable;
-                    if (node.tree.isContainer && (mirage.Size.isUndef(last) || !mirage.Size.isEqual(last, rootSize))) {
-                        node.state.flags |= LayoutFlags.measure;
-                        mirage.Size.copyTo(rootSize, node.state.previousAvailable);
-                    }
                     for (var walker = node.walkDeep(); walker.step();) {
                         var cur = walker.current;
                         if (!cur.inputs.visible) {
@@ -1656,7 +1525,7 @@ var mirage;
                             continue;
                         }
                         cur.state.flags &= ~LayoutFlags.slotHint;
-                        if (cur.state.lastArrangedSlot !== undefined) {
+                        if (!mirage.Rect.isUndef(cur.state.lastArrangedSlot)) {
                             slotList.push(cur);
                         }
                     }
@@ -1681,10 +1550,7 @@ var mirage;
                     return slotUpdates.length > 0;
                 },
                 notify: function () {
-                    var update;
-                    while ((update = slotUpdates.pop()) != null) {
-                        update.node.onSlotChanged(update.oldRect, update.newRect);
-                    }
+                    mirage.adapters.updateSlots(slotUpdates);
                     return true;
                 }
             };

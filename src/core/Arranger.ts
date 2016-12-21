@@ -1,28 +1,4 @@
 namespace mirage.core {
-    export interface IArrangeInputs {
-        visible: boolean;
-        margin: Thickness;
-        width: number;
-        height: number;
-        minWidth: number;
-        minHeight: number;
-        maxWidth: number;
-        maxHeight: number;
-        useLayoutRounding: boolean;
-        horizontalAlignment: HorizontalAlignment;
-        verticalAlignment: VerticalAlignment;
-    }
-
-    export interface IArrangeState {
-        flags: LayoutFlags;
-        previousAvailable: ISize;
-        desiredSize: ISize;
-        hiddenDesire: ISize;
-        layoutSlot: IRect;
-        arrangedSlot: IRect;
-        lastArrangedSlot: IRect;
-    }
-
     export interface IArranger {
         (finalRect: Rect): boolean;
     }
@@ -30,7 +6,7 @@ namespace mirage.core {
         (finalSize: ISize): ISize;
     }
 
-    export function NewArranger(inputs: IArrangeInputs, state: IArrangeState, tree: ILayoutTree, override: IArrangeOverride): IArranger {
+    export function NewArranger(inputs: ILayoutNodeInputs, state: ILayoutNodeState, tree: ILayoutTree, override: IArrangeOverride): IArranger {
         function calcOffer(childRect: IRect): ISize {
             var stretched = new Size(childRect.width, childRect.height);
             coerceSize(stretched, inputs);

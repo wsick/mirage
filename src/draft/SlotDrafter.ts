@@ -10,7 +10,7 @@ namespace mirage.draft {
         notify(): boolean;
     }
 
-    interface ISlotUpdates {
+    export interface ISlotUpdate {
         node: core.LayoutNode;
         oldRect: IRect;
         newRect: IRect;
@@ -18,7 +18,7 @@ namespace mirage.draft {
 
     export function NewSlotDrafter(node: core.LayoutNode): ISlotDrafter {
         var slotList: core.LayoutNode[] = [];
-        var slotUpdates: ISlotUpdates[] = [];
+        var slotUpdates: ISlotUpdate[] = [];
 
         return {
             flush() {
@@ -41,7 +41,7 @@ namespace mirage.draft {
                     }
 
                     cur.state.flags &= ~LayoutFlags.slotHint;
-                    if (cur.state.lastArrangedSlot !== undefined) {
+                    if (!Rect.isUndef(cur.state.lastArrangedSlot)) {
                         slotList.push(cur);
                     }
                 }
@@ -66,10 +66,7 @@ namespace mirage.draft {
                 return slotUpdates.length > 0;
             },
             notify(): boolean {
-                var update: ISlotUpdates;
-                while ((update = slotUpdates.pop()) != null) {
-                    update.node.onSlotChanged(update.oldRect, update.newRect);
-                }
+                adapters.updateSlots(slotUpdates);
                 return true;
             }
         };
