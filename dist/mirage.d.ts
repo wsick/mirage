@@ -356,7 +356,7 @@ declare namespace mirage.draft {
         prepare(): boolean;
         draft(): boolean;
     }
-    function NewMeasureDrafter(node: core.LayoutNode, rootSize: ISize): IMeasureDrafter;
+    function NewMeasureDrafter(node: core.LayoutNode): IMeasureDrafter;
 }
 declare namespace mirage.draft {
     interface ISlotDrafter {

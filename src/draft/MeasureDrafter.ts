@@ -8,7 +8,7 @@ namespace mirage.draft {
         draft(): boolean;
     }
 
-    export function NewMeasureDrafter(node: core.LayoutNode, rootSize: ISize): IMeasureDrafter {
+    export function NewMeasureDrafter(node: core.LayoutNode): IMeasureDrafter {
         var measureList: core.LayoutNode[] = [];
 
         return {

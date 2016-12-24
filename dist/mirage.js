@@ -1340,7 +1340,7 @@ var mirage;
         var LayoutFlags = mirage.core.LayoutFlags;
         var MAX_COUNT = 255;
         function NewDrafter(node, rootSize) {
-            var measure = draft.NewMeasureDrafter(node, rootSize);
+            var measure = draft.NewMeasureDrafter(node);
             var arrange = draft.NewArrangeDrafter(node, rootSize);
             var slot = draft.NewSlotDrafter(node);
             function runDraft() {
@@ -1368,7 +1368,8 @@ var mirage;
                 if ((node.state.flags & LayoutFlags.hints) === 0)
                     return false;
                 var updated = false;
-                for (var count = 0; count < MAX_COUNT; count++) {
+                var count = 0;
+                for (; count < MAX_COUNT; count++) {
                     if (!runDraft())
                         break;
                     updated = true;
@@ -1388,7 +1389,7 @@ var mirage;
     var draft;
     (function (draft) {
         var LayoutFlags = mirage.core.LayoutFlags;
-        function NewMeasureDrafter(node, rootSize) {
+        function NewMeasureDrafter(node) {
             var measureList = [];
             return {
                 prepare: function () {

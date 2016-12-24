@@ -10,7 +10,7 @@ namespace mirage.draft {
     }
 
     export function NewDrafter(node: core.LayoutNode, rootSize: ISize): IDrafter {
-        var measure = NewMeasureDrafter(node, rootSize);
+        var measure = NewMeasureDrafter(node);
         var arrange = NewArrangeDrafter(node, rootSize);
         var slot = NewSlotDrafter(node);
 
@@ -45,7 +45,8 @@ namespace mirage.draft {
             if ((node.state.flags & LayoutFlags.hints) === 0)
                 return false;
             var updated = false;
-            for (var count = 0; count < MAX_COUNT; count++) {
+            var count = 0;
+            for (; count < MAX_COUNT; count++) {
                 if (!runDraft())
                     break;
                 updated = true;
