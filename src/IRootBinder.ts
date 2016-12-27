@@ -4,10 +4,10 @@ namespace mirage {
         draft(rootSize: ISize): boolean;
     }
 
-    export interface IRenderBinder extends draft.IDraftUpdater {
+    export interface IRenderUpdater extends draft.IDraftUpdater {
     }
 
-    export function NewRootBinder(root: core.LayoutNode, updater: IRenderBinder): IRootBinder {
+    export function NewRootBinder(root: core.LayoutNode, updater: IRenderUpdater): IRootBinder {
         return {
             root: root,
             draft: draft.NewDrafter(root, updater),

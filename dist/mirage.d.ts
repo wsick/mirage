@@ -191,9 +191,9 @@ declare namespace mirage {
         root: core.LayoutNode;
         draft(rootSize: ISize): boolean;
     }
-    interface IRenderBinder extends draft.IDraftUpdater {
+    interface IRenderUpdater extends draft.IDraftUpdater {
     }
-    function NewRootBinder(root: core.LayoutNode, updater: IRenderBinder): IRootBinder;
+    function NewRootBinder(root: core.LayoutNode, updater: IRenderUpdater): IRootBinder;
 }
 declare namespace mirage {
     interface IRowDefinition {

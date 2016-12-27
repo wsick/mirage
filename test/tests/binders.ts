@@ -12,7 +12,7 @@ namespace mirage.tests {
         canvas.appendChild(child1);
 
         var passes: mirage.draft.ISlotUpdate[][] = [];
-        var updater: mirage.IRenderBinder = {
+        var updater: mirage.IRenderUpdater = {
             updateSlots(updates: mirage.draft.ISlotUpdate[]) {
                 passes.push(updates);
             },
