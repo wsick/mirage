@@ -2,9 +2,8 @@ var fs = require('fs'),
     meta = {
         name: 'mirage',
         buildfiles: [
-            'typings/**/*.d.ts',
-            'lib/perfex/dist/perfex.d.ts',
-            'src/_Version.ts',
+            'typings/*.d.ts',
+            'src/_version.ts',
             'src/*.ts',
             'src/**/*.ts'
         ],
@@ -29,7 +28,7 @@ meta.scaffolds = [
         src: [
             'typings/*.d.ts',
             'stress/**/*.ts',
-            '!stress/lib/**/*.ts',
+            //'!stress/lib/**/*.ts',
             `dist/${meta.name}.d.ts`
         ]
     }

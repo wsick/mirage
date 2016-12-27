@@ -23,6 +23,8 @@ module.exports = function (meta) {
     function createSymlinkTask(scaffold) {
         gulp.task(`symlink-${scaffold.name}-libs`, () => {
             var libs = glob.sync("lib/*", !scaffold.ignore ? undefined : {ignore: scaffold.ignore});
+            if (!libs || libs.length < 1)
+                return;
             var dest = path.resolve(path.join(scaffold.name, 'lib'));
             return vfs.src(libs).pipe(vfs.symlink(dest));
         });
