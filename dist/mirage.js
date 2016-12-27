@@ -734,6 +734,16 @@ var mirage;
 })(mirage || (mirage = {}));
 var mirage;
 (function (mirage) {
+    function NewRootBinder(root, updater) {
+        return {
+            root: root,
+            draft: mirage.draft.NewDrafter(root, updater),
+        };
+    }
+    mirage.NewRootBinder = NewRootBinder;
+})(mirage || (mirage = {}));
+var mirage;
+(function (mirage) {
     function NewRowDefinitions(defs) {
         var rowdefs = [];
         for (var i = 0, tokens = defs.split(" "); i < tokens.length; i++) {
@@ -1293,7 +1303,7 @@ var mirage;
     var draft;
     (function (draft) {
         var LayoutFlags = mirage.core.LayoutFlags;
-        function NewArrangeDrafter(node, rootSize) {
+        function NewArrangeDrafter(node) {
             var arrangeList = [];
             return {
                 flush: function () {
@@ -1320,7 +1330,7 @@ var mirage;
                     }
                     return arrangeList.length > 0;
                 },
-                draft: function () {
+                draft: function (rootSize) {
                     var cur;
                     while ((cur = arrangeList.shift()) != null) {
                         cur.doArrange(rootSize);
@@ -1339,11 +1349,11 @@ var mirage;
     (function (draft) {
         var LayoutFlags = mirage.core.LayoutFlags;
         var MAX_COUNT = 255;
-        function NewDrafter(node, rootSize) {
+        function NewDrafter(node, updater) {
             var measure = draft.NewMeasureDrafter(node);
-            var arrange = draft.NewArrangeDrafter(node, rootSize);
+            var arrange = draft.NewArrangeDrafter(node);
             var slot = draft.NewSlotDrafter(node);
-            function runDraft() {
+            function runDraft(rootSize) {
                 if (!node.inputs.visible)
                     return false;
                 arrange.flush();
@@ -1355,22 +1365,22 @@ var mirage;
                 }
                 if ((flags & LayoutFlags.arrangeHint) > 0) {
                     return arrange.prepare()
-                        && arrange.draft();
+                        && arrange.draft(rootSize);
                 }
                 if ((flags & LayoutFlags.slotHint) > 0) {
                     return slot.prepare()
                         && slot.draft()
-                        && slot.notify();
+                        && slot.notify(updater);
                 }
                 return false;
             }
-            return function () {
+            return function (rootSize) {
                 if ((node.state.flags & LayoutFlags.hints) === 0)
                     return false;
                 var updated = false;
                 var count = 0;
                 for (; count < MAX_COUNT; count++) {
-                    if (!runDraft())
+                    if (!runDraft(rootSize))
                         break;
                     updated = true;
                 }
@@ -1474,8 +1484,8 @@ var mirage;
                     }
                     return slotUpdates.length > 0;
                 },
-                notify: function () {
-                    mirage.adapters.updateSlots(slotUpdates);
+                notify: function (updater) {
+                    updater.updateSlots(slotUpdates);
                     return true;
                 }
             };

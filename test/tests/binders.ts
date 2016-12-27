@@ -1,5 +1,5 @@
 namespace mirage.tests {
-    QUnit.module("adapters");
+    QUnit.module("binders");
 
     QUnit.test("updateSlots", () => {
         var canvas = new Canvas();
@@ -12,18 +12,14 @@ namespace mirage.tests {
         canvas.appendChild(child1);
 
         var passes: mirage.draft.ISlotUpdate[][] = [];
-        var adapter: mirage.adapters.IRenderAdapter = {
+        var updater: mirage.IRenderUpdater = {
             updateSlots(updates: mirage.draft.ISlotUpdate[]) {
                 passes.push(updates);
             },
         };
 
-        mirage.adapters.register(adapter);
-        try {
-            ok(mirage.draft.NewDrafter(canvas, new Size(600, 600))(), "draft updated");
-        } finally {
-            mirage.adapters.unregister(adapter);
-        }
+        var rootBinder = NewRootBinder(canvas, updater);
+        ok(rootBinder.draft(new Size(600, 600)), "draft updated");
 
         strictEqual(passes.length, 1, "1 slot pass");
         var firstPass = passes[0];

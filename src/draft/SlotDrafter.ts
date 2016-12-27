@@ -7,7 +7,7 @@ namespace mirage.draft {
         flush();
         prepare(): boolean;
         draft(): boolean;
-        notify(): boolean;
+        notify(updater: IDraftUpdater): boolean;
     }
 
     export interface ISlotUpdate {
@@ -65,8 +65,8 @@ namespace mirage.draft {
                 }
                 return slotUpdates.length > 0;
             },
-            notify(): boolean {
-                adapters.updateSlots(slotUpdates);
+            notify(updater: IDraftUpdater): boolean {
+                updater.updateSlots(slotUpdates);
                 return true;
             }
         };

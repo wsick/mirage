@@ -6,10 +6,10 @@ namespace mirage.draft {
     export interface IArrangeDrafter {
         flush();
         prepare(): boolean;
-        draft(): boolean;
+        draft(rootSize: ISize): boolean;
     }
 
-    export function NewArrangeDrafter(node: core.LayoutNode, rootSize: ISize): IArrangeDrafter {
+    export function NewArrangeDrafter(node: core.LayoutNode): IArrangeDrafter {
         var arrangeList: core.LayoutNode[] = [];
 
         return {
@@ -39,7 +39,7 @@ namespace mirage.draft {
                 }
                 return arrangeList.length > 0;
             },
-            draft(): boolean {
+            draft(rootSize: ISize): boolean {
                 var cur: core.LayoutNode;
                 while ((cur = arrangeList.shift()) != null) {
                     cur.doArrange(rootSize);
