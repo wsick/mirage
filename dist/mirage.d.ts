@@ -187,6 +187,15 @@ declare namespace mirage.adapters {
     function updateSlots(updates: draft.ISlotUpdate[]): void;
 }
 declare namespace mirage {
+    interface IRootBinder {
+        root: core.LayoutNode;
+        draft(rootSize: ISize): boolean;
+    }
+    interface IRenderBinder extends draft.IDraftUpdater {
+    }
+    function NewRootBinder(root: core.LayoutNode, updater: IRenderBinder): IRootBinder;
+}
+declare namespace mirage {
     interface IRowDefinition {
         height: IGridLength;
         minHeight: number;
@@ -341,15 +350,18 @@ declare namespace mirage.draft {
     interface IArrangeDrafter {
         flush(): any;
         prepare(): boolean;
-        draft(): boolean;
+        draft(rootSize: ISize): boolean;
     }
-    function NewArrangeDrafter(node: core.LayoutNode, rootSize: ISize): IArrangeDrafter;
+    function NewArrangeDrafter(node: core.LayoutNode): IArrangeDrafter;
 }
 declare namespace mirage.draft {
     interface IDrafter {
-        (): boolean;
+        (rootSize: ISize): boolean;
     }
-    function NewDrafter(node: core.LayoutNode, rootSize: ISize): IDrafter;
+    interface IDraftUpdater {
+        updateSlots(updates: draft.ISlotUpdate[]): any;
+    }
+    function NewDrafter(node: core.LayoutNode, updater: IDraftUpdater): IDrafter;
 }
 declare namespace mirage.draft {
     interface IMeasureDrafter {
@@ -363,7 +375,7 @@ declare namespace mirage.draft {
         flush(): any;
         prepare(): boolean;
         draft(): boolean;
-        notify(): boolean;
+        notify(updater: IDraftUpdater): boolean;
     }
     interface ISlotUpdate {
         node: core.LayoutNode;
