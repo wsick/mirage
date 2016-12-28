@@ -6,21 +6,21 @@ namespace mirage.draft {
     var MAX_COUNT = 255;
 
     export interface IDrafter {
-        (rootSize: ISize): boolean;
+        (updater: IDraftUpdater, rootSize: ISize): boolean;
     }
 
     export interface IDraftUpdater {
         updateSlots(updates: draft.ISlotUpdate[]);
     }
 
-    export function NewDrafter(node: core.LayoutNode, updater: IDraftUpdater): IDrafter {
+    export function NewDrafter(node: core.LayoutNode): IDrafter {
         var measure = NewMeasureDrafter(node);
         var arrange = NewArrangeDrafter(node);
         var slot = NewSlotDrafter(node);
 
         /// Every pass at runDraft will exclusively run measure, arrange, or size
         /// true should be returned if any updates were made
-        function runDraft(rootSize: ISize): boolean {
+        function runDraft(updater: IDraftUpdater, rootSize: ISize): boolean {
             if (!node.inputs.visible)
                 return false;
 
@@ -45,13 +45,13 @@ namespace mirage.draft {
             return false;
         }
 
-        return function (rootSize: ISize): boolean {
+        return function (updater: IDraftUpdater, rootSize: ISize): boolean {
             if ((node.state.flags & LayoutFlags.hints) === 0)
                 return false;
             var updated = false;
             var count = 0;
             for (; count < MAX_COUNT; count++) {
-                if (!runDraft(rootSize))
+                if (!runDraft(updater, rootSize))
                     break;
                 updated = true;
             }

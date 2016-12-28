@@ -12,14 +12,14 @@ namespace mirage.tests {
         canvas.appendChild(child1);
 
         var passes: mirage.draft.ISlotUpdate[][] = [];
-        var updater: mirage.IRenderUpdater = {
+        var binder: mirage.draft.IDraftUpdater = {
             updateSlots(updates: mirage.draft.ISlotUpdate[]) {
                 passes.push(updates);
             },
         };
 
-        var rootBinder = NewRootBinder(canvas, updater);
-        ok(rootBinder.draft(new Size(600, 600)), "draft updated");
+        var draft = mirage.draft.NewDrafter(canvas);
+        ok(draft(binder, new Size(600, 600)), "draft updated");
 
         strictEqual(passes.length, 1, "1 slot pass");
         var firstPass = passes[0];
