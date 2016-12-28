@@ -1,4 +1,5 @@
 /// <reference path="Panel" />
+/// <reference path="typeLookup" />
 
 namespace mirage {
     export class Canvas extends Panel {
@@ -41,4 +42,5 @@ namespace mirage {
             return arrangeSize;
         }
     }
+    registerNodeType("canvas", Canvas);
 }

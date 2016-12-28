@@ -1,3 +1,5 @@
+/// <reference path="typeLookup" />
+
 namespace mirage {
     export interface IStackPanelInputs extends core.ILayoutNodeInputs {
         orientation: Orientation;
@@ -128,4 +130,5 @@ namespace mirage {
             return arranged;
         }
     }
+    registerNodeType("stack-panel", StackPanel);
 }

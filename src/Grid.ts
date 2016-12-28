@@ -1,4 +1,5 @@
 /// <reference path="Panel" />
+/// <reference path="typeLookup" />
 
 namespace mirage {
     export interface IGridInputs extends core.ILayoutNodeInputs {
@@ -98,6 +99,7 @@ namespace mirage {
             return this.$arrangeOverride(arrangeSize);
         }
     }
+    registerNodeType("grid", Grid);
 
     function invalidateCell(node: core.LayoutNode) {
         var parent = node.tree.parent;
