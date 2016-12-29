@@ -1,4 +1,5 @@
 /// <reference path="core/LayoutNode" />
+/// <reference path="typeLookup" />
 
 namespace mirage {
     export class Panel extends core.LayoutNode {
@@ -66,6 +67,7 @@ namespace mirage {
             return this.tree.children[index];
         }
     }
+    registerNodeType("panel", Panel);
 
     export interface IPanelTree extends core.ILayoutTree {
         children: core.LayoutNode[];
