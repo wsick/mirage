@@ -75,6 +75,13 @@ declare namespace mirage.core {
     }
 }
 declare namespace mirage {
+    function createNodeByType(type: string): core.LayoutNode;
+    interface ITypeNodeCreator {
+        new (): core.LayoutNode;
+    }
+    function registerNodeType(type: string, creator: ITypeNodeCreator): void;
+}
+declare namespace mirage {
     class Panel extends core.LayoutNode {
         tree: IPanelTree;
         protected createTree(): core.ILayoutTree;
@@ -185,15 +192,6 @@ declare namespace mirage.adapters {
     function register(adapter: IRenderAdapter): void;
     function unregister(adapter: IRenderAdapter): void;
     function updateSlots(updates: draft.ISlotUpdate[]): void;
-}
-declare namespace mirage {
-    interface IRootBinder {
-        root: core.LayoutNode;
-        draft(rootSize: ISize): boolean;
-    }
-    interface IRenderUpdater extends draft.IDraftUpdater {
-    }
-    function NewRootBinder(root: core.LayoutNode, updater: IRenderUpdater): IRootBinder;
 }
 declare namespace mirage {
     interface IRowDefinition {
@@ -356,12 +354,12 @@ declare namespace mirage.draft {
 }
 declare namespace mirage.draft {
     interface IDrafter {
-        (rootSize: ISize): boolean;
+        (updater: IDraftUpdater, rootSize: ISize): boolean;
     }
     interface IDraftUpdater {
         updateSlots(updates: draft.ISlotUpdate[]): any;
     }
-    function NewDrafter(node: core.LayoutNode, updater: IDraftUpdater): IDrafter;
+    function NewDrafter(node: core.LayoutNode): IDrafter;
 }
 declare namespace mirage.draft {
     interface IMeasureDrafter {

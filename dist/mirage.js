@@ -348,7 +348,26 @@ var mirage;
         }
     })(core = mirage.core || (mirage.core = {}));
 })(mirage || (mirage = {}));
+var mirage;
+(function (mirage) {
+    var typeCreators = {};
+    function createNodeByType(type) {
+        var creator = typeCreators[type];
+        if (!creator)
+            return new mirage.core.LayoutNode();
+        return new creator();
+    }
+    mirage.createNodeByType = createNodeByType;
+    function registerNodeType(type, creator) {
+        if (typeCreators[type]) {
+            console.warn("[mirage] Overriding type registration for " + type);
+        }
+        typeCreators[type] = creator;
+    }
+    mirage.registerNodeType = registerNodeType;
+})(mirage || (mirage = {}));
 /// <reference path="core/LayoutNode" />
+/// <reference path="typeLookup" />
 var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
@@ -422,6 +441,7 @@ var mirage;
         return Panel;
     })(mirage.core.LayoutNode);
     mirage.Panel = Panel;
+    mirage.registerNodeType("panel", Panel);
     function NewPanelTree() {
         var tree = mirage.core.DefaultLayoutTree();
         tree.children = [];
@@ -462,6 +482,7 @@ var mirage;
     mirage.NewPanelTree = NewPanelTree;
 })(mirage || (mirage = {}));
 /// <reference path="Panel" />
+/// <reference path="typeLookup" />
 var mirage;
 (function (mirage) {
     var Canvas = (function (_super) {
@@ -504,6 +525,7 @@ var mirage;
         return Canvas;
     })(mirage.Panel);
     mirage.Canvas = Canvas;
+    mirage.registerNodeType("canvas", Canvas);
 })(mirage || (mirage = {}));
 var mirage;
 (function (mirage) {
@@ -528,6 +550,7 @@ var mirage;
     var Orientation = mirage.Orientation;
 })(mirage || (mirage = {}));
 /// <reference path="Panel" />
+/// <reference path="typeLookup" />
 var mirage;
 (function (mirage) {
     var Grid = (function (_super) {
@@ -610,6 +633,7 @@ var mirage;
         return Grid;
     })(mirage.Panel);
     mirage.Grid = Grid;
+    mirage.registerNodeType("grid", Grid);
     function invalidateCell(node) {
         var parent = node.tree.parent;
         if (parent instanceof Grid)
@@ -731,16 +755,6 @@ var mirage;
         }
         adapters.updateSlots = updateSlots;
     })(adapters = mirage.adapters || (mirage.adapters = {}));
-})(mirage || (mirage = {}));
-var mirage;
-(function (mirage) {
-    function NewRootBinder(root, updater) {
-        return {
-            root: root,
-            draft: mirage.draft.NewDrafter(root, updater),
-        };
-    }
-    mirage.NewRootBinder = NewRootBinder;
 })(mirage || (mirage = {}));
 var mirage;
 (function (mirage) {
@@ -918,6 +932,7 @@ var mirage;
     })();
     mirage.Size = Size;
 })(mirage || (mirage = {}));
+/// <reference path="typeLookup" />
 var mirage;
 (function (mirage) {
     var StackPanel = (function (_super) {
@@ -1029,6 +1044,7 @@ var mirage;
         return StackPanel;
     })(mirage.Panel);
     mirage.StackPanel = StackPanel;
+    mirage.registerNodeType("stack-panel", StackPanel);
 })(mirage || (mirage = {}));
 var mirage;
 (function (mirage) {
@@ -1349,11 +1365,11 @@ var mirage;
     (function (draft) {
         var LayoutFlags = mirage.core.LayoutFlags;
         var MAX_COUNT = 255;
-        function NewDrafter(node, updater) {
+        function NewDrafter(node) {
             var measure = draft.NewMeasureDrafter(node);
             var arrange = draft.NewArrangeDrafter(node);
             var slot = draft.NewSlotDrafter(node);
-            function runDraft(rootSize) {
+            function runDraft(updater, rootSize) {
                 if (!node.inputs.visible)
                     return false;
                 arrange.flush();
@@ -1374,13 +1390,13 @@ var mirage;
                 }
                 return false;
             }
-            return function (rootSize) {
+            return function (updater, rootSize) {
                 if ((node.state.flags & LayoutFlags.hints) === 0)
                     return false;
                 var updated = false;
                 var count = 0;
                 for (; count < MAX_COUNT; count++) {
-                    if (!runDraft(rootSize))
+                    if (!runDraft(updater, rootSize))
                         break;
                     updated = true;
                 }
