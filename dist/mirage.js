@@ -481,8 +481,79 @@ var mirage;
     }
     mirage.NewPanelTree = NewPanelTree;
 })(mirage || (mirage = {}));
+var mirage;
+(function (mirage) {
+    var Thickness = (function () {
+        function Thickness(left, top, right, bottom) {
+            this.left = left == null ? 0 : left;
+            this.top = top == null ? 0 : top;
+            this.right = right == null ? 0 : right;
+            this.bottom = bottom == null ? 0 : bottom;
+        }
+        Thickness.isEqual = function (t1, t2) {
+            return t1.left === t2.left
+                && t1.top === t2.top
+                && t1.right === t2.right
+                && t1.bottom === t2.bottom;
+        };
+        Thickness.growSize = function (thickness, dest) {
+            var w = dest.width;
+            var h = dest.height;
+            if (w != Number.POSITIVE_INFINITY)
+                w += thickness.left + thickness.right;
+            if (h != Number.POSITIVE_INFINITY)
+                h += thickness.top + thickness.bottom;
+            dest.width = w > 0 ? w : 0;
+            dest.height = h > 0 ? h : 0;
+            return dest;
+        };
+        Thickness.shrinkSize = function (thickness, dest) {
+            var w = dest.width;
+            var h = dest.height;
+            if (w != Number.POSITIVE_INFINITY)
+                w -= thickness.left + thickness.right;
+            if (h != Number.POSITIVE_INFINITY)
+                h -= thickness.top + thickness.bottom;
+            dest.width = w > 0 ? w : 0;
+            dest.height = h > 0 ? h : 0;
+            return dest;
+        };
+        Thickness.shrinkRect = function (thickness, dest) {
+            dest.x += thickness.left;
+            dest.y += thickness.top;
+            dest.width -= thickness.left + thickness.right;
+            dest.height -= thickness.top + thickness.bottom;
+            if (dest.width < 0)
+                dest.width = 0;
+            if (dest.height < 0)
+                dest.height = 0;
+        };
+        return Thickness;
+    })();
+    mirage.Thickness = Thickness;
+})(mirage || (mirage = {}));
+/// <reference path="../Thickness" />
+var mirage;
+(function (mirage) {
+    var convert;
+    (function (convert) {
+        var converters = {};
+        function fromString(property, value) {
+            var converter = converters[property];
+            if (!converter)
+                return value;
+            return converter(value);
+        }
+        convert.fromString = fromString;
+        function registerFromString(property, converter) {
+            converters[property] = converter;
+        }
+        convert.registerFromString = registerFromString;
+    })(convert = mirage.convert || (mirage.convert = {}));
+})(mirage || (mirage = {}));
 /// <reference path="Panel" />
 /// <reference path="typeLookup" />
+/// <reference path="convert/fromString" />
 var mirage;
 (function (mirage) {
     var Canvas = (function (_super) {
@@ -526,21 +597,28 @@ var mirage;
     })(mirage.Panel);
     mirage.Canvas = Canvas;
     mirage.registerNodeType("canvas", Canvas);
+    mirage.convert.registerFromString("canvas.top", convertCanvasCoord);
+    mirage.convert.registerFromString("canvas.left", convertCanvasCoord);
+    function convertCanvasCoord(value) {
+        if (!value)
+            return 0;
+        return parseFloat(value);
+    }
 })(mirage || (mirage = {}));
 var mirage;
 (function (mirage) {
     (function (HorizontalAlignment) {
-        HorizontalAlignment[HorizontalAlignment["left"] = 0] = "left";
-        HorizontalAlignment[HorizontalAlignment["center"] = 1] = "center";
-        HorizontalAlignment[HorizontalAlignment["right"] = 2] = "right";
-        HorizontalAlignment[HorizontalAlignment["stretch"] = 3] = "stretch";
+        HorizontalAlignment[HorizontalAlignment["stretch"] = 0] = "stretch";
+        HorizontalAlignment[HorizontalAlignment["left"] = 1] = "left";
+        HorizontalAlignment[HorizontalAlignment["center"] = 2] = "center";
+        HorizontalAlignment[HorizontalAlignment["right"] = 3] = "right";
     })(mirage.HorizontalAlignment || (mirage.HorizontalAlignment = {}));
     var HorizontalAlignment = mirage.HorizontalAlignment;
     (function (VerticalAlignment) {
-        VerticalAlignment[VerticalAlignment["top"] = 0] = "top";
-        VerticalAlignment[VerticalAlignment["center"] = 1] = "center";
-        VerticalAlignment[VerticalAlignment["bottom"] = 2] = "bottom";
-        VerticalAlignment[VerticalAlignment["stretch"] = 3] = "stretch";
+        VerticalAlignment[VerticalAlignment["stretch"] = 0] = "stretch";
+        VerticalAlignment[VerticalAlignment["top"] = 1] = "top";
+        VerticalAlignment[VerticalAlignment["center"] = 2] = "center";
+        VerticalAlignment[VerticalAlignment["bottom"] = 3] = "bottom";
     })(mirage.VerticalAlignment || (mirage.VerticalAlignment = {}));
     var VerticalAlignment = mirage.VerticalAlignment;
     (function (Orientation) {
@@ -549,8 +627,135 @@ var mirage;
     })(mirage.Orientation || (mirage.Orientation = {}));
     var Orientation = mirage.Orientation;
 })(mirage || (mirage = {}));
+var mirage;
+(function (mirage) {
+    function NewRowDefinitions(defs) {
+        var rowdefs = [];
+        for (var i = 0, tokens = defs.split(" "); i < tokens.length; i++) {
+            var token = tokens[i];
+            if (token === " ")
+                continue;
+            rowdefs.push(NewRowDefinition(token));
+        }
+        return rowdefs;
+    }
+    mirage.NewRowDefinitions = NewRowDefinitions;
+    function NewRowDefinition() {
+        var len;
+        var min = 0;
+        var max = Number.POSITIVE_INFINITY;
+        switch (arguments.length) {
+            case 1:
+                len = mirage.parseGridLength(arguments[0]);
+                break;
+            case 2:
+                len = {
+                    value: arguments[0],
+                    type: arguments[1],
+                };
+                break;
+            case 3:
+                len = mirage.parseGridLength(arguments[0]);
+                min = arguments[1];
+                max = arguments[2];
+                break;
+            case 4:
+                len = {
+                    value: arguments[0],
+                    type: arguments[1],
+                };
+                min = arguments[2];
+                max = arguments[3];
+                break;
+            default:
+                len = {
+                    value: 1,
+                    type: mirage.GridUnitType.star,
+                };
+                break;
+        }
+        var actual = NaN;
+        return {
+            height: len,
+            minHeight: min,
+            maxHeight: max,
+            getActualHeight: function () {
+                return actual;
+            },
+            setActualHeight: function (value) {
+                actual = value;
+            },
+        };
+    }
+    mirage.NewRowDefinition = NewRowDefinition;
+})(mirage || (mirage = {}));
+var mirage;
+(function (mirage) {
+    function NewColumnDefinitions(defs) {
+        var coldefs = [];
+        for (var i = 0, tokens = defs.split(" "); i < tokens.length; i++) {
+            var token = tokens[i];
+            if (token === " ")
+                continue;
+            coldefs.push(NewColumnDefinition(token));
+        }
+        return coldefs;
+    }
+    mirage.NewColumnDefinitions = NewColumnDefinitions;
+    function NewColumnDefinition() {
+        var len;
+        var min = 0;
+        var max = Number.POSITIVE_INFINITY;
+        switch (arguments.length) {
+            case 1:
+                len = mirage.parseGridLength(arguments[0]);
+                break;
+            case 2:
+                len = {
+                    value: arguments[0],
+                    type: arguments[1],
+                };
+                break;
+            case 3:
+                len = mirage.parseGridLength(arguments[0]);
+                min = arguments[1];
+                max = arguments[2];
+                break;
+            case 4:
+                len = {
+                    value: arguments[0],
+                    type: arguments[1],
+                };
+                min = arguments[2];
+                max = arguments[3];
+                break;
+            default:
+                len = {
+                    value: 1,
+                    type: mirage.GridUnitType.star,
+                };
+                break;
+        }
+        var actual = NaN;
+        return {
+            width: len,
+            minWidth: min,
+            maxWidth: max,
+            getActualWidth: function () {
+                return actual;
+            },
+            setActualWidth: function (value) {
+                actual = value;
+            },
+        };
+    }
+    mirage.NewColumnDefinition = NewColumnDefinition;
+})(mirage || (mirage = {}));
 /// <reference path="Panel" />
 /// <reference path="typeLookup" />
+/// <reference path="convert/fromString" />
+/// <reference path="IRowDefinition" />
+/// <reference path="IColumnDefinition" />
 var mirage;
 (function (mirage) {
     var Grid = (function (_super) {
@@ -634,74 +839,23 @@ var mirage;
     })(mirage.Panel);
     mirage.Grid = Grid;
     mirage.registerNodeType("grid", Grid);
+    mirage.convert.registerFromString("row-definitions", mirage.NewRowDefinitions);
+    mirage.convert.registerFromString("column-definitions", mirage.NewColumnDefinitions);
+    mirage.convert.registerFromString("grid.row", convertGridCell);
+    mirage.convert.registerFromString("grid.row-span", convertGridCell);
+    mirage.convert.registerFromString("grid.column", convertGridCell);
+    mirage.convert.registerFromString("grid.column-span", convertGridCell);
     function invalidateCell(node) {
         var parent = node.tree.parent;
         if (parent instanceof Grid)
             parent.invalidateMeasure();
         node.invalidateMeasure();
     }
-})(mirage || (mirage = {}));
-var mirage;
-(function (mirage) {
-    function NewColumnDefinitions(defs) {
-        var coldefs = [];
-        for (var i = 0, tokens = defs.split(" "); i < tokens.length; i++) {
-            var token = tokens[i];
-            if (token === " ")
-                continue;
-            coldefs.push(NewColumnDefinition(token));
-        }
-        return coldefs;
+    function convertGridCell(value) {
+        if (!value)
+            return 0;
+        return parseInt(value);
     }
-    mirage.NewColumnDefinitions = NewColumnDefinitions;
-    function NewColumnDefinition() {
-        var len;
-        var min = 0;
-        var max = Number.POSITIVE_INFINITY;
-        switch (arguments.length) {
-            case 1:
-                len = mirage.parseGridLength(arguments[0]);
-                break;
-            case 2:
-                len = {
-                    value: arguments[0],
-                    type: arguments[1],
-                };
-                break;
-            case 3:
-                len = mirage.parseGridLength(arguments[0]);
-                min = arguments[1];
-                max = arguments[2];
-                break;
-            case 4:
-                len = {
-                    value: arguments[0],
-                    type: arguments[1],
-                };
-                min = arguments[2];
-                max = arguments[3];
-                break;
-            default:
-                len = {
-                    value: 1,
-                    type: mirage.GridUnitType.star,
-                };
-                break;
-        }
-        var actual = NaN;
-        return {
-            width: len,
-            minWidth: min,
-            maxWidth: max,
-            getActualWidth: function () {
-                return actual;
-            },
-            setActualWidth: function (value) {
-                actual = value;
-            },
-        };
-    }
-    mirage.NewColumnDefinition = NewColumnDefinition;
 })(mirage || (mirage = {}));
 var mirage;
 (function (mirage) {
@@ -755,68 +909,6 @@ var mirage;
         }
         adapters.updateSlots = updateSlots;
     })(adapters = mirage.adapters || (mirage.adapters = {}));
-})(mirage || (mirage = {}));
-var mirage;
-(function (mirage) {
-    function NewRowDefinitions(defs) {
-        var rowdefs = [];
-        for (var i = 0, tokens = defs.split(" "); i < tokens.length; i++) {
-            var token = tokens[i];
-            if (token === " ")
-                continue;
-            rowdefs.push(NewRowDefinition(token));
-        }
-        return rowdefs;
-    }
-    mirage.NewRowDefinitions = NewRowDefinitions;
-    function NewRowDefinition() {
-        var len;
-        var min = 0;
-        var max = Number.POSITIVE_INFINITY;
-        switch (arguments.length) {
-            case 1:
-                len = mirage.parseGridLength(arguments[0]);
-                break;
-            case 2:
-                len = {
-                    value: arguments[0],
-                    type: arguments[1],
-                };
-                break;
-            case 3:
-                len = mirage.parseGridLength(arguments[0]);
-                min = arguments[1];
-                max = arguments[2];
-                break;
-            case 4:
-                len = {
-                    value: arguments[0],
-                    type: arguments[1],
-                };
-                min = arguments[2];
-                max = arguments[3];
-                break;
-            default:
-                len = {
-                    value: 1,
-                    type: mirage.GridUnitType.star,
-                };
-                break;
-        }
-        var actual = NaN;
-        return {
-            height: len,
-            minHeight: min,
-            maxHeight: max,
-            getActualHeight: function () {
-                return actual;
-            },
-            setActualHeight: function (value) {
-                actual = value;
-            },
-        };
-    }
-    mirage.NewRowDefinition = NewRowDefinition;
 })(mirage || (mirage = {}));
 var mirage;
 (function (mirage) {
@@ -932,7 +1024,84 @@ var mirage;
     })();
     mirage.Size = Size;
 })(mirage || (mirage = {}));
+/// <reference path="../convert/fromString" />
+var mirage;
+(function (mirage) {
+    var core;
+    (function (core) {
+        function booleanDefaultTrue(value) {
+            return value !== "0"
+                && value !== "false";
+        }
+        function float(value) {
+            if (!value)
+                return 0;
+            return parseFloat(value) || 0;
+        }
+        function floatDefaultNaN(value) {
+            if (!value)
+                return NaN;
+            return parseFloat(value);
+        }
+        function floatDefaultInfinite(value) {
+            if (!value)
+                return Number.POSITIVE_INFINITY;
+            var val = parseFloat(value);
+            if (isNaN(val))
+                return Number.POSITIVE_INFINITY;
+            return val;
+        }
+        function thickness(value) {
+            var tokens = splitCommaList(value);
+            if (tokens.length === 1) {
+                var uniform = parseFloat(tokens[0]);
+                return new mirage.Thickness(uniform, uniform, uniform, uniform);
+            }
+            else if (tokens.length === 2) {
+                var x = parseFloat(tokens[0]);
+                var y = parseFloat(tokens[1]);
+                return new mirage.Thickness(x, y, x, y);
+            }
+            else if (tokens.length === 4) {
+                return new mirage.Thickness(parseFloat(tokens[0]), parseFloat(tokens[1]), parseFloat(tokens[2]), parseFloat(tokens[3]));
+            }
+            else {
+                console.warn("[mirage] Invalid thickness value", value);
+            }
+        }
+        function enumConverter(src) {
+            return function (value) {
+                if (!value)
+                    return 0;
+                return src[value] || 0;
+            };
+        }
+        core.enumConverter = enumConverter;
+        function splitCommaList(str) {
+            var tokens = [];
+            for (var i = 0, arr = str.split(' ').join(',').split(','); i < arr.length; i++) {
+                var cur = arr[i];
+                if (cur)
+                    tokens.push(cur);
+            }
+            return tokens;
+        }
+        mirage.convert.registerFromString("visible", booleanDefaultTrue);
+        mirage.convert.registerFromString("use-layout-rounding", booleanDefaultTrue);
+        mirage.convert.registerFromString("margin", thickness);
+        mirage.convert.registerFromString("width", floatDefaultNaN);
+        mirage.convert.registerFromString("height", floatDefaultNaN);
+        mirage.convert.registerFromString("min-width", float);
+        mirage.convert.registerFromString("min-height", float);
+        mirage.convert.registerFromString("max-width", floatDefaultInfinite);
+        mirage.convert.registerFromString("max-height", floatDefaultInfinite);
+        mirage.convert.registerFromString("horizontal-alignment", enumConverter(mirage.HorizontalAlignment));
+        mirage.convert.registerFromString("vertical-alignment", enumConverter(mirage.VerticalAlignment));
+    })(core = mirage.core || (mirage.core = {}));
+})(mirage || (mirage = {}));
 /// <reference path="typeLookup" />
+/// <reference path="convert/fromString" />
+/// <reference path="core/converters" />
 var mirage;
 (function (mirage) {
     var StackPanel = (function (_super) {
@@ -1045,57 +1214,7 @@ var mirage;
     })(mirage.Panel);
     mirage.StackPanel = StackPanel;
     mirage.registerNodeType("stack-panel", StackPanel);
-})(mirage || (mirage = {}));
-var mirage;
-(function (mirage) {
-    var Thickness = (function () {
-        function Thickness(left, top, right, bottom) {
-            this.left = left == null ? 0 : left;
-            this.top = top == null ? 0 : top;
-            this.right = right == null ? 0 : right;
-            this.bottom = bottom == null ? 0 : bottom;
-        }
-        Thickness.isEqual = function (t1, t2) {
-            return t1.left === t2.left
-                && t1.top === t2.top
-                && t1.right === t2.right
-                && t1.bottom === t2.bottom;
-        };
-        Thickness.growSize = function (thickness, dest) {
-            var w = dest.width;
-            var h = dest.height;
-            if (w != Number.POSITIVE_INFINITY)
-                w += thickness.left + thickness.right;
-            if (h != Number.POSITIVE_INFINITY)
-                h += thickness.top + thickness.bottom;
-            dest.width = w > 0 ? w : 0;
-            dest.height = h > 0 ? h : 0;
-            return dest;
-        };
-        Thickness.shrinkSize = function (thickness, dest) {
-            var w = dest.width;
-            var h = dest.height;
-            if (w != Number.POSITIVE_INFINITY)
-                w -= thickness.left + thickness.right;
-            if (h != Number.POSITIVE_INFINITY)
-                h -= thickness.top + thickness.bottom;
-            dest.width = w > 0 ? w : 0;
-            dest.height = h > 0 ? h : 0;
-            return dest;
-        };
-        Thickness.shrinkRect = function (thickness, dest) {
-            dest.x += thickness.left;
-            dest.y += thickness.top;
-            dest.width -= thickness.left + thickness.right;
-            dest.height -= thickness.top + thickness.bottom;
-            if (dest.width < 0)
-                dest.width = 0;
-            if (dest.height < 0)
-                dest.height = 0;
-        };
-        return Thickness;
-    })();
-    mirage.Thickness = Thickness;
+    mirage.convert.registerFromString("orientation", mirage.core.enumConverter(mirage.Orientation));
 })(mirage || (mirage = {}));
 var mirage;
 (function (mirage) {
