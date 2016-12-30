@@ -1,5 +1,8 @@
 /// <reference path="Panel" />
 /// <reference path="typeLookup" />
+/// <reference path="convert/fromString" />
+/// <reference path="IRowDefinition" />
+/// <reference path="IColumnDefinition" />
 
 namespace mirage {
     export interface IGridInputs extends core.ILayoutNodeInputs {
@@ -100,11 +103,23 @@ namespace mirage {
         }
     }
     registerNodeType("grid", Grid);
+    convert.registerFromString("row-definitions", NewRowDefinitions);
+    convert.registerFromString("column-definitions", NewColumnDefinitions);
+    convert.registerFromString("grid.row", convertGridCell);
+    convert.registerFromString("grid.row-span", convertGridCell);
+    convert.registerFromString("grid.column", convertGridCell);
+    convert.registerFromString("grid.column-span", convertGridCell);
 
     function invalidateCell(node: core.LayoutNode) {
         var parent = node.tree.parent;
         if (parent instanceof Grid)
             parent.invalidateMeasure();
         node.invalidateMeasure();
+    }
+
+    function convertGridCell(value: string): number {
+        if (!value)
+            return 0;
+        return parseInt(value);
     }
 }

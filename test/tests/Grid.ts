@@ -3,16 +3,42 @@ namespace mirage.tests {
 
     QUnit.module("Grid");
 
-    function sameRowDef(got: IRowDefinition, wantHeight: IGridLength, wantMin: number, wantMax: number, message?: string) {
-        deepEqual(got.height, wantHeight, "height " + message);
-        strictEqual(got.minHeight, wantMin, "min " + message);
-        strictEqual(got.maxHeight, wantMax, "max " + message);
+    interface IRowDefinitionRaw {
+        height: IGridLength;
+        minHeight: number;
+        maxHeight: number;
     }
 
-    function sameColDef(got: IColumnDefinition, wantWidth: IGridLength, wantMin: number, wantMax: number, message?: string) {
-        deepEqual(got.width, wantWidth, "width " + message);
-        strictEqual(got.minWidth, wantMin, "min " + message);
-        strictEqual(got.maxWidth, wantMax, "max " + message);
+    function sameRowDef(got: IRowDefinition, want: IRowDefinitionRaw, message?: string) {
+        deepEqual(got.height, want.height, "height " + message);
+        strictEqual(got.minHeight, want.minHeight, "min " + message);
+        strictEqual(got.maxHeight, want.maxHeight, "max " + message);
+    }
+
+    function sameRowDefs(got: IRowDefinition[], want: IRowDefinitionRaw[], message: string) {
+        strictEqual(got.length, want.length, `length - ${message}`);
+        for (let i = 0; i < got.length && i < want.length; i++) {
+            sameRowDef(got[i], want[i], `${message}[${i}]`);
+        }
+    }
+
+    interface IColumnDefinitionRaw {
+        width: IGridLength;
+        minWidth: number;
+        maxWidth: number;
+    }
+
+    function sameColDef(got: IColumnDefinition, want: IColumnDefinitionRaw, message?: string) {
+        deepEqual(got.width, want.width, "width " + message);
+        strictEqual(got.minWidth, want.minWidth, "min " + message);
+        strictEqual(got.maxWidth, want.maxWidth, "max " + message);
+    }
+
+    function sameColDefs(got: IColumnDefinition[], want: IColumnDefinitionRaw[], message: string) {
+        strictEqual(got.length, want.length, `length - ${message}`);
+        for (let i = 0; i < got.length && i < want.length; i++) {
+            sameColDef(got[i], want[i], `${message}[${i}]`);
+        }
     }
 
     QUnit.test("parseGridLength", () => {
@@ -24,25 +50,60 @@ namespace mirage.tests {
     });
 
     QUnit.test("NewRowDefinition", () => {
-        sameRowDef(NewRowDefinition(), {value: 1, type: GridUnitType.star}, 0, Number.POSITIVE_INFINITY, "0");
-        sameRowDef(NewRowDefinition("auto"), {value: 0, type: GridUnitType.auto}, 0, Number.POSITIVE_INFINITY, "1");
+        sameRowDef(NewRowDefinition(), {
+            height: {value: 1, type: GridUnitType.star},
+            minHeight: 0,
+            maxHeight: Number.POSITIVE_INFINITY
+        }, "0");
+        sameRowDef(NewRowDefinition("auto"), {
+            height: {value: 0, type: GridUnitType.auto},
+            minHeight: 0,
+            maxHeight: Number.POSITIVE_INFINITY
+        }, "1");
         sameRowDef(NewRowDefinition(0, GridUnitType.auto), {
-            value: 0,
-            type: GridUnitType.auto
-        }, 0, Number.POSITIVE_INFINITY, "2");
-        sameRowDef(NewRowDefinition("auto", 10, 50), {value: 0, type: GridUnitType.auto}, 10, 50, "3");
-        sameRowDef(NewRowDefinition(0, GridUnitType.auto, 10, 50), {value: 0, type: GridUnitType.auto}, 10, 50, "4");
+            height: {
+                value: 0,
+                type: GridUnitType.auto
+            }, minHeight: 0, maxHeight: Number.POSITIVE_INFINITY
+        }, "2");
+        sameRowDef(NewRowDefinition("auto", 10, 50), {
+            height: {value: 0, type: GridUnitType.auto},
+            minHeight: 10,
+            maxHeight: 50
+        }, "3");
+        sameRowDef(NewRowDefinition(0, GridUnitType.auto, 10, 50), {
+            height: {value: 0, type: GridUnitType.auto},
+            minHeight: 10,
+            maxHeight: 50
+        }, "4");
     });
 
     QUnit.test("NewColumnDefinition", () => {
-        sameColDef(NewColumnDefinition(), {value: 1, type: GridUnitType.star}, 0, Number.POSITIVE_INFINITY, "0");
-        sameColDef(NewColumnDefinition("auto"), {value: 0, type: GridUnitType.auto}, 0, Number.POSITIVE_INFINITY, "1");
+        sameColDef(NewColumnDefinition(), {
+            width: {value: 1, type: GridUnitType.star},
+            minWidth: 0,
+            maxWidth: Number.POSITIVE_INFINITY
+        }, "0");
+        sameColDef(NewColumnDefinition("auto"), {
+            width: {value: 0, type: GridUnitType.auto},
+            minWidth: 0,
+            maxWidth: Number.POSITIVE_INFINITY
+        }, "1");
         sameColDef(NewColumnDefinition(0, GridUnitType.auto), {
-            value: 0,
-            type: GridUnitType.auto
-        }, 0, Number.POSITIVE_INFINITY, "2");
-        sameColDef(NewColumnDefinition("auto", 10, 50), {value: 0, type: GridUnitType.auto}, 10, 50, "3");
-        sameColDef(NewColumnDefinition(0, GridUnitType.auto, 10, 50), {value: 0, type: GridUnitType.auto}, 10, 50, "4");
+            width: {value: 0, type: GridUnitType.auto},
+            minWidth: 0,
+            maxWidth: Number.POSITIVE_INFINITY
+        }, "2");
+        sameColDef(NewColumnDefinition("auto", 10, 50), {
+            width: {value: 0, type: GridUnitType.auto},
+            minWidth: 10,
+            maxWidth: 50
+        }, "3");
+        sameColDef(NewColumnDefinition(0, GridUnitType.auto, 10, 50), {
+            width: {value: 0, type: GridUnitType.auto},
+            minWidth: 10,
+            maxWidth: 50
+        }, "4");
     });
 
     QUnit.test("draft-scenario1", () => {
@@ -158,5 +219,43 @@ namespace mirage.tests {
         arrangeState(child1, new Rect(0, 0, 250, 400), new Rect(100, 175, 50, 50), "child1");
         arrangeState(child2, new Rect(250, 0, 100, 400), new Rect(250, 175, 100, 50), "child2");
         arrangeState(child3, new Rect(350, 0, 50, 400), new Rect(350, 175, 50, 50), "child3");
+    });
+
+    QUnit.test("converters", (assert) => {
+        assert.strictEqual(convert.fromString("grid.row", null), 0, "grid.row: (null)");
+        assert.strictEqual(convert.fromString("grid.row", ""), 0, "grid.row: (empty)");
+        assert.strictEqual(convert.fromString("grid.row", "0"), 0, "grid.row: 0");
+        assert.strictEqual(convert.fromString("grid.row", "2"), 2, "grid.row: 2");
+        assert.strictEqual(convert.fromString("grid.row", "2.2"), 2, "grid.row: 2.2");
+
+        assert.strictEqual(convert.fromString("grid.row-span", null), 0, "grid.row-span: (null)");
+        assert.strictEqual(convert.fromString("grid.row-span", ""), 0, "grid.row-span: (empty)");
+        assert.strictEqual(convert.fromString("grid.row-span", "0"), 0, "grid.row-span: 0");
+        assert.strictEqual(convert.fromString("grid.row-span", "2"), 2, "grid.row-span: 2");
+        assert.strictEqual(convert.fromString("grid.row-span", "2.2"), 2, "grid.row-span: 2.2");
+
+        assert.strictEqual(convert.fromString("grid.column", null), 0, "grid.column: (null)");
+        assert.strictEqual(convert.fromString("grid.column", ""), 0, "grid.column: (empty)");
+        assert.strictEqual(convert.fromString("grid.column", "0"), 0, "grid.column: 0");
+        assert.strictEqual(convert.fromString("grid.column", "2"), 2, "grid.column: 2");
+        assert.strictEqual(convert.fromString("grid.column", "2.2"), 2, "grid.column: 2.2");
+
+        assert.strictEqual(convert.fromString("grid.column-span", null), 0, "grid.column-span: (null)");
+        assert.strictEqual(convert.fromString("grid.column-span", ""), 0, "grid.column-span: (empty)");
+        assert.strictEqual(convert.fromString("grid.column-span", "0"), 0, "grid.column-span: 0");
+        assert.strictEqual(convert.fromString("grid.column-span", "2"), 2, "grid.column-span: 2");
+        assert.strictEqual(convert.fromString("grid.column-span", "2.2"), 2, "grid.column-span: 2.2");
+
+        sameRowDefs(convert.fromString("row-definitions", "* auto 100"), [
+            {height: {value: 1, type: GridUnitType.star}, minHeight: 0, maxHeight: Number.POSITIVE_INFINITY},
+            {height: {value: 0, type: GridUnitType.auto}, minHeight: 0, maxHeight: Number.POSITIVE_INFINITY},
+            {height: {value: 100, type: GridUnitType.pixel}, minHeight: 0, maxHeight: Number.POSITIVE_INFINITY},
+        ], "row-definitions: * auto 100");
+
+        sameColDefs(convert.fromString("column-definitions", "* auto 100"), [
+            {width: {value: 1, type: GridUnitType.star}, minWidth: 0, maxWidth: Number.POSITIVE_INFINITY},
+            {width: {value: 0, type: GridUnitType.auto}, minWidth: 0, maxWidth: Number.POSITIVE_INFINITY},
+            {width: {value: 100, type: GridUnitType.pixel}, minWidth: 0, maxWidth: Number.POSITIVE_INFINITY},
+        ], "column-definitions: * auto 100");
     });
 }

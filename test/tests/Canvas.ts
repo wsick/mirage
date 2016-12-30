@@ -39,4 +39,16 @@ namespace mirage.tests {
         arrangeState(child2, new Rect(100, 200, 50, 50), new Rect(100, 200, 50, 50), "child2");
         arrangeState(child3, new Rect(300, 600, 75, 50), new Rect(300, 600, 75, 50), "child3");
     });
+
+    QUnit.test("converters", (assert) => {
+        assert.strictEqual(convert.fromString("canvas.top", null), 0, "canvas.top: (null)");
+        assert.strictEqual(convert.fromString("canvas.top", ""), 0, "canvas.top: (empty)");
+        assert.strictEqual(convert.fromString("canvas.top", "0"), 0, "canvas.top: 0");
+        assert.strictEqual(convert.fromString("canvas.top", "100.2"), 100.2, "canvas.top: 100.2");
+
+        assert.strictEqual(convert.fromString("canvas.left", null), 0, "canvas.left: (null)");
+        assert.strictEqual(convert.fromString("canvas.left", ""), 0, "canvas.left: (empty)");
+        assert.strictEqual(convert.fromString("canvas.left", "0"), 0, "canvas.left: 0");
+        assert.strictEqual(convert.fromString("canvas.left", "100.2"), 100.2, "canvas.left: 100.2");
+    });
 }
