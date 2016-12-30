@@ -1,15 +1,15 @@
 namespace mirage {
     export enum HorizontalAlignment {
-        left = 0,
-        center = 1,
-        right = 2,
-        stretch = 3,
+        stretch = 0,
+        left = 1,
+        center = 2,
+        right = 3,
     }
     export enum VerticalAlignment {
-        top = 0,
-        center = 1,
-        bottom = 2,
-        stretch = 3,
+        stretch = 0,
+        top = 1,
+        center = 2,
+        bottom = 3,
     }
     export enum Orientation {
         horizontal = 0,

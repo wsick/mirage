@@ -74,4 +74,11 @@ namespace mirage.tests {
         arrangeState(child2, new Rect(50, 0, 50, 200), new Rect(50, 75, 50, 50), "child2");
         arrangeState(child3, new Rect(100, 0, 50, 200), new Rect(100, 125, 50, 75), "child3");
     });
+
+    QUnit.test("converters", (assert) => {
+        assert.strictEqual(convert.fromString("orientation", null), Orientation.horizontal, "orientation: (null)");
+        assert.strictEqual(convert.fromString("orientation", ""), Orientation.horizontal, "orientation: (empty)");
+        assert.strictEqual(convert.fromString("orientation", "horizontal"), Orientation.horizontal, "orientation: horizontal");
+        assert.strictEqual(convert.fromString("orientation", "vertical"), Orientation.vertical, "orientation: vertical");
+    });
 }

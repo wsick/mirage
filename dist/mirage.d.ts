@@ -101,6 +101,27 @@ declare namespace mirage {
     function NewPanelTree(): IPanelTree;
 }
 declare namespace mirage {
+    class Thickness {
+        left: number;
+        top: number;
+        right: number;
+        bottom: number;
+        constructor(left?: number, top?: number, right?: number, bottom?: number);
+        static isEqual(t1: Thickness, t2: Thickness): boolean;
+        static growSize(thickness: Thickness, dest: Size): Size;
+        static shrinkSize(thickness: Thickness, dest: Size): Size;
+        static shrinkRect(thickness: Thickness, dest: IRect): void;
+    }
+}
+declare namespace mirage.convert {
+    interface IConverter {
+        (value: string): any;
+    }
+    function fromString(property: string, value: string): any;
+    function registerFromString(property: string, converter: IConverter): void;
+    function getFromStringConverter(property: string): IConverter;
+}
+declare namespace mirage {
     class Canvas extends Panel {
         static getLeft(node: core.LayoutNode): number;
         static setLeft(node: core.LayoutNode, value: number): void;
@@ -112,21 +133,51 @@ declare namespace mirage {
 }
 declare namespace mirage {
     enum HorizontalAlignment {
-        left = 0,
-        center = 1,
-        right = 2,
-        stretch = 3,
+        stretch = 0,
+        left = 1,
+        center = 2,
+        right = 3,
     }
     enum VerticalAlignment {
-        top = 0,
-        center = 1,
-        bottom = 2,
-        stretch = 3,
+        stretch = 0,
+        top = 1,
+        center = 2,
+        bottom = 3,
     }
     enum Orientation {
         horizontal = 0,
         vertical = 1,
     }
+}
+declare namespace mirage {
+    interface IRowDefinition {
+        height: IGridLength;
+        minHeight: number;
+        maxHeight: number;
+        getActualHeight(): number;
+        setActualHeight(value: number): any;
+    }
+    function NewRowDefinitions(defs: string): IRowDefinition[];
+    function NewRowDefinition(): IRowDefinition;
+    function NewRowDefinition(height: string): IRowDefinition;
+    function NewRowDefinition(heightValue: number, heightType: GridUnitType): IRowDefinition;
+    function NewRowDefinition(height: string, minHeight: number, maxHeight: number): IRowDefinition;
+    function NewRowDefinition(heightValue: number, heightType: GridUnitType, minHeight: number, maxHeight: number): IRowDefinition;
+}
+declare namespace mirage {
+    interface IColumnDefinition {
+        width: IGridLength;
+        minWidth: number;
+        maxWidth: number;
+        getActualWidth(): number;
+        setActualWidth(value: number): any;
+    }
+    function NewColumnDefinitions(defs: string): IColumnDefinition[];
+    function NewColumnDefinition(): IColumnDefinition;
+    function NewColumnDefinition(width: string): IColumnDefinition;
+    function NewColumnDefinition(widthValue: number, widthType: GridUnitType): IColumnDefinition;
+    function NewColumnDefinition(width: string, minWidth: number, maxWidth: number): IColumnDefinition;
+    function NewColumnDefinition(widthValue: number, widthType: GridUnitType, minWidth: number, maxWidth: number): IColumnDefinition;
 }
 declare namespace mirage {
     interface IGridInputs extends core.ILayoutNodeInputs {
@@ -159,21 +210,6 @@ declare namespace mirage {
     }
 }
 declare namespace mirage {
-    interface IColumnDefinition {
-        width: IGridLength;
-        minWidth: number;
-        maxWidth: number;
-        getActualWidth(): number;
-        setActualWidth(value: number): any;
-    }
-    function NewColumnDefinitions(defs: string): IColumnDefinition[];
-    function NewColumnDefinition(): IColumnDefinition;
-    function NewColumnDefinition(width: string): IColumnDefinition;
-    function NewColumnDefinition(widthValue: number, widthType: GridUnitType): IColumnDefinition;
-    function NewColumnDefinition(width: string, minWidth: number, maxWidth: number): IColumnDefinition;
-    function NewColumnDefinition(widthValue: number, widthType: GridUnitType, minWidth: number, maxWidth: number): IColumnDefinition;
-}
-declare namespace mirage {
     enum GridUnitType {
         auto = 0,
         pixel = 1,
@@ -192,21 +228,6 @@ declare namespace mirage.adapters {
     function register(adapter: IRenderAdapter): void;
     function unregister(adapter: IRenderAdapter): void;
     function updateSlots(updates: draft.ISlotUpdate[]): void;
-}
-declare namespace mirage {
-    interface IRowDefinition {
-        height: IGridLength;
-        minHeight: number;
-        maxHeight: number;
-        getActualHeight(): number;
-        setActualHeight(value: number): any;
-    }
-    function NewRowDefinitions(defs: string): IRowDefinition[];
-    function NewRowDefinition(): IRowDefinition;
-    function NewRowDefinition(height: string): IRowDefinition;
-    function NewRowDefinition(heightValue: number, heightType: GridUnitType): IRowDefinition;
-    function NewRowDefinition(height: string, minHeight: number, maxHeight: number): IRowDefinition;
-    function NewRowDefinition(heightValue: number, heightType: GridUnitType, minHeight: number, maxHeight: number): IRowDefinition;
 }
 declare namespace mirage {
     interface IPoint {
@@ -259,6 +280,9 @@ declare namespace mirage {
         static undef(size: ISize): void;
     }
 }
+declare namespace mirage.core {
+    function enumConverter(src: any): (value: string) => any;
+}
 declare namespace mirage {
     interface IStackPanelInputs extends core.ILayoutNodeInputs {
         orientation: Orientation;
@@ -273,19 +297,6 @@ declare namespace mirage {
         protected arrangeOverride(arrangeSize: ISize): ISize;
         private arrangeVertical(arrangeSize);
         private arrangeHorizontal(arrangeSize);
-    }
-}
-declare namespace mirage {
-    class Thickness {
-        left: number;
-        top: number;
-        right: number;
-        bottom: number;
-        constructor(left?: number, top?: number, right?: number, bottom?: number);
-        static isEqual(t1: Thickness, t2: Thickness): boolean;
-        static growSize(thickness: Thickness, dest: Size): Size;
-        static shrinkSize(thickness: Thickness, dest: Size): Size;
-        static shrinkRect(thickness: Thickness, dest: IRect): void;
     }
 }
 declare namespace mirage.core {
