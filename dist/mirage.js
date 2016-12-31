@@ -548,21 +548,31 @@ var mirage;
         convert.getConverter = getConverter;
     })(convert = mirage.convert || (mirage.convert = {}));
 })(mirage || (mirage = {}));
+/// <reference path="../convert/converters" />
 var mirage;
 (function (mirage) {
     var map;
     (function (map) {
         var setters = {};
-        function getMapper(property) {
+        var mappers = {};
+        function getSetter(property) {
             return setters[property];
+        }
+        map.getSetter = getSetter;
+        function getMapper(property) {
+            return mappers[property];
         }
         map.getMapper = getMapper;
         function registerNormal(property, key) {
             setters[property] = function (node, value) { return node[key] = value; };
+            var converter = mirage.convert.getConverter(property);
+            mappers[property] = function (node, value) { return node[key] = converter(value); };
         }
         map.registerNormal = registerNormal;
-        function registerCustom(property, mapper) {
-            setters[property] = mapper;
+        function registerCustom(property, setter) {
+            setters[property] = setter;
+            var converter = mirage.convert.getConverter(property);
+            mappers[property] = function (node, value) { return setter(node, converter(value)); };
         }
         map.registerCustom = registerCustom;
     })(map = mirage.map || (mirage.map = {}));

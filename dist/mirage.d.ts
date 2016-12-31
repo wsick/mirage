@@ -121,12 +121,16 @@ declare namespace mirage.convert {
     function getConverter(property: string): IConverter;
 }
 declare namespace mirage.map {
-    interface IPropertyMapper {
+    interface IPropertySetter {
         (node: core.LayoutNode, value: any): void;
     }
+    interface IPropertyMapper {
+        (node: core.LayoutNode, value: string): void;
+    }
+    function getSetter(property: string): IPropertySetter;
     function getMapper(property: string): IPropertyMapper;
     function registerNormal(property: string, key: string): void;
-    function registerCustom(property: string, mapper: IPropertyMapper): void;
+    function registerCustom(property: string, setter: IPropertySetter): void;
 }
 declare namespace mirage {
     class Canvas extends Panel {
