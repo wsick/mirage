@@ -33,6 +33,14 @@ declare namespace mirage.core {
         step(): boolean;
         skipBranch(): any;
     }
+    var DEFAULT_VISIBLE: boolean;
+    var DEFAULT_USE_LAYOUT_ROUNDING: boolean;
+    var DEFAULT_WIDTH: number;
+    var DEFAULT_HEIGHT: number;
+    var DEFAULT_MIN_WIDTH: number;
+    var DEFAULT_MIN_HEIGHT: number;
+    var DEFAULT_MAX_WIDTH: number;
+    var DEFAULT_MAX_HEIGHT: number;
     class LayoutNode {
         inputs: ILayoutNodeInputs;
         state: ILayoutNodeState;

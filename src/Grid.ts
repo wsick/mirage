@@ -69,6 +69,8 @@ namespace mirage {
         }
 
         set rowDefinitions(value: IRowDefinition[]) {
+            if (!value)
+                value = [];
             this.inputs.rowDefinitions = value;
             this.invalidateMeasure();
         }
@@ -78,6 +80,8 @@ namespace mirage {
         }
 
         set columnDefinitions(value: IColumnDefinition[]) {
+            if (!value)
+                value = [];
             this.inputs.columnDefinitions = value;
             this.invalidateMeasure();
         }
