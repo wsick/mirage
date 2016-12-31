@@ -41,14 +41,14 @@ namespace mirage.tests {
     });
 
     QUnit.test("converters", (assert) => {
-        assert.strictEqual(convert.fromString("canvas.top", null), 0, "canvas.top: (null)");
-        assert.strictEqual(convert.fromString("canvas.top", ""), 0, "canvas.top: (empty)");
-        assert.strictEqual(convert.fromString("canvas.top", "0"), 0, "canvas.top: 0");
-        assert.strictEqual(convert.fromString("canvas.top", "100.2"), 100.2, "canvas.top: 100.2");
+        assert.strictEqual(convert.getConverter("canvas.top")(null), 0, "canvas.top: (null)");
+        assert.strictEqual(convert.getConverter("canvas.top")(""), 0, "canvas.top: (empty)");
+        assert.strictEqual(convert.getConverter("canvas.top")("0"), 0, "canvas.top: 0");
+        assert.strictEqual(convert.getConverter("canvas.top")("100.2"), 100.2, "canvas.top: 100.2");
 
-        assert.strictEqual(convert.fromString("canvas.left", null), 0, "canvas.left: (null)");
-        assert.strictEqual(convert.fromString("canvas.left", ""), 0, "canvas.left: (empty)");
-        assert.strictEqual(convert.fromString("canvas.left", "0"), 0, "canvas.left: 0");
-        assert.strictEqual(convert.fromString("canvas.left", "100.2"), 100.2, "canvas.left: 100.2");
+        assert.strictEqual(convert.getConverter("canvas.left")(null), 0, "canvas.left: (null)");
+        assert.strictEqual(convert.getConverter("canvas.left")(""), 0, "canvas.left: (empty)");
+        assert.strictEqual(convert.getConverter("canvas.left")("0"), 0, "canvas.left: 0");
+        assert.strictEqual(convert.getConverter("canvas.left")("100.2"), 100.2, "canvas.left: 100.2");
     });
 }

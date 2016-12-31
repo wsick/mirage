@@ -76,9 +76,9 @@ namespace mirage.tests {
     });
 
     QUnit.test("converters", (assert) => {
-        assert.strictEqual(convert.fromString("orientation", null), Orientation.horizontal, "orientation: (null)");
-        assert.strictEqual(convert.fromString("orientation", ""), Orientation.horizontal, "orientation: (empty)");
-        assert.strictEqual(convert.fromString("orientation", "horizontal"), Orientation.horizontal, "orientation: horizontal");
-        assert.strictEqual(convert.fromString("orientation", "vertical"), Orientation.vertical, "orientation: vertical");
+        assert.strictEqual(convert.getConverter("orientation")(null), Orientation.horizontal, "orientation: (null)");
+        assert.strictEqual(convert.getConverter("orientation")(""), Orientation.horizontal, "orientation: (empty)");
+        assert.strictEqual(convert.getConverter("orientation")("horizontal"), Orientation.horizontal, "orientation: horizontal");
+        assert.strictEqual(convert.getConverter("orientation")("vertical"), Orientation.vertical, "orientation: vertical");
     });
 }

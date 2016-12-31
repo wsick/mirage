@@ -1,4 +1,4 @@
-/// <reference path="../convert/fromString" />
+/// <reference path="../convert/converters" />
 
 namespace mirage.core {
     function booleanDefaultTrue(value: string): boolean {
@@ -66,15 +66,15 @@ namespace mirage.core {
         return tokens;
     }
 
-    convert.registerFromString("visible", booleanDefaultTrue);
-    convert.registerFromString("use-layout-rounding", booleanDefaultTrue);
-    convert.registerFromString("margin", thickness);
-    convert.registerFromString("width", floatDefaultNaN);
-    convert.registerFromString("height", floatDefaultNaN);
-    convert.registerFromString("min-width", float);
-    convert.registerFromString("min-height", float);
-    convert.registerFromString("max-width", floatDefaultInfinite);
-    convert.registerFromString("max-height", floatDefaultInfinite);
-    convert.registerFromString("horizontal-alignment", enumConverter(HorizontalAlignment));
-    convert.registerFromString("vertical-alignment", enumConverter(VerticalAlignment));
+    convert.register("visible", booleanDefaultTrue);
+    convert.register("use-layout-rounding", booleanDefaultTrue);
+    convert.register("margin", thickness);
+    convert.register("width", floatDefaultNaN);
+    convert.register("height", floatDefaultNaN);
+    convert.register("min-width", float);
+    convert.register("min-height", float);
+    convert.register("max-width", floatDefaultInfinite);
+    convert.register("max-height", floatDefaultInfinite);
+    convert.register("horizontal-alignment", enumConverter(HorizontalAlignment));
+    convert.register("vertical-alignment", enumConverter(VerticalAlignment));
 }

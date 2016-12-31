@@ -222,37 +222,37 @@ namespace mirage.tests {
     });
 
     QUnit.test("converters", (assert) => {
-        assert.strictEqual(convert.fromString("grid.row", null), 0, "grid.row: (null)");
-        assert.strictEqual(convert.fromString("grid.row", ""), 0, "grid.row: (empty)");
-        assert.strictEqual(convert.fromString("grid.row", "0"), 0, "grid.row: 0");
-        assert.strictEqual(convert.fromString("grid.row", "2"), 2, "grid.row: 2");
-        assert.strictEqual(convert.fromString("grid.row", "2.2"), 2, "grid.row: 2.2");
+        assert.strictEqual(convert.getConverter("grid.row")(null), 0, "grid.row: (null)");
+        assert.strictEqual(convert.getConverter("grid.row")(""), 0, "grid.row: (empty)");
+        assert.strictEqual(convert.getConverter("grid.row")("0"), 0, "grid.row: 0");
+        assert.strictEqual(convert.getConverter("grid.row")("2"), 2, "grid.row: 2");
+        assert.strictEqual(convert.getConverter("grid.row")("2.2"), 2, "grid.row: 2.2");
 
-        assert.strictEqual(convert.fromString("grid.row-span", null), 0, "grid.row-span: (null)");
-        assert.strictEqual(convert.fromString("grid.row-span", ""), 0, "grid.row-span: (empty)");
-        assert.strictEqual(convert.fromString("grid.row-span", "0"), 0, "grid.row-span: 0");
-        assert.strictEqual(convert.fromString("grid.row-span", "2"), 2, "grid.row-span: 2");
-        assert.strictEqual(convert.fromString("grid.row-span", "2.2"), 2, "grid.row-span: 2.2");
+        assert.strictEqual(convert.getConverter("grid.row-span")(null), 0, "grid.row-span: (null)");
+        assert.strictEqual(convert.getConverter("grid.row-span")(""), 0, "grid.row-span: (empty)");
+        assert.strictEqual(convert.getConverter("grid.row-span")("0"), 0, "grid.row-span: 0");
+        assert.strictEqual(convert.getConverter("grid.row-span")("2"), 2, "grid.row-span: 2");
+        assert.strictEqual(convert.getConverter("grid.row-span")("2.2"), 2, "grid.row-span: 2.2");
 
-        assert.strictEqual(convert.fromString("grid.column", null), 0, "grid.column: (null)");
-        assert.strictEqual(convert.fromString("grid.column", ""), 0, "grid.column: (empty)");
-        assert.strictEqual(convert.fromString("grid.column", "0"), 0, "grid.column: 0");
-        assert.strictEqual(convert.fromString("grid.column", "2"), 2, "grid.column: 2");
-        assert.strictEqual(convert.fromString("grid.column", "2.2"), 2, "grid.column: 2.2");
+        assert.strictEqual(convert.getConverter("grid.column")(null), 0, "grid.column: (null)");
+        assert.strictEqual(convert.getConverter("grid.column")(""), 0, "grid.column: (empty)");
+        assert.strictEqual(convert.getConverter("grid.column")("0"), 0, "grid.column: 0");
+        assert.strictEqual(convert.getConverter("grid.column")("2"), 2, "grid.column: 2");
+        assert.strictEqual(convert.getConverter("grid.column")("2.2"), 2, "grid.column: 2.2");
 
-        assert.strictEqual(convert.fromString("grid.column-span", null), 0, "grid.column-span: (null)");
-        assert.strictEqual(convert.fromString("grid.column-span", ""), 0, "grid.column-span: (empty)");
-        assert.strictEqual(convert.fromString("grid.column-span", "0"), 0, "grid.column-span: 0");
-        assert.strictEqual(convert.fromString("grid.column-span", "2"), 2, "grid.column-span: 2");
-        assert.strictEqual(convert.fromString("grid.column-span", "2.2"), 2, "grid.column-span: 2.2");
+        assert.strictEqual(convert.getConverter("grid.column-span")(null), 0, "grid.column-span: (null)");
+        assert.strictEqual(convert.getConverter("grid.column-span")(""), 0, "grid.column-span: (empty)");
+        assert.strictEqual(convert.getConverter("grid.column-span")("0"), 0, "grid.column-span: 0");
+        assert.strictEqual(convert.getConverter("grid.column-span")("2"), 2, "grid.column-span: 2");
+        assert.strictEqual(convert.getConverter("grid.column-span")("2.2"), 2, "grid.column-span: 2.2");
 
-        sameRowDefs(convert.fromString("row-definitions", "* auto 100"), [
+        sameRowDefs(convert.getConverter("row-definitions")("* auto 100"), [
             {height: {value: 1, type: GridUnitType.star}, minHeight: 0, maxHeight: Number.POSITIVE_INFINITY},
             {height: {value: 0, type: GridUnitType.auto}, minHeight: 0, maxHeight: Number.POSITIVE_INFINITY},
             {height: {value: 100, type: GridUnitType.pixel}, minHeight: 0, maxHeight: Number.POSITIVE_INFINITY},
         ], "row-definitions: * auto 100");
 
-        sameColDefs(convert.fromString("column-definitions", "* auto 100"), [
+        sameColDefs(convert.getConverter("column-definitions")("* auto 100"), [
             {width: {value: 1, type: GridUnitType.star}, minWidth: 0, maxWidth: Number.POSITIVE_INFINITY},
             {width: {value: 0, type: GridUnitType.auto}, minWidth: 0, maxWidth: Number.POSITIVE_INFINITY},
             {width: {value: 100, type: GridUnitType.pixel}, minWidth: 0, maxWidth: Number.POSITIVE_INFINITY},
