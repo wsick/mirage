@@ -467,6 +467,9 @@ var mirage;
         Panel.prototype.getChildAt = function (index) {
             return this.tree.children[index];
         };
+        Panel.prototype.indexOfChild = function (child) {
+            return this.tree.children.indexOf(child);
+        };
         return Panel;
     })(mirage.core.LayoutNode);
     mirage.Panel = Panel;

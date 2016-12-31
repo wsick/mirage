@@ -102,6 +102,7 @@ declare namespace mirage {
         removeChild(child: core.LayoutNode): boolean;
         removeChildAt(index: number): core.LayoutNode;
         getChildAt(index: number): core.LayoutNode;
+        indexOfChild(child: core.LayoutNode): number;
     }
     interface IPanelTree extends core.ILayoutTree {
         children: core.LayoutNode[];

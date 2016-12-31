@@ -66,6 +66,10 @@ namespace mirage {
         getChildAt(index: number): core.LayoutNode {
             return this.tree.children[index];
         }
+
+        indexOfChild(child: core.LayoutNode): number {
+            return this.tree.children.indexOf(child);
+        }
     }
     registerNodeType("panel", Panel);
 
