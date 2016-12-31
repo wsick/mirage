@@ -6,6 +6,14 @@ var mirage;
 (function (mirage) {
     var core;
     (function (core) {
+        core.DEFAULT_VISIBLE = true;
+        core.DEFAULT_USE_LAYOUT_ROUNDING = true;
+        core.DEFAULT_WIDTH = NaN;
+        core.DEFAULT_HEIGHT = NaN;
+        core.DEFAULT_MIN_WIDTH = 0.0;
+        core.DEFAULT_MIN_HEIGHT = 0.0;
+        core.DEFAULT_MAX_WIDTH = Number.POSITIVE_INFINITY;
+        core.DEFAULT_MAX_HEIGHT = Number.POSITIVE_INFINITY;
         var LayoutNode = (function () {
             function LayoutNode() {
                 this.init();
@@ -93,6 +101,8 @@ var mirage;
                     return this.inputs.margin;
                 },
                 set: function (value) {
+                    if (!value)
+                        value = new mirage.Thickness();
                     if (mirage.Thickness.isEqual(this.inputs.margin, value))
                         return;
                     this.inputs.margin = value;
@@ -106,6 +116,8 @@ var mirage;
                     return this.inputs.width;
                 },
                 set: function (value) {
+                    if (value == null)
+                        value = core.DEFAULT_WIDTH;
                     if (this.inputs.width === value)
                         return;
                     this.inputs.width = value;
@@ -119,6 +131,8 @@ var mirage;
                     return this.inputs.height;
                 },
                 set: function (value) {
+                    if (value == null)
+                        value = core.DEFAULT_HEIGHT;
                     if (this.inputs.height === value)
                         return;
                     this.inputs.height = value;
@@ -132,6 +146,8 @@ var mirage;
                     return this.inputs.minWidth;
                 },
                 set: function (value) {
+                    if (value == null)
+                        value = core.DEFAULT_MIN_WIDTH;
                     if (this.inputs.minWidth === value)
                         return;
                     this.inputs.minWidth = value;
@@ -145,6 +161,8 @@ var mirage;
                     return this.inputs.minHeight;
                 },
                 set: function (value) {
+                    if (value == null)
+                        value = core.DEFAULT_MIN_HEIGHT;
                     if (this.inputs.minHeight === value)
                         return;
                     this.inputs.minHeight = value;
@@ -158,6 +176,8 @@ var mirage;
                     return this.inputs.maxWidth;
                 },
                 set: function (value) {
+                    if (value == null)
+                        value = core.DEFAULT_MAX_WIDTH;
                     if (this.inputs.maxWidth === value)
                         return;
                     this.inputs.maxWidth = value;
@@ -171,6 +191,8 @@ var mirage;
                     return this.inputs.maxHeight;
                 },
                 set: function (value) {
+                    if (value == null)
+                        value = core.DEFAULT_MAX_HEIGHT;
                     if (this.inputs.maxHeight === value)
                         return;
                     this.inputs.maxHeight = value;
@@ -184,6 +206,7 @@ var mirage;
                     return this.inputs.horizontalAlignment;
                 },
                 set: function (value) {
+                    value = value || 0;
                     if (this.inputs.horizontalAlignment === value)
                         return;
                     this.inputs.horizontalAlignment = value;
@@ -197,6 +220,7 @@ var mirage;
                     return this.inputs.verticalAlignment;
                 },
                 set: function (value) {
+                    value = value || 0;
                     if (this.inputs.verticalAlignment === value)
                         return;
                     this.inputs.verticalAlignment = value;
@@ -209,7 +233,12 @@ var mirage;
                 return this.inputs.attached[property];
             };
             LayoutNode.prototype.setAttached = function (property, value) {
-                this.inputs.attached[property] = value;
+                if (value === undefined) {
+                    delete this.inputs.attached[property];
+                }
+                else {
+                    this.inputs.attached[property] = value;
+                }
             };
             LayoutNode.prototype.setParent = function (parent) {
                 if (!parent) {
@@ -831,6 +860,8 @@ var mirage;
                 return this.inputs.rowDefinitions;
             },
             set: function (value) {
+                if (!value)
+                    value = [];
                 this.inputs.rowDefinitions = value;
                 this.invalidateMeasure();
             },
@@ -842,6 +873,8 @@ var mirage;
                 return this.inputs.columnDefinitions;
             },
             set: function (value) {
+                if (!value)
+                    value = [];
                 this.inputs.columnDefinitions = value;
                 this.invalidateMeasure();
             },
@@ -1151,6 +1184,7 @@ var mirage;
                 return this.inputs.orientation;
             },
             set: function (value) {
+                value = value || 0;
                 if (this.inputs.orientation === value)
                     return;
                 this.inputs.orientation = value;
