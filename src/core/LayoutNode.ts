@@ -34,6 +34,15 @@ namespace mirage.core {
         skipBranch();
     }
 
+    export var DEFAULT_VISIBLE = true;
+    export var DEFAULT_USE_LAYOUT_ROUNDING = true;
+    export var DEFAULT_WIDTH = NaN;
+    export var DEFAULT_HEIGHT = NaN;
+    export var DEFAULT_MIN_WIDTH = 0.0;
+    export var DEFAULT_MIN_HEIGHT = 0.0;
+    export var DEFAULT_MAX_WIDTH = Number.POSITIVE_INFINITY;
+    export var DEFAULT_MAX_HEIGHT = Number.POSITIVE_INFINITY;
+
     export class LayoutNode {
         inputs: ILayoutNodeInputs;
         state: ILayoutNodeState;
@@ -131,6 +140,8 @@ namespace mirage.core {
         }
 
         set margin(value: Thickness) {
+            if (!value) // unset
+                value = new Thickness();
             if (Thickness.isEqual(this.inputs.margin, value))
                 return;
             this.inputs.margin = value;
@@ -142,6 +153,8 @@ namespace mirage.core {
         }
 
         set width(value: number) {
+            if (value == null) //unset
+                value = DEFAULT_WIDTH;
             if (this.inputs.width === value)
                 return;
             this.inputs.width = value;
@@ -153,6 +166,8 @@ namespace mirage.core {
         }
 
         set height(value: number) {
+            if (value == null) //unset
+                value = DEFAULT_HEIGHT;
             if (this.inputs.height === value)
                 return;
             this.inputs.height = value;
@@ -164,6 +179,8 @@ namespace mirage.core {
         }
 
         set minWidth(value: number) {
+            if (value == null) //unset
+                value = DEFAULT_MIN_WIDTH;
             if (this.inputs.minWidth === value)
                 return;
             this.inputs.minWidth = value;
@@ -175,6 +192,8 @@ namespace mirage.core {
         }
 
         set minHeight(value: number) {
+            if (value == null) //unset
+                value = DEFAULT_MIN_HEIGHT;
             if (this.inputs.minHeight === value)
                 return;
             this.inputs.minHeight = value;
@@ -186,6 +205,8 @@ namespace mirage.core {
         }
 
         set maxWidth(value: number) {
+            if (value == null) //unset
+                value = DEFAULT_MAX_WIDTH;
             if (this.inputs.maxWidth === value)
                 return;
             this.inputs.maxWidth = value;
@@ -197,6 +218,8 @@ namespace mirage.core {
         }
 
         set maxHeight(value: number) {
+            if (value == null) //unset
+                value = DEFAULT_MAX_HEIGHT;
             if (this.inputs.maxHeight === value)
                 return;
             this.inputs.maxHeight = value;
@@ -208,6 +231,7 @@ namespace mirage.core {
         }
 
         set horizontalAlignment(value: HorizontalAlignment) {
+            value = value || 0; // coerce null, undefined, 0 => 0
             if (this.inputs.horizontalAlignment === value)
                 return;
             this.inputs.horizontalAlignment = value;
@@ -219,6 +243,7 @@ namespace mirage.core {
         }
 
         set verticalAlignment(value: VerticalAlignment) {
+            value = value || 0; // coerce null, undefined, 0 => 0
             if (this.inputs.verticalAlignment === value)
                 return;
             this.inputs.verticalAlignment = value;
@@ -232,7 +257,11 @@ namespace mirage.core {
         }
 
         setAttached(property: string, value: any) {
-            this.inputs.attached[property] = value;
+            if (value === undefined) {
+                delete this.inputs.attached[property];
+            } else {
+                this.inputs.attached[property] = value;
+            }
         }
 
         // TREE

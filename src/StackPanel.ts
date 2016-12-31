@@ -16,6 +16,7 @@ namespace mirage {
         }
 
         set orientation(value: Orientation) {
+            value = value || 0; // coerce null, undefined, 0 => 0
             if (this.inputs.orientation === value)
                 return;
             this.inputs.orientation = value;
