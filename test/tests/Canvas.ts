@@ -40,15 +40,25 @@ namespace mirage.tests {
         arrangeState(child3, new Rect(300, 600, 75, 50), new Rect(300, 600, 75, 50), "child3");
     });
 
-    QUnit.test("converters", (assert) => {
-        assert.strictEqual(convert.fromString("canvas.top", null), 0, "canvas.top: (null)");
-        assert.strictEqual(convert.fromString("canvas.top", ""), 0, "canvas.top: (empty)");
-        assert.strictEqual(convert.fromString("canvas.top", "0"), 0, "canvas.top: 0");
-        assert.strictEqual(convert.fromString("canvas.top", "100.2"), 100.2, "canvas.top: 100.2");
+    QUnit.test("setters", (assert) => {
+        var node = new core.LayoutNode();
 
-        assert.strictEqual(convert.fromString("canvas.left", null), 0, "canvas.left: (null)");
-        assert.strictEqual(convert.fromString("canvas.left", ""), 0, "canvas.left: (empty)");
-        assert.strictEqual(convert.fromString("canvas.left", "0"), 0, "canvas.left: 0");
-        assert.strictEqual(convert.fromString("canvas.left", "100.2"), 100.2, "canvas.left: 100.2");
+        map.getSetter("canvas.left")(node, 50);
+        assert.deepEqual(Canvas.getLeft(node), 50, "canvas.left");
+
+        map.getSetter("canvas.top")(node, 100);
+        assert.deepEqual(Canvas.getTop(node), 100, "canvas.top");
+    });
+
+    QUnit.test("converters", (assert) => {
+        assert.strictEqual(convert.getConverter("canvas.top")(null), 0, "canvas.top: (null)");
+        assert.strictEqual(convert.getConverter("canvas.top")(""), 0, "canvas.top: (empty)");
+        assert.strictEqual(convert.getConverter("canvas.top")("0"), 0, "canvas.top: 0");
+        assert.strictEqual(convert.getConverter("canvas.top")("100.2"), 100.2, "canvas.top: 100.2");
+
+        assert.strictEqual(convert.getConverter("canvas.left")(null), 0, "canvas.left: (null)");
+        assert.strictEqual(convert.getConverter("canvas.left")(""), 0, "canvas.left: (empty)");
+        assert.strictEqual(convert.getConverter("canvas.left")("0"), 0, "canvas.left: 0");
+        assert.strictEqual(convert.getConverter("canvas.left")("100.2"), 100.2, "canvas.left: 100.2");
     });
 }

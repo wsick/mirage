@@ -75,10 +75,17 @@ namespace mirage.tests {
         arrangeState(child3, new Rect(100, 0, 50, 200), new Rect(100, 125, 50, 75), "child3");
     });
 
+    QUnit.test("setters", (assert) => {
+        var stackPanel = new StackPanel();
+
+        map.getSetter("orientation")(stackPanel, Orientation.vertical);
+        assert.deepEqual(stackPanel.orientation, Orientation.vertical, "orientation");
+    });
+
     QUnit.test("converters", (assert) => {
-        assert.strictEqual(convert.fromString("orientation", null), Orientation.horizontal, "orientation: (null)");
-        assert.strictEqual(convert.fromString("orientation", ""), Orientation.horizontal, "orientation: (empty)");
-        assert.strictEqual(convert.fromString("orientation", "horizontal"), Orientation.horizontal, "orientation: horizontal");
-        assert.strictEqual(convert.fromString("orientation", "vertical"), Orientation.vertical, "orientation: vertical");
+        assert.strictEqual(convert.getConverter("orientation")(null), Orientation.horizontal, "orientation: (null)");
+        assert.strictEqual(convert.getConverter("orientation")(""), Orientation.horizontal, "orientation: (empty)");
+        assert.strictEqual(convert.getConverter("orientation")("horizontal"), Orientation.horizontal, "orientation: horizontal");
+        assert.strictEqual(convert.getConverter("orientation")("vertical"), Orientation.vertical, "orientation: vertical");
     });
 }

@@ -117,9 +117,20 @@ declare namespace mirage.convert {
     interface IConverter {
         (value: string): any;
     }
-    function fromString(property: string, value: string): any;
-    function registerFromString(property: string, converter: IConverter): void;
-    function getFromStringConverter(property: string): IConverter;
+    function register(property: string, converter: IConverter): void;
+    function getConverter(property: string): IConverter;
+}
+declare namespace mirage.map {
+    interface IPropertySetter {
+        (node: core.LayoutNode, value: any): void;
+    }
+    interface IPropertyMapper {
+        (node: core.LayoutNode, value: string): void;
+    }
+    function getSetter(property: string): IPropertySetter;
+    function getMapper(property: string): IPropertyMapper;
+    function registerNormal(property: string, key: string): void;
+    function registerCustom(property: string, setter: IPropertySetter): void;
 }
 declare namespace mirage {
     class Canvas extends Panel {
@@ -333,6 +344,8 @@ declare namespace mirage.core {
         slotHint = 32,
         hints = 56,
     }
+}
+declare namespace mirage.core {
 }
 declare namespace mirage.core {
     interface IMeasurer {

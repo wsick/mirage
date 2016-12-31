@@ -1,6 +1,7 @@
 /// <reference path="Panel" />
 /// <reference path="typeLookup" />
-/// <reference path="convert/fromString" />
+/// <reference path="convert/converters" />
+/// <reference path="map/mappers" />
 /// <reference path="IRowDefinition" />
 /// <reference path="IColumnDefinition" />
 
@@ -103,12 +104,18 @@ namespace mirage {
         }
     }
     registerNodeType("grid", Grid);
-    convert.registerFromString("row-definitions", NewRowDefinitions);
-    convert.registerFromString("column-definitions", NewColumnDefinitions);
-    convert.registerFromString("grid.row", convertGridCell);
-    convert.registerFromString("grid.row-span", convertGridCell);
-    convert.registerFromString("grid.column", convertGridCell);
-    convert.registerFromString("grid.column-span", convertGridCell);
+    convert.register("row-definitions", NewRowDefinitions);
+    convert.register("column-definitions", NewColumnDefinitions);
+    convert.register("grid.row", convertGridCell);
+    convert.register("grid.row-span", convertGridCell);
+    convert.register("grid.column", convertGridCell);
+    convert.register("grid.column-span", convertGridCell);
+    map.registerNormal("row-definitions", "rowDefinitions");
+    map.registerNormal("column-definitions", "columnDefinitions");
+    map.registerCustom("grid.row", Grid.setRow);
+    map.registerCustom("grid.row-span", Grid.setRowSpan);
+    map.registerCustom("grid.column", Grid.setColumn);
+    map.registerCustom("grid.column-span", Grid.setColumnSpan);
 
     function invalidateCell(node: core.LayoutNode) {
         var parent = node.tree.parent;

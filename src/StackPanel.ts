@@ -1,6 +1,7 @@
 /// <reference path="typeLookup" />
-/// <reference path="convert/fromString" />
+/// <reference path="convert/converters" />
 /// <reference path="core/converters" />
+/// <reference path="map/mappers" />
 
 namespace mirage {
     export interface IStackPanelInputs extends core.ILayoutNodeInputs {
@@ -133,5 +134,6 @@ namespace mirage {
         }
     }
     registerNodeType("stack-panel", StackPanel);
-    convert.registerFromString("orientation", core.enumConverter(Orientation));
+    convert.register("orientation", core.enumConverter(Orientation));
+    map.registerNormal("orientation", "orientation");
 }

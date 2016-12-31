@@ -221,38 +221,70 @@ namespace mirage.tests {
         arrangeState(child3, new Rect(350, 0, 50, 400), new Rect(350, 175, 50, 50), "child3");
     });
 
+    QUnit.test("setters", (assert) => {
+        var grid = new Grid();
+
+        map.getSetter("row-definitions")(grid, NewRowDefinitions("*"));
+        sameRowDefs(grid.rowDefinitions, [{
+            height: {value: 1, type: GridUnitType.star},
+            minHeight: 0,
+            maxHeight: Number.POSITIVE_INFINITY
+        }], "row-definitions");
+
+        map.getSetter("column-definitions")(grid, NewColumnDefinitions("*"));
+        sameColDefs(grid.columnDefinitions, [{
+            width: {value: 1, type: GridUnitType.star},
+            minWidth: 0,
+            maxWidth: Number.POSITIVE_INFINITY
+        }], "column-definitions");
+
+        var node = new core.LayoutNode();
+
+        map.getSetter("grid.row")(node, 2);
+        assert.deepEqual(Grid.getRow(node), 2, "grid.row");
+
+        map.getSetter("grid.row-span")(node, 3);
+        assert.deepEqual(Grid.getRowSpan(node), 3, "grid.row-span");
+
+        map.getSetter("grid.column")(node, 4);
+        assert.deepEqual(Grid.getColumn(node), 4, "grid.column");
+
+        map.getSetter("grid.column-span")(node, 5);
+        assert.deepEqual(Grid.getColumnSpan(node), 5, "grid.column-span");
+    });
+
     QUnit.test("converters", (assert) => {
-        assert.strictEqual(convert.fromString("grid.row", null), 0, "grid.row: (null)");
-        assert.strictEqual(convert.fromString("grid.row", ""), 0, "grid.row: (empty)");
-        assert.strictEqual(convert.fromString("grid.row", "0"), 0, "grid.row: 0");
-        assert.strictEqual(convert.fromString("grid.row", "2"), 2, "grid.row: 2");
-        assert.strictEqual(convert.fromString("grid.row", "2.2"), 2, "grid.row: 2.2");
+        assert.strictEqual(convert.getConverter("grid.row")(null), 0, "grid.row: (null)");
+        assert.strictEqual(convert.getConverter("grid.row")(""), 0, "grid.row: (empty)");
+        assert.strictEqual(convert.getConverter("grid.row")("0"), 0, "grid.row: 0");
+        assert.strictEqual(convert.getConverter("grid.row")("2"), 2, "grid.row: 2");
+        assert.strictEqual(convert.getConverter("grid.row")("2.2"), 2, "grid.row: 2.2");
 
-        assert.strictEqual(convert.fromString("grid.row-span", null), 0, "grid.row-span: (null)");
-        assert.strictEqual(convert.fromString("grid.row-span", ""), 0, "grid.row-span: (empty)");
-        assert.strictEqual(convert.fromString("grid.row-span", "0"), 0, "grid.row-span: 0");
-        assert.strictEqual(convert.fromString("grid.row-span", "2"), 2, "grid.row-span: 2");
-        assert.strictEqual(convert.fromString("grid.row-span", "2.2"), 2, "grid.row-span: 2.2");
+        assert.strictEqual(convert.getConverter("grid.row-span")(null), 0, "grid.row-span: (null)");
+        assert.strictEqual(convert.getConverter("grid.row-span")(""), 0, "grid.row-span: (empty)");
+        assert.strictEqual(convert.getConverter("grid.row-span")("0"), 0, "grid.row-span: 0");
+        assert.strictEqual(convert.getConverter("grid.row-span")("2"), 2, "grid.row-span: 2");
+        assert.strictEqual(convert.getConverter("grid.row-span")("2.2"), 2, "grid.row-span: 2.2");
 
-        assert.strictEqual(convert.fromString("grid.column", null), 0, "grid.column: (null)");
-        assert.strictEqual(convert.fromString("grid.column", ""), 0, "grid.column: (empty)");
-        assert.strictEqual(convert.fromString("grid.column", "0"), 0, "grid.column: 0");
-        assert.strictEqual(convert.fromString("grid.column", "2"), 2, "grid.column: 2");
-        assert.strictEqual(convert.fromString("grid.column", "2.2"), 2, "grid.column: 2.2");
+        assert.strictEqual(convert.getConverter("grid.column")(null), 0, "grid.column: (null)");
+        assert.strictEqual(convert.getConverter("grid.column")(""), 0, "grid.column: (empty)");
+        assert.strictEqual(convert.getConverter("grid.column")("0"), 0, "grid.column: 0");
+        assert.strictEqual(convert.getConverter("grid.column")("2"), 2, "grid.column: 2");
+        assert.strictEqual(convert.getConverter("grid.column")("2.2"), 2, "grid.column: 2.2");
 
-        assert.strictEqual(convert.fromString("grid.column-span", null), 0, "grid.column-span: (null)");
-        assert.strictEqual(convert.fromString("grid.column-span", ""), 0, "grid.column-span: (empty)");
-        assert.strictEqual(convert.fromString("grid.column-span", "0"), 0, "grid.column-span: 0");
-        assert.strictEqual(convert.fromString("grid.column-span", "2"), 2, "grid.column-span: 2");
-        assert.strictEqual(convert.fromString("grid.column-span", "2.2"), 2, "grid.column-span: 2.2");
+        assert.strictEqual(convert.getConverter("grid.column-span")(null), 0, "grid.column-span: (null)");
+        assert.strictEqual(convert.getConverter("grid.column-span")(""), 0, "grid.column-span: (empty)");
+        assert.strictEqual(convert.getConverter("grid.column-span")("0"), 0, "grid.column-span: 0");
+        assert.strictEqual(convert.getConverter("grid.column-span")("2"), 2, "grid.column-span: 2");
+        assert.strictEqual(convert.getConverter("grid.column-span")("2.2"), 2, "grid.column-span: 2.2");
 
-        sameRowDefs(convert.fromString("row-definitions", "* auto 100"), [
+        sameRowDefs(convert.getConverter("row-definitions")("* auto 100"), [
             {height: {value: 1, type: GridUnitType.star}, minHeight: 0, maxHeight: Number.POSITIVE_INFINITY},
             {height: {value: 0, type: GridUnitType.auto}, minHeight: 0, maxHeight: Number.POSITIVE_INFINITY},
             {height: {value: 100, type: GridUnitType.pixel}, minHeight: 0, maxHeight: Number.POSITIVE_INFINITY},
         ], "row-definitions: * auto 100");
 
-        sameColDefs(convert.fromString("column-definitions", "* auto 100"), [
+        sameColDefs(convert.getConverter("column-definitions")("* auto 100"), [
             {width: {value: 1, type: GridUnitType.star}, minWidth: 0, maxWidth: Number.POSITIVE_INFINITY},
             {width: {value: 0, type: GridUnitType.auto}, minWidth: 0, maxWidth: Number.POSITIVE_INFINITY},
             {width: {value: 100, type: GridUnitType.pixel}, minWidth: 0, maxWidth: Number.POSITIVE_INFINITY},
