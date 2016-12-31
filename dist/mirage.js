@@ -1868,14 +1868,14 @@ var mirage;
                     allocate: function (allocFunc) {
                         var cell;
                         while ((cell = unicells.pop()) != null) {
-                            var i = cell.start;
-                            var j = cell.end;
+                            var i = cell.end;
+                            var j = cell.start;
                             cell.matrix[i][j].desired = Math.max(cell.matrix[i][j].desired, cell.size);
                             allocFunc();
                         }
                         while ((cell = multicells.pop()) != null) {
-                            var i = cell.start;
-                            var j = cell.end;
+                            var i = cell.end;
+                            var j = cell.start;
                             cell.matrix[i][j].desired = Math.max(cell.matrix[i][j].desired, cell.size);
                             allocFunc();
                         }
