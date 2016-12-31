@@ -538,26 +538,39 @@ var mirage;
     var convert;
     (function (convert) {
         var converters = {};
-        function fromString(property, value) {
-            var converter = converters[property];
-            if (!converter)
-                return value;
-            return converter(value);
-        }
-        convert.fromString = fromString;
-        function registerFromString(property, converter) {
+        function register(property, converter) {
             converters[property] = converter;
         }
-        convert.registerFromString = registerFromString;
-        function getFromStringConverter(property) {
+        convert.register = register;
+        function getConverter(property) {
             return converters[property];
         }
-        convert.getFromStringConverter = getFromStringConverter;
+        convert.getConverter = getConverter;
     })(convert = mirage.convert || (mirage.convert = {}));
+})(mirage || (mirage = {}));
+var mirage;
+(function (mirage) {
+    var map;
+    (function (map) {
+        var setters = {};
+        function getMapper(property) {
+            return setters[property];
+        }
+        map.getMapper = getMapper;
+        function registerNormal(property, key) {
+            setters[property] = function (node, value) { return node[key] = value; };
+        }
+        map.registerNormal = registerNormal;
+        function registerCustom(property, mapper) {
+            setters[property] = mapper;
+        }
+        map.registerCustom = registerCustom;
+    })(map = mirage.map || (mirage.map = {}));
 })(mirage || (mirage = {}));
 /// <reference path="Panel" />
 /// <reference path="typeLookup" />
-/// <reference path="convert/fromString" />
+/// <reference path="convert/converters" />
+/// <reference path="map/mappers" />
 var mirage;
 (function (mirage) {
     var Canvas = (function (_super) {
@@ -601,8 +614,10 @@ var mirage;
     })(mirage.Panel);
     mirage.Canvas = Canvas;
     mirage.registerNodeType("canvas", Canvas);
-    mirage.convert.registerFromString("canvas.top", convertCanvasCoord);
-    mirage.convert.registerFromString("canvas.left", convertCanvasCoord);
+    mirage.convert.register("canvas.left", convertCanvasCoord);
+    mirage.convert.register("canvas.top", convertCanvasCoord);
+    mirage.map.registerCustom("canvas.left", Canvas.setLeft);
+    mirage.map.registerCustom("canvas.top", Canvas.setTop);
     function convertCanvasCoord(value) {
         if (!value)
             return 0;
@@ -757,7 +772,8 @@ var mirage;
 })(mirage || (mirage = {}));
 /// <reference path="Panel" />
 /// <reference path="typeLookup" />
-/// <reference path="convert/fromString" />
+/// <reference path="convert/converters" />
+/// <reference path="map/mappers" />
 /// <reference path="IRowDefinition" />
 /// <reference path="IColumnDefinition" />
 var mirage;
@@ -843,12 +859,18 @@ var mirage;
     })(mirage.Panel);
     mirage.Grid = Grid;
     mirage.registerNodeType("grid", Grid);
-    mirage.convert.registerFromString("row-definitions", mirage.NewRowDefinitions);
-    mirage.convert.registerFromString("column-definitions", mirage.NewColumnDefinitions);
-    mirage.convert.registerFromString("grid.row", convertGridCell);
-    mirage.convert.registerFromString("grid.row-span", convertGridCell);
-    mirage.convert.registerFromString("grid.column", convertGridCell);
-    mirage.convert.registerFromString("grid.column-span", convertGridCell);
+    mirage.convert.register("row-definitions", mirage.NewRowDefinitions);
+    mirage.convert.register("column-definitions", mirage.NewColumnDefinitions);
+    mirage.convert.register("grid.row", convertGridCell);
+    mirage.convert.register("grid.row-span", convertGridCell);
+    mirage.convert.register("grid.column", convertGridCell);
+    mirage.convert.register("grid.column-span", convertGridCell);
+    mirage.map.registerNormal("row-definitions", "rowDefinitions");
+    mirage.map.registerNormal("column-definitions", "columnDefinitions");
+    mirage.map.registerCustom("grid.row", Grid.setRow);
+    mirage.map.registerCustom("grid.row-span", Grid.setRowSpan);
+    mirage.map.registerCustom("grid.column", Grid.setColumn);
+    mirage.map.registerCustom("grid.column-span", Grid.setColumnSpan);
     function invalidateCell(node) {
         var parent = node.tree.parent;
         if (parent instanceof Grid)
@@ -1028,7 +1050,7 @@ var mirage;
     })();
     mirage.Size = Size;
 })(mirage || (mirage = {}));
-/// <reference path="../convert/fromString" />
+/// <reference path="../convert/converters" />
 var mirage;
 (function (mirage) {
     var core;
@@ -1090,22 +1112,23 @@ var mirage;
             }
             return tokens;
         }
-        mirage.convert.registerFromString("visible", booleanDefaultTrue);
-        mirage.convert.registerFromString("use-layout-rounding", booleanDefaultTrue);
-        mirage.convert.registerFromString("margin", thickness);
-        mirage.convert.registerFromString("width", floatDefaultNaN);
-        mirage.convert.registerFromString("height", floatDefaultNaN);
-        mirage.convert.registerFromString("min-width", float);
-        mirage.convert.registerFromString("min-height", float);
-        mirage.convert.registerFromString("max-width", floatDefaultInfinite);
-        mirage.convert.registerFromString("max-height", floatDefaultInfinite);
-        mirage.convert.registerFromString("horizontal-alignment", enumConverter(mirage.HorizontalAlignment));
-        mirage.convert.registerFromString("vertical-alignment", enumConverter(mirage.VerticalAlignment));
+        mirage.convert.register("visible", booleanDefaultTrue);
+        mirage.convert.register("use-layout-rounding", booleanDefaultTrue);
+        mirage.convert.register("margin", thickness);
+        mirage.convert.register("width", floatDefaultNaN);
+        mirage.convert.register("height", floatDefaultNaN);
+        mirage.convert.register("min-width", float);
+        mirage.convert.register("min-height", float);
+        mirage.convert.register("max-width", floatDefaultInfinite);
+        mirage.convert.register("max-height", floatDefaultInfinite);
+        mirage.convert.register("horizontal-alignment", enumConverter(mirage.HorizontalAlignment));
+        mirage.convert.register("vertical-alignment", enumConverter(mirage.VerticalAlignment));
     })(core = mirage.core || (mirage.core = {}));
 })(mirage || (mirage = {}));
 /// <reference path="typeLookup" />
-/// <reference path="convert/fromString" />
+/// <reference path="convert/converters" />
 /// <reference path="core/converters" />
+/// <reference path="map/mappers" />
 var mirage;
 (function (mirage) {
     var StackPanel = (function (_super) {
@@ -1218,7 +1241,8 @@ var mirage;
     })(mirage.Panel);
     mirage.StackPanel = StackPanel;
     mirage.registerNodeType("stack-panel", StackPanel);
-    mirage.convert.registerFromString("orientation", mirage.core.enumConverter(mirage.Orientation));
+    mirage.convert.register("orientation", mirage.core.enumConverter(mirage.Orientation));
+    mirage.map.registerNormal("orientation", "orientation");
 })(mirage || (mirage = {}));
 var mirage;
 (function (mirage) {
@@ -1368,6 +1392,24 @@ var mirage;
             LayoutFlags[LayoutFlags["hints"] = 56] = "hints";
         })(core.LayoutFlags || (core.LayoutFlags = {}));
         var LayoutFlags = core.LayoutFlags;
+    })(core = mirage.core || (mirage.core = {}));
+})(mirage || (mirage = {}));
+/// <reference path="converters" />
+var mirage;
+(function (mirage) {
+    var core;
+    (function (core) {
+        mirage.map.registerNormal("visible", "visible");
+        mirage.map.registerNormal("use-layout-rounding", "useLayoutRounding");
+        mirage.map.registerNormal("margin", "margin");
+        mirage.map.registerNormal("width", "width");
+        mirage.map.registerNormal("height", "height");
+        mirage.map.registerNormal("min-width", "minWidth");
+        mirage.map.registerNormal("min-height", "minHeight");
+        mirage.map.registerNormal("max-width", "maxWidth");
+        mirage.map.registerNormal("max-height", "maxHeight");
+        mirage.map.registerNormal("horizontal-alignment", "horizontalAlignment");
+        mirage.map.registerNormal("vertical-alignment", "verticalAlignment");
     })(core = mirage.core || (mirage.core = {}));
 })(mirage || (mirage = {}));
 var mirage;
