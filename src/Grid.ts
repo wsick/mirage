@@ -1,6 +1,7 @@
 /// <reference path="Panel" />
 /// <reference path="typeLookup" />
 /// <reference path="convert/converters" />
+/// <reference path="map/mappers" />
 /// <reference path="IRowDefinition" />
 /// <reference path="IColumnDefinition" />
 
@@ -109,6 +110,12 @@ namespace mirage {
     convert.register("grid.row-span", convertGridCell);
     convert.register("grid.column", convertGridCell);
     convert.register("grid.column-span", convertGridCell);
+    map.registerNormal("row-definitions", "rowDefinitions");
+    map.registerNormal("column-definitions", "columnDefinitions");
+    map.registerCustom("grid.row", Grid.setRow);
+    map.registerCustom("grid.row-span", Grid.setRowSpan);
+    map.registerCustom("grid.column", Grid.setColumn);
+    map.registerCustom("grid.column-span", Grid.setColumnSpan);
 
     function invalidateCell(node: core.LayoutNode) {
         var parent = node.tree.parent;

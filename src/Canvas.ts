@@ -1,6 +1,7 @@
 /// <reference path="Panel" />
 /// <reference path="typeLookup" />
 /// <reference path="convert/converters" />
+/// <reference path="map/mappers" />
 
 namespace mirage {
     export class Canvas extends Panel {
@@ -44,8 +45,10 @@ namespace mirage {
         }
     }
     registerNodeType("canvas", Canvas);
-    convert.register("canvas.top", convertCanvasCoord);
     convert.register("canvas.left", convertCanvasCoord);
+    convert.register("canvas.top", convertCanvasCoord);
+    map.registerCustom("canvas.left", Canvas.setLeft);
+    map.registerCustom("canvas.top", Canvas.setTop);
     function convertCanvasCoord(value: string): number {
         if (!value)
             return 0;

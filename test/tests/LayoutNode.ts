@@ -1,6 +1,43 @@
 namespace mirage.tests {
     QUnit.module("LayoutNode");
 
+    QUnit.test("mappers", (assert) => {
+        var node = new core.LayoutNode();
+
+        map.getMapper("visible")(node, false);
+        assert.strictEqual(node.visible, false, "visible");
+
+        map.getMapper("use-layout-rounding")(node, false);
+        assert.strictEqual(node.useLayoutRounding, false, "use-layout-rounding");
+
+        map.getMapper("margin")(node, new Thickness(1, 2, 3, 4));
+        assert.deepEqual(node.margin, new Thickness(1, 2, 3, 4), "margin");
+
+        map.getMapper("width")(node, 10);
+        assert.strictEqual(node.width, 10, "width");
+
+        map.getMapper("height")(node, 10);
+        assert.strictEqual(node.height, 10, "height");
+
+        map.getMapper("min-width")(node, 10);
+        assert.strictEqual(node.minWidth, 10, "min-width");
+
+        map.getMapper("min-height")(node, 10);
+        assert.strictEqual(node.minHeight, 10, "min-height");
+
+        map.getMapper("max-width")(node, 10);
+        assert.strictEqual(node.maxWidth, 10, "max-width");
+
+        map.getMapper("max-height")(node, 10);
+        assert.strictEqual(node.maxHeight, 10, "max-height");
+
+        map.getMapper("horizontal-alignment")(node, HorizontalAlignment.left);
+        assert.strictEqual(node.horizontalAlignment, HorizontalAlignment.left, "horizontal-alignment");
+
+        map.getMapper("vertical-alignment")(node, VerticalAlignment.top);
+        assert.strictEqual(node.verticalAlignment, VerticalAlignment.top, "vertical-alignment");
+    });
+
     QUnit.test("converters", (assert) => {
         assert.strictEqual(convert.getConverter("visible")(null), true, "visible: (null)");
         assert.strictEqual(convert.getConverter("visible")(""), true, "visible: (empty)");
