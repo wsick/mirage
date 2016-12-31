@@ -221,17 +221,17 @@ namespace mirage.tests {
         arrangeState(child3, new Rect(350, 0, 50, 400), new Rect(350, 175, 50, 50), "child3");
     });
 
-    QUnit.test("mappers", (assert) => {
+    QUnit.test("setters", (assert) => {
         var grid = new Grid();
 
-        map.getMapper("row-definitions")(grid, NewRowDefinitions("*"));
+        map.getSetter("row-definitions")(grid, NewRowDefinitions("*"));
         sameRowDefs(grid.rowDefinitions, [{
             height: {value: 1, type: GridUnitType.star},
             minHeight: 0,
             maxHeight: Number.POSITIVE_INFINITY
         }], "row-definitions");
 
-        map.getMapper("column-definitions")(grid, NewColumnDefinitions("*"));
+        map.getSetter("column-definitions")(grid, NewColumnDefinitions("*"));
         sameColDefs(grid.columnDefinitions, [{
             width: {value: 1, type: GridUnitType.star},
             minWidth: 0,
@@ -240,16 +240,16 @@ namespace mirage.tests {
 
         var node = new core.LayoutNode();
 
-        map.getMapper("grid.row")(node, 2);
+        map.getSetter("grid.row")(node, 2);
         assert.deepEqual(Grid.getRow(node), 2, "grid.row");
 
-        map.getMapper("grid.row-span")(node, 3);
+        map.getSetter("grid.row-span")(node, 3);
         assert.deepEqual(Grid.getRowSpan(node), 3, "grid.row-span");
 
-        map.getMapper("grid.column")(node, 4);
+        map.getSetter("grid.column")(node, 4);
         assert.deepEqual(Grid.getColumn(node), 4, "grid.column");
 
-        map.getMapper("grid.column-span")(node, 5);
+        map.getSetter("grid.column-span")(node, 5);
         assert.deepEqual(Grid.getColumnSpan(node), 5, "grid.column-span");
     });
 

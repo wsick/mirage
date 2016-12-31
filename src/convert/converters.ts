@@ -8,10 +8,7 @@ namespace mirage.convert {
     export interface IConverter {
         (value: string): any;
     }
-    interface IConverterHash {
-        [property: string]: IConverter;
-    }
-    let converters: IConverterHash = {};
+    let converters: {[property: string]: IConverter;} = {};
 
     export function register(property: string, converter: IConverter) {
         converters[property] = converter;

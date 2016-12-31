@@ -1,24 +1,37 @@
+/// <reference path="../convert/converters" />
+
 namespace mirage.map {
     /*
-     Mappers provide a consistent interface to set properties (normal and attached) on a LayoutNode
+     Setters provide a consistent interface to set properties (normal and attached) on a LayoutNode
+     Mappers will map a string onto a node using a property's registered converter and setter
      */
-    export interface IPropertyMapper {
+    export interface IPropertySetter {
         (node: core.LayoutNode, value: any): void;
     }
-    interface IPropertyMapperHash {
-        [property: string]: IPropertyMapper;
+    export interface IPropertyMapper {
+        (node: core.LayoutNode, value: string): void;
     }
-    let setters: IPropertyMapperHash = {};
+    let setters: {[property: string]: IPropertySetter;} = {};
+    let mappers: {[property: string]: IPropertyMapper;} = {};
+
+
+    export function getSetter(property: string): IPropertySetter {
+        return setters[property];
+    }
 
     export function getMapper(property: string): IPropertyMapper {
-        return setters[property];
+        return mappers[property];
     }
 
     export function registerNormal(property: string, key: string): void {
         setters[property] = (node, value) => node[key] = value;
+        let converter = convert.getConverter(property);
+        mappers[property] = (node, value) => node[key] = converter(value);
     }
 
-    export function registerCustom(property: string, mapper: IPropertyMapper): void {
-        setters[property] = mapper;
+    export function registerCustom(property: string, setter: IPropertySetter): void {
+        setters[property] = setter;
+        let converter = convert.getConverter(property);
+        mappers[property] = (node, value) => setter(node, converter(value));
     }
 }

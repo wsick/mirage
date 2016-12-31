@@ -40,13 +40,13 @@ namespace mirage.tests {
         arrangeState(child3, new Rect(300, 600, 75, 50), new Rect(300, 600, 75, 50), "child3");
     });
 
-    QUnit.test("mappers", (assert) => {
+    QUnit.test("setters", (assert) => {
         var node = new core.LayoutNode();
 
-        map.getMapper("canvas.left")(node, 50);
+        map.getSetter("canvas.left")(node, 50);
         assert.deepEqual(Canvas.getLeft(node), 50, "canvas.left");
 
-        map.getMapper("canvas.top")(node, 100);
+        map.getSetter("canvas.top")(node, 100);
         assert.deepEqual(Canvas.getTop(node), 100, "canvas.top");
     });
 
