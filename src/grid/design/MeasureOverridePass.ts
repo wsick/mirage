@@ -9,11 +9,12 @@ namespace mirage.grid.design {
     }
 
     export function NewMeasureOverridePass(pass: MeasureOverridePass, des: IGridMeasureDesign, tree: IPanelTree) {
-        return function() {
+        return function (constraint: ISize) {
+            des.beginPass(constraint);
             for (var walker = tree.walk(), i = 0; walker.step(); i++) {
                 des.measureChild(pass, i, walker.current);
             }
-            des.finishPass();
+            des.endPass();
         };
     }
 }

@@ -330,12 +330,17 @@ namespace mirage.core {
             this.tree.propagateFlagUp(LayoutFlags.measureHint);
         }
 
-        doMeasure(): boolean {
+        doMeasure(rootSize: ISize): boolean {
             var parent = this.tree.parent;
             var available = new Size();
-            Size.copyTo(this.state.lastAvailable, available);
-            if (!parent && Size.isUndef(available))
-                available.width = available.height = Number.POSITIVE_INFINITY;
+
+            if (!parent) {
+                // A root element will always use root size for measure
+                Size.copyTo(rootSize, available);
+            } else {
+                // Other elements will use their last available size
+                Size.copyTo(this.state.lastAvailable, available);
+            }
 
             var success = false;
             if (!Size.isUndef(available)) {

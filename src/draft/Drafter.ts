@@ -30,7 +30,7 @@ namespace mirage.draft {
             var flags = node.state.flags;
             if ((flags & LayoutFlags.measureHint) > 0) {
                 return measure.prepare()
-                    && measure.draft();
+                    && measure.draft(rootSize);
             }
             if ((flags & LayoutFlags.arrangeHint) > 0) {
                 return arrange.prepare()

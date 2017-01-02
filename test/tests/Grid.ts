@@ -186,7 +186,7 @@ namespace mirage.tests {
     QUnit.test("draft-scenario3", () => {
         var grid = new Grid();
         // no defined row defs => 1*
-        // 1* auto 50 col defs => (given child constraints) 250 100 50
+        // 1* auto 50 col defs => rest (given child constraints) 50
         grid.columnDefinitions = NewColumnDefinitions("* auto 50");
         grid.invalidateMeasure();
 
@@ -210,7 +210,10 @@ namespace mirage.tests {
         // measure
         ok(grid.measure(new Size(400, 400)), "measure changed");
         strictEqual(grid.state.flags & LayoutFlags.measure, 0, "measure flag cleared");
-        deepEqual(grid.state.desiredSize, new Size(150, 50), "desiredSize");
+        deepEqual(grid.state.desiredSize, new Size(200, 50), "root-desiredSize");
+        deepEqual(child1.state.desiredSize, new Size(50, 50), "child1-desiredSize");
+        deepEqual(child2.state.desiredSize, new Size(100, 50), "child2-desiredSize");
+        deepEqual(child3.state.desiredSize, new Size(50, 50), "child3-desiredSize");
 
         // arrange
         ok(grid.arrange(new Rect(0, 0, 400, 400)), "arrange changed");
