@@ -16,11 +16,19 @@ namespace mirage.map {
 
 
     export function getSetter(property: string): IPropertySetter {
-        return setters[property];
+        let setter = setters[property];
+        if (!setter && property.indexOf(".") > -1) {
+            setter = (node, value) => node.setAttached(property, value);
+        }
+        return setter;
     }
 
     export function getMapper(property: string): IPropertyMapper {
-        return mappers[property];
+        let mapper = mappers[property];
+        if (!mapper && property.indexOf(".") > -1) {
+            mapper = (node, value) => node.setAttached(property, value);
+        }
+        return mapper;
     }
 
     export function registerNormal(property: string, key: string): void {

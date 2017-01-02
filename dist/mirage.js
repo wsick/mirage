@@ -601,11 +601,19 @@ var mirage;
         var setters = {};
         var mappers = {};
         function getSetter(property) {
-            return setters[property];
+            var setter = setters[property];
+            if (!setter && property.indexOf(".") > -1) {
+                setter = function (node, value) { return node.setAttached(property, value); };
+            }
+            return setter;
         }
         map.getSetter = getSetter;
         function getMapper(property) {
-            return mappers[property];
+            var mapper = mappers[property];
+            if (!mapper && property.indexOf(".") > -1) {
+                mapper = function (node, value) { return node.setAttached(property, value); };
+            }
+            return mapper;
         }
         map.getMapper = getMapper;
         function registerNormal(property, key) {
