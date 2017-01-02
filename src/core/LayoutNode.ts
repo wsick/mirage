@@ -338,11 +338,7 @@ namespace mirage.core {
                 // A root element will always use root size for measure
                 Size.copyTo(rootSize, available);
             } else {
-                // TODO: This looks like a no-op, are we missing something?
-                //       If that's the case, how does a non-root item ever get individually remeasured
-                // The only additional thing that happens is
-                //   invalidating parent
-                //   clearing measure layout flag
+                // Other elements will use their last available size
                 Size.copyTo(this.state.lastAvailable, available);
             }
 

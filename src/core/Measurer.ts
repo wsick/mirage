@@ -18,17 +18,16 @@ namespace mirage.core {
             }
 
             // Check need to measure
-            if ((state.flags & LayoutFlags.measure) <= 0) {
-                return false;
-            }
+            var domeasure = (state.flags & LayoutFlags.measure) > 0;
             var last = state.lastAvailable;
-            if (!Size.isUndef(last) && last.width === availableSize.width && last.height === availableSize.height) {
-                return false;
-            }
+            domeasure = domeasure || (Size.isUndef(last) || !Size.isEqual(last, availableSize));
             Size.copyTo(availableSize, last);
 
             // Apply Template
             tree.applyTemplate();
+
+            if (!domeasure)
+                return false;
 
             // Invalidate downstream
             state.flags |= (LayoutFlags.arrange | LayoutFlags.arrangeHint);
