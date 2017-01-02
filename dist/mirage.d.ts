@@ -72,7 +72,7 @@ declare namespace mirage.core {
         protected onAttached(): void;
         walkDeep(reverse?: boolean): ILayoutTreeDeepWalker;
         invalidateMeasure(): void;
-        doMeasure(): boolean;
+        doMeasure(rootSize: ISize): boolean;
         measure(availableSize: ISize): boolean;
         protected measureOverride(constraint: ISize): ISize;
         invalidateArrange(): void;
@@ -397,7 +397,7 @@ declare namespace mirage.draft {
 declare namespace mirage.draft {
     interface IMeasureDrafter {
         prepare(): boolean;
-        draft(): boolean;
+        draft(rootSize: ISize): boolean;
     }
     function NewMeasureDrafter(node: core.LayoutNode): IMeasureDrafter;
 }
@@ -429,46 +429,27 @@ declare namespace mirage.grid.design {
     function NewGridArrangeDesign(cm: Segment[][], rm: Segment[][]): IGridArrangeDesign;
 }
 declare namespace mirage.grid.design {
+    interface IGridChildShape {
+        col: number;
+        row: number;
+        colspan: number;
+        rowspan: number;
+        hasAutoAuto: boolean;
+        hasStarAuto: boolean;
+        hasAutoStar: boolean;
+        init(child: core.LayoutNode, cm: Segment[][], rm: Segment[][]): any;
+        shouldMeasurePass(pass: MeasureOverridePass): boolean;
+        calcConstraint(pass: MeasureOverridePass, gridHasAutoStar: boolean, cm: Segment[][], rm: Segment[][]): ISize;
+    }
+    function NewGridChildShape(): IGridChildShape;
+}
+declare namespace mirage.grid.design {
     interface IGridPlacement {
         init(): any;
         add(isRow: boolean, start: number, span: number, size: number): any;
         allocate(allocFunc: () => void): any;
     }
     function NewGridPlacement(cm: Segment[][], rm: Segment[][]): IGridPlacement;
-}
-declare namespace mirage.grid.design {
-    interface IGridShape {
-        hasAutoAuto: boolean;
-        hasStarAuto: boolean;
-        hasAutoStar: boolean;
-    }
-    function NewGridShape(childShapes: IGridChildShape[]): IGridShape;
-    interface IGridChildShape {
-        starRow: boolean;
-        autoRow: boolean;
-        starCol: boolean;
-        autoCol: boolean;
-        col: number;
-        row: number;
-        colspan: number;
-        rowspan: number;
-        init(child: core.LayoutNode, rm: Segment[][], cm: Segment[][]): any;
-        shouldMeasurePass(gridShape: IGridShape, childSize: ISize, pass: MeasureOverridePass): boolean;
-        calcConstraint(childSize: ISize, cm: Segment[][], rm: Segment[][]): any;
-    }
-    class GridChildShape implements IGridChildShape {
-        starRow: boolean;
-        autoRow: boolean;
-        starCol: boolean;
-        autoCol: boolean;
-        col: number;
-        row: number;
-        colspan: number;
-        rowspan: number;
-        init(child: core.LayoutNode, cm: Segment[][], rm: Segment[][]): void;
-        shouldMeasurePass(gridShape: IGridShape, childSize: ISize, pass: MeasureOverridePass): boolean;
-        calcConstraint(childSize: ISize, cm: Segment[][], rm: Segment[][]): void;
-    }
 }
 declare namespace mirage.grid.design.helpers {
     function expand(available: number, mat: Segment[][]): void;
@@ -484,9 +465,10 @@ declare namespace mirage.grid.design {
 }
 declare namespace mirage.grid.design {
     interface IGridMeasureDesign {
-        init(constraint: ISize, coldefs: IColumnDefinition[], rowdefs: IRowDefinition[], tree: IPanelTree): any;
+        init(coldefs: IColumnDefinition[], rowdefs: IRowDefinition[], tree: IPanelTree): any;
+        beginPass(constraint: ISize): any;
         measureChild(pass: MeasureOverridePass, index: number, child: core.LayoutNode): any;
-        finishPass(): any;
+        endPass(): any;
         finish(): any;
         getDesired(): ISize;
     }
@@ -501,7 +483,7 @@ declare namespace mirage.grid.design {
         nonStar = 4,
         remainingStar = 5,
     }
-    function NewMeasureOverridePass(pass: MeasureOverridePass, des: IGridMeasureDesign, tree: IPanelTree): () => void;
+    function NewMeasureOverridePass(pass: MeasureOverridePass, des: IGridMeasureDesign, tree: IPanelTree): (constraint: ISize) => void;
 }
 declare module mirage.grid.design {
     class Segment {

@@ -296,12 +296,15 @@ var mirage;
                 this.state.flags |= core.LayoutFlags.measure | core.LayoutFlags.measureHint;
                 this.tree.propagateFlagUp(core.LayoutFlags.measureHint);
             };
-            LayoutNode.prototype.doMeasure = function () {
+            LayoutNode.prototype.doMeasure = function (rootSize) {
                 var parent = this.tree.parent;
                 var available = new mirage.Size();
-                mirage.Size.copyTo(this.state.lastAvailable, available);
-                if (!parent && mirage.Size.isUndef(available))
-                    available.width = available.height = Number.POSITIVE_INFINITY;
+                if (!parent) {
+                    mirage.Size.copyTo(rootSize, available);
+                }
+                else {
+                    mirage.Size.copyTo(this.state.lastAvailable, available);
+                }
                 var success = false;
                 if (!mirage.Size.isUndef(available)) {
                     var oldDesired = new mirage.Size();
@@ -413,9 +416,19 @@ var mirage;
             return NewPanelTree();
         };
         Panel.prototype.measureOverride = function (constraint) {
-            return new mirage.Size(constraint.width, constraint.height);
+            var measured = new mirage.Size();
+            for (var walker = this.tree.walk(); walker.step();) {
+                var child = walker.current;
+                child.measure(constraint);
+                mirage.Size.max(measured, child.state.desiredSize);
+            }
+            return measured;
         };
         Panel.prototype.arrangeOverride = function (arrangeSize) {
+            var finalRect = new mirage.Rect(0, 0, arrangeSize.width, arrangeSize.height);
+            for (var walker = this.tree.walk(); walker.step();) {
+                walker.current.arrange(finalRect);
+            }
             return new mirage.Size(arrangeSize.width, arrangeSize.height);
         };
         Object.defineProperty(Panel.prototype, "childCount", {
@@ -1472,15 +1485,13 @@ var mirage;
                 if (inputs.visible !== true) {
                     return false;
                 }
-                if ((state.flags & core.LayoutFlags.measure) <= 0) {
-                    return false;
-                }
+                var domeasure = (state.flags & core.LayoutFlags.measure) > 0;
                 var last = state.lastAvailable;
-                if (!mirage.Size.isUndef(last) && last.width === availableSize.width && last.height === availableSize.height) {
-                    return false;
-                }
+                domeasure = domeasure || (mirage.Size.isUndef(last) || !mirage.Size.isEqual(last, availableSize));
                 mirage.Size.copyTo(availableSize, last);
                 tree.applyTemplate();
+                if (!domeasure)
+                    return false;
                 state.flags |= (core.LayoutFlags.arrange | core.LayoutFlags.arrangeHint);
                 var framedSize = new mirage.Size(availableSize.width, availableSize.height);
                 mirage.Thickness.shrinkSize(inputs.margin, framedSize);
@@ -1589,7 +1600,7 @@ var mirage;
                 var flags = node.state.flags;
                 if ((flags & LayoutFlags.measureHint) > 0) {
                     return measure.prepare()
-                        && measure.draft();
+                        && measure.draft(rootSize);
                 }
                 if ((flags & LayoutFlags.arrangeHint) > 0) {
                     return arrange.prepare()
@@ -1648,10 +1659,10 @@ var mirage;
                     }
                     return measureList.length > 0;
                 },
-                draft: function () {
+                draft: function (rootSize) {
                     var cur;
                     while ((cur = measureList.shift()) != null) {
-                        cur.doMeasure();
+                        cur.doMeasure(rootSize);
                     }
                     return true;
                 },
@@ -1754,13 +1765,13 @@ var mirage;
             var overrideNonStar = grid.design.NewMeasureOverridePass(grid.design.MeasureOverridePass.nonStar, des, tree);
             var overrideRemainingStar = grid.design.NewMeasureOverridePass(grid.design.MeasureOverridePass.remainingStar, des, tree);
             return function (constraint) {
-                des.init(constraint, inputs.columnDefinitions, inputs.rowDefinitions, tree);
-                overrideAutoAuto();
-                overrideStarAuto();
-                overrideAutoStar();
-                overrideStarAuto2();
-                overrideNonStar();
-                overrideRemainingStar();
+                des.init(inputs.columnDefinitions, inputs.rowDefinitions, tree);
+                overrideAutoAuto(constraint);
+                overrideStarAuto(constraint);
+                overrideAutoStar(constraint);
+                overrideStarAuto2(constraint);
+                overrideNonStar(constraint);
+                overrideRemainingStar(constraint);
                 des.finish();
                 return des.getDesired();
             };
@@ -1843,6 +1854,102 @@ var mirage;
     (function (grid) {
         var design;
         (function (design) {
+            function NewGridChildShape() {
+                var starRow = false;
+                var autoRow = false;
+                var starCol = false;
+                var autoCol = false;
+                var col = 0;
+                var row = 0;
+                var colspan = 1;
+                var rowspan = 1;
+                var dopass = design.MeasureOverridePass.autoAuto;
+                function getConstraintInitialSize(pass, gridHasAutoStar) {
+                    switch (pass) {
+                        case design.MeasureOverridePass.autoAuto:
+                            return new mirage.Size(Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY);
+                        case design.MeasureOverridePass.starAuto:
+                            return new mirage.Size(Number.POSITIVE_INFINITY, gridHasAutoStar ? Number.POSITIVE_INFINITY : 0);
+                        case design.MeasureOverridePass.starAutoAgain:
+                            return new mirage.Size(Number.POSITIVE_INFINITY, 0);
+                        case design.MeasureOverridePass.autoStar:
+                            return new mirage.Size(0, Number.POSITIVE_INFINITY);
+                        case design.MeasureOverridePass.nonStar:
+                            return new mirage.Size(autoCol ? Number.POSITIVE_INFINITY : 0, autoRow ? Number.POSITIVE_INFINITY : 0);
+                    }
+                    return new mirage.Size();
+                }
+                return {
+                    col: 0,
+                    row: 0,
+                    colspan: 1,
+                    rowspan: 1,
+                    hasAutoAuto: false,
+                    hasStarAuto: false,
+                    hasAutoStar: false,
+                    init: function (child, cm, rm) {
+                        col = Math.min(Math.max(0, mirage.Grid.getColumn(child) || 0), cm.length - 1);
+                        row = Math.min(Math.max(0, mirage.Grid.getRow(child) || 0), rm.length - 1);
+                        colspan = Math.min(Math.max(1, mirage.Grid.getColumnSpan(child) || 0), cm.length - col);
+                        rowspan = Math.min(Math.max(1, mirage.Grid.getRowSpan(child) || 0), cm.length - col);
+                        this.col = col;
+                        this.row = row;
+                        this.colspan = colspan;
+                        this.rowspan = rowspan;
+                        starRow = autoRow = starCol = autoCol = false;
+                        for (var i = row; i < row + rowspan; i++) {
+                            starRow = starRow || (rm[i][i].type === mirage.GridUnitType.star);
+                            autoRow = autoRow || (rm[i][i].type === mirage.GridUnitType.auto);
+                        }
+                        for (var i = col; i < col + colspan; i++) {
+                            starCol = starCol || (cm[i][i].type === mirage.GridUnitType.star);
+                            autoCol = autoCol || (cm[i][i].type === mirage.GridUnitType.auto);
+                        }
+                        this.hasAutoAuto = autoRow && autoCol && !starRow && !starCol;
+                        this.hasStarAuto = starRow && autoCol;
+                        this.hasAutoStar = autoRow && starCol;
+                        if (autoRow && autoCol && !starRow && !starCol) {
+                            dopass = design.MeasureOverridePass.autoAuto;
+                        }
+                        else if (starRow && autoCol && !starCol) {
+                            dopass = design.MeasureOverridePass.starAuto;
+                        }
+                        else if (autoRow && starCol && !starRow) {
+                            dopass = design.MeasureOverridePass.autoStar;
+                        }
+                        else if (!(starRow || starCol)) {
+                            dopass = design.MeasureOverridePass.nonStar;
+                        }
+                        else {
+                            dopass = design.MeasureOverridePass.remainingStar;
+                        }
+                    },
+                    shouldMeasurePass: function (pass) {
+                        return dopass === pass
+                            || (pass === design.MeasureOverridePass.starAutoAgain && dopass === design.MeasureOverridePass.starAuto);
+                    },
+                    calcConstraint: function (pass, gridHasAutoStar, cm, rm) {
+                        var childSize = getConstraintInitialSize(pass, gridHasAutoStar);
+                        for (var i = col; i < col + colspan; i++) {
+                            childSize.width += cm[i][i].offered;
+                        }
+                        for (var i = row; i < row + rowspan; i++) {
+                            childSize.height += rm[i][i].offered;
+                        }
+                        return childSize;
+                    },
+                };
+            }
+            design.NewGridChildShape = NewGridChildShape;
+        })(design = grid.design || (grid.design = {}));
+    })(grid = mirage.grid || (mirage.grid = {}));
+})(mirage || (mirage = {}));
+var mirage;
+(function (mirage) {
+    var grid;
+    (function (grid) {
+        var design;
+        (function (design) {
             function NewGridPlacement(cm, rm) {
                 var unicells = [];
                 var multicells = [];
@@ -1883,105 +1990,6 @@ var mirage;
                 };
             }
             design.NewGridPlacement = NewGridPlacement;
-        })(design = grid.design || (grid.design = {}));
-    })(grid = mirage.grid || (mirage.grid = {}));
-})(mirage || (mirage = {}));
-var mirage;
-(function (mirage) {
-    var grid;
-    (function (grid) {
-        var design;
-        (function (design) {
-            function NewGridShape(childShapes) {
-                var hasAutoAuto = false;
-                var hasStarAuto = false;
-                var hasAutoStar = false;
-                for (var i = 0; i < childShapes.length; i++) {
-                    var cs = childShapes[i];
-                    hasAutoAuto = hasAutoAuto || (cs.autoRow && cs.autoCol && !cs.starRow && !cs.starCol);
-                    hasStarAuto = hasStarAuto || (cs.starRow && cs.autoCol);
-                    hasAutoStar = hasAutoStar || (cs.autoRow && cs.starCol);
-                }
-                return {
-                    hasAutoAuto: hasAutoAuto,
-                    hasStarAuto: hasStarAuto,
-                    hasAutoStar: hasAutoStar,
-                };
-            }
-            design.NewGridShape = NewGridShape;
-            var GridChildShape = (function () {
-                function GridChildShape() {
-                }
-                GridChildShape.prototype.init = function (child, cm, rm) {
-                    var col = this.col = Math.min(mirage.Grid.getColumn(child), cm.length - 1);
-                    if (isNaN(col))
-                        this.col = col = 0;
-                    var row = this.row = Math.min(mirage.Grid.getRow(child), rm.length - 1);
-                    if (isNaN(row))
-                        this.row = row = 0;
-                    var colspan = this.colspan = Math.min(mirage.Grid.getColumnSpan(child), cm.length - col);
-                    if (isNaN(colspan))
-                        this.colspan = colspan = 1;
-                    var rowspan = this.rowspan = Math.min(mirage.Grid.getRowSpan(child), rm.length - row);
-                    if (isNaN(rowspan))
-                        this.rowspan = rowspan = 1;
-                    this.starRow = this.autoRow = this.starCol = this.autoCol = false;
-                    for (var i = row; i < row + rowspan; i++) {
-                        this.starRow = this.starRow || (rm[i][i].type === mirage.GridUnitType.star);
-                        this.autoRow = this.autoRow || (rm[i][i].type === mirage.GridUnitType.auto);
-                    }
-                    for (var i = col; i < col + colspan; i++) {
-                        this.starCol = this.starCol || (cm[i][i].type === mirage.GridUnitType.star);
-                        this.autoCol = this.autoCol || (cm[i][i].type === mirage.GridUnitType.auto);
-                    }
-                };
-                GridChildShape.prototype.shouldMeasurePass = function (gridShape, childSize, pass) {
-                    childSize.width = childSize.height = 0;
-                    if (this.autoRow && this.autoCol && !this.starRow && !this.starCol) {
-                        if (pass !== design.MeasureOverridePass.autoAuto)
-                            return false;
-                        childSize.width = Number.POSITIVE_INFINITY;
-                        childSize.height = Number.POSITIVE_INFINITY;
-                        return true;
-                    }
-                    if (this.starRow && this.autoCol && !this.starCol) {
-                        if (pass !== design.MeasureOverridePass.starAuto && pass !== design.MeasureOverridePass.starAutoAgain)
-                            return false;
-                        if (pass === design.MeasureOverridePass.autoAuto && gridShape.hasAutoStar)
-                            childSize.height = Number.POSITIVE_INFINITY;
-                        childSize.width = Number.POSITIVE_INFINITY;
-                        return true;
-                    }
-                    if (this.autoRow && this.starCol && !this.starRow) {
-                        if (pass !== design.MeasureOverridePass.autoStar)
-                            return false;
-                        childSize.height = Number.POSITIVE_INFINITY;
-                        return true;
-                    }
-                    if ((this.autoRow || this.autoCol) && !(this.starRow || this.starCol)) {
-                        if (pass !== design.MeasureOverridePass.nonStar)
-                            return false;
-                        if (this.autoRow)
-                            childSize.height = Number.POSITIVE_INFINITY;
-                        if (this.autoCol)
-                            childSize.width = Number.POSITIVE_INFINITY;
-                        return true;
-                    }
-                    if (!(this.starRow || this.starCol))
-                        return pass === design.MeasureOverridePass.nonStar;
-                    return pass === design.MeasureOverridePass.remainingStar;
-                };
-                GridChildShape.prototype.calcConstraint = function (childSize, cm, rm) {
-                    for (var i = this.row; i < this.row + this.rowspan; i++) {
-                        childSize.height += rm[i][i].offered;
-                    }
-                    for (var i = this.col; i < this.col + this.colspan; i++) {
-                        childSize.width += cm[i][i].offered;
-                    }
-                };
-                return GridChildShape;
-            })();
-            design.GridChildShape = GridChildShape;
         })(design = grid.design || (grid.design = {}));
     })(grid = mirage.grid || (mirage.grid = {}));
 })(mirage || (mirage = {}));
@@ -2073,48 +2081,36 @@ var mirage;
         var design;
         (function (design) {
             function NewGridMeasureDesign(cm, rm) {
-                var shape;
+                var gridHasAutoStar = false;
                 var childShapes = [];
                 var placement = design.NewGridPlacement(cm, rm);
                 return {
-                    init: function (constraint, coldefs, rowdefs, tree) {
+                    init: function (coldefs, rowdefs, tree) {
                         ensureMatrix(cm, !coldefs ? 1 : coldefs.length || 1);
                         ensureMatrix(rm, !rowdefs ? 1 : rowdefs.length || 1);
                         prepareCols(cm, coldefs);
                         prepareRows(rm, rowdefs);
-                        var i = 0;
-                        for (var walker = tree.walk(); walker.step(); i++) {
-                            var childShape;
-                            if (i < childShapes.length) {
-                                childShapes[i] = childShapes[i] || new design.GridChildShape();
-                            }
-                            else {
-                                childShapes.push(childShape = new design.GridChildShape());
-                            }
-                            childShape.init(walker.current, cm, rm);
-                        }
-                        if (i < childShapes.length)
-                            childShapes.slice(i, childShapes.length - i);
-                        shape = design.NewGridShape(childShapes);
+                        syncChildShapes(childShapes, tree, cm, rm);
+                        gridHasAutoStar = doesGridHaveAutoStar(childShapes);
                         placement.init();
-                        if (tree.children.length > 0) {
+                    },
+                    beginPass: function (constraint) {
+                        if (childShapes.length > 0) {
                             design.helpers.expand(constraint.width, cm);
                             design.helpers.expand(constraint.height, rm);
                         }
                     },
                     measureChild: function (pass, index, child) {
                         var childShape = childShapes[index];
-                        var childSize = new mirage.Size();
-                        if (!childShape || !childShape.shouldMeasurePass(shape, childSize, pass))
+                        if (!childShape || !childShape.shouldMeasurePass(pass))
                             return;
-                        childShape.calcConstraint(childSize, cm, rm);
-                        child.measure(childSize);
+                        child.measure(childShape.calcConstraint(pass, gridHasAutoStar, cm, rm));
                         var desired = child.state.desiredSize;
                         if (pass !== design.MeasureOverridePass.starAuto)
                             placement.add(true, childShape.row, childShape.rowspan, desired.height);
                         placement.add(false, childShape.col, childShape.colspan, desired.width);
                     },
-                    finishPass: function () {
+                    endPass: function () {
                         placement.allocate(allocateDesiredSizeFunc(cm, rm));
                     },
                     finish: function () {
@@ -2173,11 +2169,9 @@ var mirage;
                 for (var i = 0; i < coldefs.length; i++) {
                     var colDef = coldefs[i];
                     var width = colDef.width || DEFAULT_GRID_LEN;
-                    colDef.setActualWidth(Number.POSITIVE_INFINITY);
                     var cell = design.Segment.init(cm[i][i], 0.0, colDef.minWidth, colDef.maxWidth, width.type);
                     if (width.type === mirage.GridUnitType.pixel) {
                         cell.desired = cell.offered = cell.clamp(width.value);
-                        colDef.setActualWidth(cell.desired);
                     }
                     else if (width.type === mirage.GridUnitType.star) {
                         cell.stars = width.value;
@@ -2197,11 +2191,9 @@ var mirage;
                 for (var i = 0; i < rowdefs.length; i++) {
                     var rowDef = rowdefs[i];
                     var height = rowDef.height || DEFAULT_GRID_LEN;
-                    rowDef.setActualHeight(Number.POSITIVE_INFINITY);
                     var cell = design.Segment.init(rm[i][i], 0.0, rowDef.minHeight, rowDef.maxHeight, height.type);
                     if (height.type === mirage.GridUnitType.pixel) {
                         cell.desired = cell.offered = cell.clamp(height.value);
-                        rowDef.setActualHeight(cell.desired);
                     }
                     else if (height.type === mirage.GridUnitType.star) {
                         cell.stars = height.value;
@@ -2210,6 +2202,21 @@ var mirage;
                         cell.desired = cell.offered = cell.clamp(0);
                     }
                 }
+            }
+            function syncChildShapes(childShapes, tree, cm, rm) {
+                var i = 0;
+                for (var walker = tree.walk(); walker.step(); i++) {
+                    var childShape = void 0;
+                    if (i < childShapes.length) {
+                        childShapes[i] = childShapes[i] || design.NewGridChildShape();
+                    }
+                    else {
+                        childShapes.push(childShape = design.NewGridChildShape());
+                    }
+                    childShape.init(walker.current, cm, rm);
+                }
+                if (i < childShapes.length)
+                    childShapes.slice(i, childShapes.length - i);
             }
             function allocateDesiredSizeFunc(cm, rm) {
                 function hasStarInSpan(mat, start, end) {
@@ -2253,6 +2260,13 @@ var mirage;
                     design.helpers.calcDesiredToOffered(cm);
                 };
             }
+            function doesGridHaveAutoStar(childShapes) {
+                for (var i = 0; i < childShapes.length; i++) {
+                    if (childShapes[i].hasAutoStar)
+                        return true;
+                }
+                return false;
+            }
         })(design = grid.design || (grid.design = {}));
     })(grid = mirage.grid || (mirage.grid = {}));
 })(mirage || (mirage = {}));
@@ -2272,11 +2286,12 @@ var mirage;
             })(design.MeasureOverridePass || (design.MeasureOverridePass = {}));
             var MeasureOverridePass = design.MeasureOverridePass;
             function NewMeasureOverridePass(pass, des, tree) {
-                return function () {
+                return function (constraint) {
+                    des.beginPass(constraint);
                     for (var walker = tree.walk(), i = 0; walker.step(); i++) {
                         des.measureChild(pass, i, walker.current);
                     }
-                    des.finishPass();
+                    des.endPass();
                 };
             }
             design.NewMeasureOverridePass = NewMeasureOverridePass;
