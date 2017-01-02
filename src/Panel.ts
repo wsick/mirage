@@ -10,10 +10,20 @@ namespace mirage {
         }
 
         protected measureOverride(constraint: ISize): ISize {
-            return new Size(constraint.width, constraint.height);
+            let measured = new Size();
+            for (let walker = this.tree.walk(); walker.step();) {
+                let child = walker.current;
+                child.measure(constraint);
+                Size.max(measured, child.state.desiredSize);
+            }
+            return measured;
         }
 
         protected arrangeOverride(arrangeSize: ISize): ISize {
+            let finalRect = new Rect(0, 0, arrangeSize.width, arrangeSize.height);
+            for (let walker = this.tree.walk(); walker.step();) {
+                walker.current.arrange(finalRect);
+            }
             return new Size(arrangeSize.width, arrangeSize.height);
         }
 
