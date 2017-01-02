@@ -5,7 +5,7 @@ namespace mirage.draft {
 
     export interface IMeasureDrafter {
         prepare(): boolean;
-        draft(): boolean;
+        draft(rootSize: ISize): boolean;
     }
 
     export function NewMeasureDrafter(node: core.LayoutNode): IMeasureDrafter {
@@ -33,10 +33,10 @@ namespace mirage.draft {
 
                 return measureList.length > 0;
             },
-            draft(): boolean {
+            draft(rootSize: ISize): boolean {
                 var cur: core.LayoutNode;
                 while ((cur = measureList.shift()) != null) {
-                    cur.doMeasure();
+                    cur.doMeasure(rootSize);
                 }
                 return true;
             },

@@ -330,12 +330,21 @@ namespace mirage.core {
             this.tree.propagateFlagUp(LayoutFlags.measureHint);
         }
 
-        doMeasure(): boolean {
+        doMeasure(rootSize: ISize): boolean {
             var parent = this.tree.parent;
             var available = new Size();
-            Size.copyTo(this.state.lastAvailable, available);
-            if (!parent && Size.isUndef(available))
-                available.width = available.height = Number.POSITIVE_INFINITY;
+
+            if (!parent) {
+                // A root element will always use root size for measure
+                Size.copyTo(rootSize, available);
+            } else {
+                // TODO: This looks like a no-op, are we missing something?
+                //       If that's the case, how does a non-root item ever get individually remeasured
+                // The only additional thing that happens is
+                //   invalidating parent
+                //   clearing measure layout flag
+                Size.copyTo(this.state.lastAvailable, available);
+            }
 
             var success = false;
             if (!Size.isUndef(available)) {
