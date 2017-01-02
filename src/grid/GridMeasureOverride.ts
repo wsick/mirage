@@ -10,13 +10,13 @@ namespace mirage.grid {
         var overrideRemainingStar = design.NewMeasureOverridePass(design.MeasureOverridePass.remainingStar, des, tree);
 
         return function (constraint: ISize): ISize {
-            des.init(constraint, inputs.columnDefinitions, inputs.rowDefinitions, tree);
-            overrideAutoAuto();
-            overrideStarAuto();
-            overrideAutoStar();
-            overrideStarAuto2();
-            overrideNonStar();
-            overrideRemainingStar();
+            des.init(inputs.columnDefinitions, inputs.rowDefinitions, tree);
+            overrideAutoAuto(constraint);
+            overrideStarAuto(constraint);
+            overrideAutoStar(constraint);
+            overrideStarAuto2(constraint);
+            overrideNonStar(constraint);
+            overrideRemainingStar(constraint);
             des.finish();
             return des.getDesired();
         };

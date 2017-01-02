@@ -58,18 +58,10 @@ namespace mirage.grid.design {
             hasStarAuto: false,
             hasAutoStar: false,
             init(child: core.LayoutNode, cm: Segment[][], rm: Segment[][]) {
-                col = Math.min(Grid.getColumn(child), cm.length - 1);
-                if (isNaN(col))
-                    col = 0;
-                row = Math.min(Grid.getRow(child), rm.length - 1);
-                if (isNaN(row))
-                    row = 0;
-                colspan = Math.min(Grid.getColumnSpan(child), cm.length - col);
-                if (isNaN(colspan))
-                    colspan = 1;
-                rowspan = Math.min(Grid.getRowSpan(child), rm.length - row);
-                if (isNaN(rowspan))
-                    rowspan = 1;
+                col = Math.min(Math.max(0, Grid.getColumn(child) || 0), cm.length - 1);
+                row = Math.min(Math.max(0, Grid.getRow(child) || 0), rm.length - 1);
+                colspan = Math.min(Math.max(1, Grid.getColumnSpan(child) || 0), cm.length - col);
+                rowspan = Math.min(Math.max(1, Grid.getRowSpan(child) || 0), cm.length - col);
 
                 this.col = col;
                 this.row = row;
