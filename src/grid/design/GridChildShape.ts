@@ -1,107 +1,121 @@
 namespace mirage.grid.design {
     export interface IGridChildShape {
-        starRow: boolean;
-        autoRow: boolean;
-        starCol: boolean;
-        autoCol: boolean;
-
         col: number;
         row: number;
         colspan: number;
         rowspan: number;
 
-        init (child: core.LayoutNode, rm: Segment[][], cm: Segment[][]);
-        shouldMeasurePass (gridShape: IGridShape, childSize: ISize, pass: MeasureOverridePass): boolean;
-        calcConstraint (childSize: ISize, cm: Segment[][], rm: Segment[][]);
+        hasAutoAuto: boolean;
+        hasStarAuto: boolean;
+        hasAutoStar: boolean;
+
+        init (child: core.LayoutNode, cm: Segment[][], rm: Segment[][]);
+        shouldMeasurePass (pass: MeasureOverridePass): boolean;
+        calcConstraint (pass: MeasureOverridePass, gridHasAutoStar: boolean, cm: Segment[][], rm: Segment[][]): ISize;
     }
 
-    export class GridChildShape implements IGridChildShape {
-        starRow: boolean;
-        autoRow: boolean;
-        starCol: boolean;
-        autoCol: boolean;
+    export function NewGridChildShape(): IGridChildShape {
+        let starRow = false;
+        let autoRow = false;
+        let starCol = false;
+        let autoCol = false;
 
-        col: number;
-        row: number;
-        colspan: number;
-        rowspan: number;
+        let col = 0;
+        let row = 0;
+        let colspan = 1;
+        let rowspan = 1;
 
-        init(child: core.LayoutNode, cm: Segment[][], rm: Segment[][]) {
-            var col = this.col = Math.min(Grid.getColumn(child), cm.length - 1);
-            if (isNaN(col))
-                this.col = col = 0;
-            var row = this.row = Math.min(Grid.getRow(child), rm.length - 1);
-            if (isNaN(row))
-                this.row = row = 0;
-            var colspan = this.colspan = Math.min(Grid.getColumnSpan(child), cm.length - col);
-            if (isNaN(colspan))
-                this.colspan = colspan = 1;
-            var rowspan = this.rowspan = Math.min(Grid.getRowSpan(child), rm.length - row);
-            if (isNaN(rowspan))
-                this.rowspan = rowspan = 1;
+        let dopass = MeasureOverridePass.autoAuto;
 
-            this.starRow = this.autoRow = this.starCol = this.autoCol = false;
-
-            for (var i = row; i < row + rowspan; i++) {
-                this.starRow = this.starRow || (rm[i][i].type === GridUnitType.star);
-                this.autoRow = this.autoRow || (rm[i][i].type === GridUnitType.auto);
+        function getConstraintInitialSize(pass: MeasureOverridePass, gridHasAutoStar: boolean): ISize {
+            switch (pass) {
+                case MeasureOverridePass.autoAuto:
+                    return new Size(Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY);
+                case MeasureOverridePass.starAuto:
+                    return new Size(
+                        Number.POSITIVE_INFINITY,
+                        gridHasAutoStar ? Number.POSITIVE_INFINITY : 0
+                    );
+                case MeasureOverridePass.starAutoAgain:
+                    return new Size(Number.POSITIVE_INFINITY, 0);
+                case MeasureOverridePass.autoStar:
+                    return new Size(0, Number.POSITIVE_INFINITY);
+                case MeasureOverridePass.nonStar:
+                    return new Size(
+                        autoCol ? Number.POSITIVE_INFINITY : 0,
+                        autoRow ? Number.POSITIVE_INFINITY : 0
+                    );
             }
-            for (var i = col; i < col + colspan; i++) {
-                this.starCol = this.starCol || (cm[i][i].type === GridUnitType.star);
-                this.autoCol = this.autoCol || (cm[i][i].type === GridUnitType.auto);
-            }
+            return new Size();
         }
 
-        shouldMeasurePass(gridShape: IGridShape, childSize: ISize, pass: MeasureOverridePass): boolean {
-            childSize.width = childSize.height = 0;
+        return {
+            col: 0,
+            row: 0,
+            colspan: 1,
+            rowspan: 1,
+            hasAutoAuto: false,
+            hasStarAuto: false,
+            hasAutoStar: false,
+            init(child: core.LayoutNode, cm: Segment[][], rm: Segment[][]) {
+                col = Math.min(Grid.getColumn(child), cm.length - 1);
+                if (isNaN(col))
+                    col = 0;
+                row = Math.min(Grid.getRow(child), rm.length - 1);
+                if (isNaN(row))
+                    row = 0;
+                colspan = Math.min(Grid.getColumnSpan(child), cm.length - col);
+                if (isNaN(colspan))
+                    colspan = 1;
+                rowspan = Math.min(Grid.getRowSpan(child), rm.length - row);
+                if (isNaN(rowspan))
+                    rowspan = 1;
 
-            if (this.autoRow && this.autoCol && !this.starRow && !this.starCol) {
-                if (pass !== MeasureOverridePass.autoAuto)
-                    return false;
-                childSize.width = Number.POSITIVE_INFINITY;
-                childSize.height = Number.POSITIVE_INFINITY;
-                return true;
-            }
+                this.col = col;
+                this.row = row;
+                this.colspan = colspan;
+                this.rowspan = rowspan;
 
-            if (this.starRow && this.autoCol && !this.starCol) {
-                if (pass !== MeasureOverridePass.starAuto && pass !== MeasureOverridePass.starAutoAgain)
-                    return false;
-                if (pass === MeasureOverridePass.autoAuto && gridShape.hasAutoStar)
-                    childSize.height = Number.POSITIVE_INFINITY;
-                childSize.width = Number.POSITIVE_INFINITY;
-                return true;
-            }
+                starRow = autoRow = starCol = autoCol = false;
+                for (let i = row; i < row + rowspan; i++) {
+                    starRow = starRow || (rm[i][i].type === GridUnitType.star);
+                    autoRow = autoRow || (rm[i][i].type === GridUnitType.auto);
+                }
+                for (let i = col; i < col + colspan; i++) {
+                    starCol = starCol || (cm[i][i].type === GridUnitType.star);
+                    autoCol = autoCol || (cm[i][i].type === GridUnitType.auto);
+                }
 
-            if (this.autoRow && this.starCol && !this.starRow) {
-                if (pass !== MeasureOverridePass.autoStar)
-                    return false;
-                childSize.height = Number.POSITIVE_INFINITY;
-                return true;
-            }
+                this.hasAutoAuto = autoRow && autoCol && !starRow && !starCol;
+                this.hasStarAuto = starRow && autoCol;
+                this.hasAutoStar = autoRow && starCol;
 
-            if ((this.autoRow || this.autoCol) && !(this.starRow || this.starCol)) {
-                if (pass !== MeasureOverridePass.nonStar)
-                    return false;
-                if (this.autoRow)
-                    childSize.height = Number.POSITIVE_INFINITY;
-                if (this.autoCol)
-                    childSize.width = Number.POSITIVE_INFINITY;
-                return true;
-            }
-
-            if (!(this.starRow || this.starCol))
-                return pass === MeasureOverridePass.nonStar;
-
-            return pass === MeasureOverridePass.remainingStar;
-        }
-
-        calcConstraint(childSize: ISize, cm: Segment[][], rm: Segment[][]) {
-            for (var i = this.row; i < this.row + this.rowspan; i++) {
-                childSize.height += rm[i][i].offered;
-            }
-            for (var i = this.col; i < this.col + this.colspan; i++) {
-                childSize.width += cm[i][i].offered;
-            }
-        }
+                if (autoRow && autoCol && !starRow && !starCol) {
+                    dopass = MeasureOverridePass.autoAuto;
+                } else if (starRow && autoCol && !starCol) {
+                    dopass = MeasureOverridePass.starAuto;
+                } else if (autoRow && starCol && !starRow) {
+                    dopass = MeasureOverridePass.autoStar;
+                } else if (!(starRow || starCol)) {
+                    dopass = MeasureOverridePass.nonStar;
+                } else {
+                    dopass = MeasureOverridePass.remainingStar;
+                }
+            },
+            shouldMeasurePass(pass: MeasureOverridePass): boolean {
+                return dopass === pass
+                    || (pass === MeasureOverridePass.starAutoAgain && dopass === MeasureOverridePass.starAuto);
+            },
+            calcConstraint (pass: MeasureOverridePass, gridHasAutoStar: boolean, cm: Segment[][], rm: Segment[][]): ISize {
+                let childSize = getConstraintInitialSize(pass, gridHasAutoStar);
+                for (let i = col; i < col + colspan; i++) {
+                    childSize.width += cm[i][i].offered;
+                }
+                for (let i = row; i < row + rowspan; i++) {
+                    childSize.height += rm[i][i].offered;
+                }
+                return childSize;
+            },
+        };
     }
 }

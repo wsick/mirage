@@ -8,7 +8,7 @@ namespace mirage.grid.design {
     }
 
     export function NewGridMeasureDesign(cm: Segment[][], rm: Segment[][]): IGridMeasureDesign {
-        var shape: IGridShape;
+        let gridHasAutoStar = false;
         var childShapes: IGridChildShape[] = [];
         var placement = NewGridPlacement(cm, rm);
 
@@ -23,15 +23,15 @@ namespace mirage.grid.design {
                 for (var walker = tree.walk(); walker.step(); i++) {
                     var childShape: IGridChildShape;
                     if (i < childShapes.length) {
-                        childShapes[i] = childShapes[i] || new GridChildShape();
+                        childShapes[i] = childShapes[i] || NewGridChildShape();
                     } else {
-                        childShapes.push(childShape = new GridChildShape());
+                        childShapes.push(childShape = NewGridChildShape());
                     }
                     childShape.init(walker.current, cm, rm);
                 }
                 if (i < childShapes.length)
                     childShapes.slice(i, childShapes.length - i);
-                shape = NewGridShape(childShapes);
+                gridHasAutoStar = doesGridHaveAutoStar(childShapes);
 
                 placement.init();
 
@@ -43,13 +43,9 @@ namespace mirage.grid.design {
             },
             measureChild(pass: MeasureOverridePass, index: number, child: core.LayoutNode) {
                 var childShape = childShapes[index];
-
-                var childSize = new Size();
-                if (!childShape || !childShape.shouldMeasurePass(shape, childSize, pass))
+                if (!childShape || !childShape.shouldMeasurePass(pass))
                     return;
-                childShape.calcConstraint(childSize, cm, rm);
-
-                child.measure(childSize);
+                child.measure(childShape.calcConstraint(pass, gridHasAutoStar, cm, rm));
 
                 var desired = child.state.desiredSize;
                 if (pass !== MeasureOverridePass.starAuto)
@@ -202,5 +198,13 @@ namespace mirage.grid.design {
             helpers.calcDesiredToOffered(rm);
             helpers.calcDesiredToOffered(cm);
         };
+    }
+
+    function doesGridHaveAutoStar(childShapes: IGridChildShape[]): boolean {
+        for (let i = 0; i < childShapes.length; i++) {
+            if (childShapes[i].hasAutoStar)
+                return true;
+        }
+        return false;
     }
 }
