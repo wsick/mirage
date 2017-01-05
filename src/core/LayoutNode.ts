@@ -342,25 +342,26 @@ namespace mirage.core {
                 Size.copyTo(this.state.lastAvailable, available);
             }
 
-            var success = false;
             if (!Size.isUndef(available)) {
-                var oldDesired = new Size();
-                var newDesired = this.state.desiredSize;
-                Size.copyTo(newDesired, oldDesired);
-                success = this.$measurer(available);
-                if (Size.isEqual(oldDesired, newDesired))
-                    return success;
+                logger.measure(this, available);
+                let change = this.$measurer(available);
+                logger.finishMeasure(this);
+                if (!change)
+                    return false;
             }
 
             if (parent)
                 parent.invalidateMeasure();
 
             this.state.flags &= ~LayoutFlags.measure;
-            return success;
+            return true;
         }
 
         measure(availableSize: ISize): boolean {
-            return this.$measurer(availableSize);
+            logger.measure(this, availableSize);
+            let change = this.$measurer(availableSize);
+            logger.finishMeasure(this);
+            return change;
         }
 
         protected measureOverride(constraint: ISize): ISize {
@@ -378,6 +379,7 @@ namespace mirage.core {
         }
 
         doArrange(rootSize: ISize): boolean {
+            logger.doArrange(this);
             var parent = this.tree.parent;
             var final = new Rect();
             if (!parent) {
@@ -391,17 +393,25 @@ namespace mirage.core {
                 Size.copyTo(this.state.desiredSize, final);
             }
 
-            if (!Rect.isUndef(final))
-                return this.$arranger(final);
+            if (!Rect.isUndef(final)) {
+                logger.arrange(this, final);
+                let change = this.$arranger(final);
+                logger.finishArrange(this);
+                if (!change)
+                    return false;
+            }
 
             if (parent)
                 parent.invalidateArrange();
 
-            return false;
+            return true;
         }
 
         arrange(finalRect: IRect): boolean {
-            return this.$arranger(finalRect);
+            logger.arrange(this, finalRect);
+            let change = this.$arranger(finalRect);
+            logger.finishArrange(this);
+            return change;
         }
 
         protected arrangeOverride(arrangeSize: ISize): ISize {
