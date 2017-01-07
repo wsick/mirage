@@ -331,6 +331,7 @@ namespace mirage.core {
         }
 
         doMeasure(rootSize: ISize): boolean {
+            logger.doMeasure(this);
             var parent = this.tree.parent;
             var available = new Size();
 

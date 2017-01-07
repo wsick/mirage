@@ -1,5 +1,5 @@
 namespace mirage.logging {
-    export function NewConsoleLogger(): ILogger {
+    export function NewConsoleLogger(getNodeDescriptor?: (node: core.LayoutNode) => string): ILogger {
         let curindent = "";
 
         function indent() {
@@ -10,35 +10,35 @@ namespace mirage.logging {
             curindent = curindent.substr(0, curindent.length - 2);
         }
 
-        function getNodeDescriptor(node: core.LayoutNode): string {
-            let type = <any>node.constructor;
-            return `${type.name}`;
-        }
+        getNodeDescriptor = getNodeDescriptor || function (node): string {
+                let type = <any>node.constructor;
+                return `${type.name}`;
+            };
 
         return {
             doMeasure(node: core.LayoutNode){
-                console.log(`[do-measure]${curindent} ${getNodeDescriptor(node)}`);
+                console.log(`[do-measure]`);
             },
             measure(node: core.LayoutNode, constraint: ISize){
-                console.log(`[measure]${curindent} ${getNodeDescriptor(node)} => (${constraint.width} ${constraint.height})`);
+                console.log(`${curindent}${getNodeDescriptor(node)} => (${constraint.width} ${constraint.height}) [measure]`);
                 indent();
             },
             finishMeasure(node: core.LayoutNode){
                 unindent();
                 let desired = node.state.desiredSize;
-                console.log(`[finish-measure]${curindent} ${getNodeDescriptor(node)} => (${desired.width} ${desired.height})`);
+                console.log(`${curindent}${getNodeDescriptor(node)} <= (${desired.width} ${desired.height}) [finish-measure]`);
             },
             doArrange(node: core.LayoutNode){
-                console.log(`[do-arrange]${curindent} ${getNodeDescriptor(node)}`);
+                console.log(`[do-arrange]`);
             },
             arrange(node: core.LayoutNode, final: IRect){
-                console.log(`[arrange]${curindent} ${getNodeDescriptor(node)} => (${final.x} ${final.y} ${final.width} ${final.height})`);
+                console.log(`${curindent}${getNodeDescriptor(node)} => (${final.x} ${final.y} ${final.width} ${final.height}) [arrange]`);
                 indent();
             },
             finishArrange(node: core.LayoutNode){
                 unindent();
                 let slot = node.state.arrangedSlot;
-                console.log(`[finish-arrange]${curindent} ${getNodeDescriptor(node)} => (${slot.x} ${slot.y} ${slot.width} ${slot.height})`);
+                console.log(`${curindent}${getNodeDescriptor(node)} <= (${slot.x} ${slot.y} ${slot.width} ${slot.height}) [finish-arrange]`);
             },
         }
     }
