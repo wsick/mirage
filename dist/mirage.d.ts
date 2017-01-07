@@ -421,6 +421,25 @@ declare namespace mirage.grid {
 declare namespace mirage.grid {
     function NewGridMeasureOverride(inputs: IGridInputs, state: IGridState, tree: IPanelTree): core.IMeasureOverride;
 }
+declare namespace mirage.logging {
+    function NewConsoleLogger(getNodeDescriptor?: (node: core.LayoutNode) => string): ILogger;
+}
+declare namespace mirage.logging {
+    interface ILogger {
+        doMeasure(node: core.LayoutNode): any;
+        measure(node: core.LayoutNode, constraint: ISize): any;
+        finishMeasure(node: core.LayoutNode): any;
+        doArrange(node: core.LayoutNode): any;
+        arrange(node: core.LayoutNode, final: IRect): any;
+        finishArrange(node: core.LayoutNode): any;
+    }
+}
+declare namespace mirage.logging {
+    function NewNoLogger(): ILogger;
+}
+declare namespace mirage {
+    var logger: logging.ILogger;
+}
 declare namespace mirage.grid.design {
     interface IGridArrangeDesign {
         init(arrangeSize: ISize, coldefs: IColumnDefinition[], rowdefs: IRowDefinition[]): any;
