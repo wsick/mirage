@@ -69,7 +69,7 @@ namespace mirage.core {
             }
 
             // Apply rounding
-            var childRect = new Rect();
+            let childRect = new Rect();
             if (inputs.useLayoutRounding) {
                 childRect.x = Math.round(finalRect.x);
                 childRect.y = Math.round(finalRect.y);
@@ -89,12 +89,10 @@ namespace mirage.core {
             }
 
             // Check need to arrange
-            if ((state.flags & LayoutFlags.arrange) <= 0) {
+            let doarrange = (state.flags & LayoutFlags.arrange) > 0
+                || !Rect.isEqual(state.layoutSlot, childRect);
+            if (!doarrange)
                 return false;
-            }
-            if (Rect.isEqual(state.layoutSlot, childRect)) {
-                return false;
-            }
             Rect.copyTo(childRect, state.layoutSlot);
 
             // Prepare offer
