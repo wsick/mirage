@@ -53,9 +53,10 @@ namespace mirage.core {
             if (inputs.useLayoutRounding) {
                 Size.round(desired);
             }
-            Size.copyTo(desired, state.desiredSize);
 
-            return true;
+            let change = !Size.isEqual(desired, state.desiredSize);
+            Size.copyTo(desired, state.desiredSize);
+            return change;
         };
     }
 }
