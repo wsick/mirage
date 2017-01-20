@@ -386,6 +386,11 @@ namespace mirage.core {
             if (!parent) {
                 // A root element will always use root size for arrange
                 Size.copyTo(rootSize, final);
+                // Constrain "infinite" dimensions by desired measure
+                if (!isFinite(final.width))
+                    final.width = this.state.desiredSize.width;
+                if (!isFinite(final.height))
+                    final.height = this.state.desiredSize.height;
             } else {
                 // If we are starting an arrange from a non-root element,
                 //   our measure developed a desired size that *did not*

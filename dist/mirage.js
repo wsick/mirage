@@ -342,6 +342,10 @@ var mirage;
                 var final = new mirage.Rect();
                 if (!parent) {
                     mirage.Size.copyTo(rootSize, final);
+                    if (!isFinite(final.width))
+                        final.width = this.state.desiredSize.width;
+                    if (!isFinite(final.height))
+                        final.height = this.state.desiredSize.height;
                 }
                 else {
                     mirage.Size.copyTo(this.state.desiredSize, final);
@@ -1510,6 +1514,7 @@ var mirage;
                 if (!domeasure)
                     return false;
                 state.flags |= (core.LayoutFlags.arrange | core.LayoutFlags.arrangeHint);
+                tree.propagateFlagUp(core.LayoutFlags.arrangeHint);
                 var framedSize = new mirage.Size(availableSize.width, availableSize.height);
                 mirage.Thickness.shrinkSize(inputs.margin, framedSize);
                 core.coerceSize(framedSize, inputs);

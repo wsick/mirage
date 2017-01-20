@@ -31,6 +31,7 @@ namespace mirage.core {
 
             // Invalidate downstream
             state.flags |= (LayoutFlags.arrange | LayoutFlags.arrangeHint);
+            tree.propagateFlagUp(LayoutFlags.arrangeHint);
 
             // Prepare for override
             var framedSize = new Size(availableSize.width, availableSize.height);
