@@ -9,17 +9,6 @@ namespace mirage {
         setActualWidth(value: number);
     }
 
-    export function NewColumnDefinitions(defs: string): IColumnDefinition[] {
-        var coldefs: IColumnDefinition[] = [];
-        for (var i = 0, tokens = defs.split(" "); i < tokens.length; i++) {
-            let token = tokens[i];
-            if (token === " ")
-                continue;
-            coldefs.push(NewColumnDefinition(token));
-        }
-        return coldefs;
-    }
-
     export function NewColumnDefinition(): IColumnDefinition;
     export function NewColumnDefinition(width: string): IColumnDefinition;
     export function NewColumnDefinition(widthValue: number, widthType: GridUnitType): IColumnDefinition;

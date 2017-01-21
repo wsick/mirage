@@ -9,17 +9,6 @@ namespace mirage {
         setActualHeight(value: number);
     }
 
-    export function NewRowDefinitions(defs: string): IRowDefinition[] {
-        var rowdefs: IRowDefinition[] = [];
-        for (var i = 0, tokens = defs.split(" "); i < tokens.length; i++) {
-            let token = tokens[i];
-            if (token === " ")
-                continue;
-            rowdefs.push(NewRowDefinition(token));
-        }
-        return rowdefs;
-    }
-
     export function NewRowDefinition(): IRowDefinition;
     export function NewRowDefinition(height: string): IRowDefinition;
     export function NewRowDefinition(heightValue: number, heightType: GridUnitType): IRowDefinition;
