@@ -92,6 +92,24 @@ namespace mirage.tests {
             minHeight: 200,
             maxHeight: 400
         }, "7");
+
+        sameRowDefs(NewRowDefinitions("* (auto 100 400) *"), [
+            {
+                height: {value: 1, type: GridUnitType.star},
+                minHeight: 0,
+                maxHeight: Number.POSITIVE_INFINITY,
+            },
+            {
+                height: {value: 0, type: GridUnitType.auto},
+                minHeight: 100,
+                maxHeight: 400,
+            },
+            {
+                height: {value: 1, type: GridUnitType.star},
+                minHeight: 0,
+                maxHeight: Number.POSITIVE_INFINITY,
+            }
+        ], "8");
     });
 
     QUnit.test("NewColumnDefinition", () => {
@@ -136,6 +154,24 @@ namespace mirage.tests {
             minWidth: 200,
             maxWidth: 400
         }, "7");
+
+        sameColDefs(NewColumnDefinitions("* (auto 100 400) *"), [
+            {
+                width: {value: 1, type: GridUnitType.star},
+                minWidth: 0,
+                maxWidth: Number.POSITIVE_INFINITY,
+            },
+            {
+                width: {value: 0, type: GridUnitType.auto},
+                minWidth: 100,
+                maxWidth: 400,
+            },
+            {
+                width: {value: 1, type: GridUnitType.star},
+                minWidth: 0,
+                maxWidth: Number.POSITIVE_INFINITY,
+            }
+        ], "8");
     });
 
     QUnit.test("draft-scenario1", () => {
