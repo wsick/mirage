@@ -1,6 +1,6 @@
 var mirage;
 (function (mirage) {
-    mirage.version = '0.1.0';
+    mirage.version = '0.1.1';
 })(mirage || (mirage = {}));
 var mirage;
 (function (mirage) {
@@ -743,8 +743,7 @@ var mirage;
         var max = Number.POSITIVE_INFINITY;
         switch (arguments.length) {
             case 1:
-                len = mirage.parseGridLength(arguments[0]);
-                break;
+                return parseGridRowDef(arguments[0]);
             case 2:
                 len = {
                     value: arguments[0],
@@ -785,6 +784,36 @@ var mirage;
         };
     }
     mirage.NewRowDefinition = NewRowDefinition;
+    function parseGridRowDef(raw) {
+        var len;
+        var min = 0;
+        var max = Number.POSITIVE_INFINITY;
+        if (raw[0] === "(" && raw[raw.length - 1] === ")") {
+            var tokens = raw.substr(1, raw.length - 2).split(" ");
+            len = mirage.parseGridLength(tokens[0]);
+            len.value = len.value || 0;
+            min = parseInt(tokens[1]) || 0;
+            max = parseInt(tokens[2]);
+            if (isNaN(max)) {
+                max = Number.POSITIVE_INFINITY;
+            }
+        }
+        else {
+            len = mirage.parseGridLength(raw);
+        }
+        var actual = NaN;
+        return {
+            height: len,
+            minHeight: min,
+            maxHeight: max,
+            getActualHeight: function () {
+                return actual;
+            },
+            setActualHeight: function (value) {
+                actual = value;
+            },
+        };
+    }
 })(mirage || (mirage = {}));
 var mirage;
 (function (mirage) {
@@ -805,8 +834,7 @@ var mirage;
         var max = Number.POSITIVE_INFINITY;
         switch (arguments.length) {
             case 1:
-                len = mirage.parseGridLength(arguments[0]);
-                break;
+                return parseGridColDef(arguments[0]);
             case 2:
                 len = {
                     value: arguments[0],
@@ -847,6 +875,36 @@ var mirage;
         };
     }
     mirage.NewColumnDefinition = NewColumnDefinition;
+    function parseGridColDef(raw) {
+        var len;
+        var min = 0;
+        var max = Number.POSITIVE_INFINITY;
+        if (raw[0] === "(" && raw[raw.length - 1] === ")") {
+            var tokens = raw.substr(1, raw.length - 2).split(" ");
+            len = mirage.parseGridLength(tokens[0]);
+            len.value = len.value || 0;
+            min = parseInt(tokens[1]) || 0;
+            max = parseInt(tokens[2]);
+            if (isNaN(max)) {
+                max = Number.POSITIVE_INFINITY;
+            }
+        }
+        else {
+            len = mirage.parseGridLength(raw);
+        }
+        var actual = NaN;
+        return {
+            width: len,
+            minWidth: min,
+            maxWidth: max,
+            getActualWidth: function () {
+                return actual;
+            },
+            setActualWidth: function (value) {
+                actual = value;
+            },
+        };
+    }
 })(mirage || (mirage = {}));
 /// <reference path="Panel" />
 /// <reference path="typeLookup" />
