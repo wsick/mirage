@@ -177,7 +177,6 @@ declare namespace mirage {
         getActualHeight(): number;
         setActualHeight(value: number): any;
     }
-    function NewRowDefinitions(defs: string): IRowDefinition[];
     function NewRowDefinition(): IRowDefinition;
     function NewRowDefinition(height: string): IRowDefinition;
     function NewRowDefinition(heightValue: number, heightType: GridUnitType): IRowDefinition;
@@ -192,12 +191,15 @@ declare namespace mirage {
         getActualWidth(): number;
         setActualWidth(value: number): any;
     }
-    function NewColumnDefinitions(defs: string): IColumnDefinition[];
     function NewColumnDefinition(): IColumnDefinition;
     function NewColumnDefinition(width: string): IColumnDefinition;
     function NewColumnDefinition(widthValue: number, widthType: GridUnitType): IColumnDefinition;
     function NewColumnDefinition(width: string, minWidth: number, maxWidth: number): IColumnDefinition;
     function NewColumnDefinition(widthValue: number, widthType: GridUnitType, minWidth: number, maxWidth: number): IColumnDefinition;
+}
+declare namespace mirage {
+    function NewRowDefinitions(defs: string): IRowDefinition[];
+    function NewColumnDefinitions(defs: string): IColumnDefinition[];
 }
 declare namespace mirage {
     interface IGridInputs extends core.ILayoutNodeInputs {

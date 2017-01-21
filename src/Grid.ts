@@ -4,6 +4,7 @@
 /// <reference path="map/mappers" />
 /// <reference path="IRowDefinition" />
 /// <reference path="IColumnDefinition" />
+/// <reference path="GridDefinitions" />
 
 namespace mirage {
     export interface IGridInputs extends core.ILayoutNodeInputs {

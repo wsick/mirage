@@ -27,7 +27,7 @@ namespace mirage.tests {
         canvas.appendChild(child3);
 
         // measure
-        ok(canvas.measure(new Size(600, 600)), "measure changed");
+        ok(!canvas.measure(new Size(600, 600)), "measure changed");
         strictEqual(canvas.state.flags & LayoutFlags.measure, 0, "measure flag cleared");
         deepEqual(canvas.state.desiredSize, new Size(0, 0), "desiredSize");
 
