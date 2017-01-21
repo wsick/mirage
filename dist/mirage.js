@@ -726,17 +726,6 @@ var mirage;
 })(mirage || (mirage = {}));
 var mirage;
 (function (mirage) {
-    function NewRowDefinitions(defs) {
-        var rowdefs = [];
-        for (var i = 0, tokens = defs.split(" "); i < tokens.length; i++) {
-            var token = tokens[i];
-            if (token === " ")
-                continue;
-            rowdefs.push(NewRowDefinition(token));
-        }
-        return rowdefs;
-    }
-    mirage.NewRowDefinitions = NewRowDefinitions;
     function NewRowDefinition() {
         var len;
         var min = 0;
@@ -817,17 +806,6 @@ var mirage;
 })(mirage || (mirage = {}));
 var mirage;
 (function (mirage) {
-    function NewColumnDefinitions(defs) {
-        var coldefs = [];
-        for (var i = 0, tokens = defs.split(" "); i < tokens.length; i++) {
-            var token = tokens[i];
-            if (token === " ")
-                continue;
-            coldefs.push(NewColumnDefinition(token));
-        }
-        return coldefs;
-    }
-    mirage.NewColumnDefinitions = NewColumnDefinitions;
     function NewColumnDefinition() {
         var len;
         var min = 0;
@@ -906,12 +884,55 @@ var mirage;
         };
     }
 })(mirage || (mirage = {}));
+var mirage;
+(function (mirage) {
+    function NewRowDefinitions(defs) {
+        var rowdefs = [];
+        for (var walker = walkDefinitions(defs); walker.walk();) {
+            rowdefs.push(mirage.NewRowDefinition(walker.current));
+        }
+        return rowdefs;
+    }
+    mirage.NewRowDefinitions = NewRowDefinitions;
+    function NewColumnDefinitions(defs) {
+        var coldefs = [];
+        for (var walker = walkDefinitions(defs); walker.walk();) {
+            coldefs.push(mirage.NewColumnDefinition(walker.current));
+        }
+        return coldefs;
+    }
+    mirage.NewColumnDefinitions = NewColumnDefinitions;
+    function walkDefinitions(defs) {
+        var index = 0;
+        var d = {
+            current: "",
+            walk: function () {
+                if (defs[index] === "(") {
+                    var next = defs.indexOf(")", index);
+                    d.current = (next > -1)
+                        ? defs.substr(index, next - index + 1)
+                        : defs.substr(index);
+                }
+                else {
+                    var next = defs.indexOf(" ", index);
+                    d.current = (next > -1)
+                        ? defs.substr(index, next - index)
+                        : defs.substr(index);
+                }
+                index += d.current.length + 1;
+                return d.current && d.current != " ";
+            },
+        };
+        return d;
+    }
+})(mirage || (mirage = {}));
 /// <reference path="Panel" />
 /// <reference path="typeLookup" />
 /// <reference path="convert/converters" />
 /// <reference path="map/mappers" />
 /// <reference path="IRowDefinition" />
 /// <reference path="IColumnDefinition" />
+/// <reference path="GridDefinitions" />
 var mirage;
 (function (mirage) {
     var Grid = (function (_super) {
